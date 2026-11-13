@@ -19,10 +19,6 @@ export const env = Object.freeze({
   supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '',
   whatsappPhone: process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '5492257554759',
   contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hola@pokeshopcoast.com',
-  // Modo presentación: solo la home, sin menú, búsqueda, cuenta ni carrito (ver src/middleware.js).
-  homeOnly: toBool(process.env.NEXT_PUBLIC_HOME_ONLY, false),
 });
-
-export const PRESENTATION_MODE = env.homeOnly;
 
 export const isSupabaseConfigured = Boolean(env.supabaseUrl && env.supabaseKey);

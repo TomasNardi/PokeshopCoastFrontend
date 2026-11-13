@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { CONTACT, SITE } from '@/config/site';
 import { CATEGORIES } from '@/domain/catalog';
 import Wordmark from './Wordmark';
-import { PRESENTATION_MODE } from '@/config/env';
+import { PRESENTATION_MODE } from '@/config/presentation';
 
 const ALL_COLUMNS = [
   { title: 'Tienda', links: [...CATEGORIES.map((c) => ({ label: c.name, href: `/tienda?category=${c.slug}` })), { label: 'Outlet', href: '/outlet' }] },

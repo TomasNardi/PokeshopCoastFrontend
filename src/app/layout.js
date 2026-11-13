@@ -9,7 +9,7 @@ import SiteHeader from '@/components/header/SiteHeader';
 import Footer from '@/components/layout/Footer';
 import FloatingContact from '@/components/layout/FloatingContact';
 import CartDrawer from '@/components/cart/CartDrawer';
-import { PRESENTATION_MODE } from '@/config/env';
+import { PRESENTATION_MODE } from '@/config/presentation';
 import PresentationGuard from '@/components/layout/PresentationGuard';
 
 // Mismas familias que unsobremas.com (Wappalyzer → Google Font API).

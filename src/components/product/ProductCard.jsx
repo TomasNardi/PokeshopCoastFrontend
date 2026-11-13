@@ -4,7 +4,7 @@ import { formatPrice } from '@/domain/money';
 import ProductStage from './ProductStage';
 import AddToCartButton from './AddToCartButton';
 import { CertBadge, ConditionBadge, LanguageFlag, OutletBadge, SaleBadge, SoldOutBadge } from './ProductBadges';
-import { PRESENTATION_MODE } from '@/config/env';
+import { PRESENTATION_MODE } from '@/config/presentation';
 
 /** En modo presentación la card se ve y anima igual, pero no es un link. */
 function CardLink({ href, children, ...rest }) {

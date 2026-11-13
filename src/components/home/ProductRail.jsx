@@ -3,7 +3,7 @@ import { useRef } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '@/components/product/ProductCard';
-import { PRESENTATION_MODE } from '@/config/env';
+import { PRESENTATION_MODE } from '@/config/presentation';
 
 /**
  * Fila deslizable de productos (grid-slider del tema): 4 por vista en desktop,

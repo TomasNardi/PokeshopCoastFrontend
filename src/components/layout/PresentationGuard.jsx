@@ -22,7 +22,7 @@ export function isBlockedHref(anchor, origin = window.location.origin) {
 }
 
 /**
- * Modo presentación (NEXT_PUBLIC_HOME_ONLY): el header y los menús funcionan
+ * Modo presentación (src/config/presentation.js): el header y los menús funcionan
  * (se abren, animan, etc.) pero ningún link lleva a otra sección: muestra
  * "Próximamente". Un solo listener en fase de captura de window corre antes
  * que los handlers de React y de next/link, que respetan defaultPrevented.

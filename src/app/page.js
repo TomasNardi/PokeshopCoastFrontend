@@ -5,7 +5,7 @@ import ProductRail from '@/components/home/ProductRail';
 import ProductGrid from '@/components/product/ProductGrid';
 import Newsletter from '@/components/home/Newsletter';
 import SocialConnect from '@/components/home/SocialConnect';
-import { PRESENTATION_MODE } from '@/config/env';
+import { PRESENTATION_MODE } from '@/config/presentation';
 
 // Modo presentación: "Comprar" baja a los productos en vez de ir a la tienda.
 const mainHero = PRESENTATION_MODE
