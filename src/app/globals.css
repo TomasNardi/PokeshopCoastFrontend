@@ -1,0 +1,1277 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Sistema de UI calcado del tema Broadcast 6.1 (unsobremas.com):
+   tipografías, header, megamenú, búsqueda, hero y product-item.
+   Curvas y tiempos tomados del theme.css / theme.js original.
+   ========================================================================== */
+
+:root {
+  --ease-out: cubic-bezier(0.215, 0.61, 0.355, 1); /* easeOutCubic: la del tema */
+  --ease-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --outer: 16px;
+  --gap: 8px;
+  --header-height: 60px;
+  /* Sombra elíptica bajo los productos (cards, megamenú, búsqueda): naranja
+     medio, un poco más tostado en el centro para que siga leyendo como sombra. */
+  --product-shadow: radial-gradient(ellipse at center, rgba(196, 96, 18, 0.6) 0%, rgba(240, 140, 40, 0.28) 42%, rgba(240, 140, 40, 0) 70%);
+}
+
+@media (min-width: 750px) {
+  :root {
+    --outer: 40px;
+    --gap: 15px;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --header-height: 77px;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-uns-bg font-sans text-uns-text antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(226, 87, 76, 0.25);
+}
+
+@layer components {
+  .container-site {
+    @apply mx-auto w-full max-w-[1800px];
+    padding-inline: var(--outer);
+  }
+
+  .eyebrow {
+    @apply text-[12px] font-bold uppercase tracking-[0.1em] text-uns-muted;
+  }
+
+  .section-heading {
+    @apply font-heading text-[24px] font-bold uppercase leading-none text-black md:text-[40px];
+  }
+
+  .input {
+    @apply w-full border border-uns-border bg-white px-4 py-3 text-[14px] text-black outline-none transition-colors placeholder:text-[#9a9a9a] focus:border-black;
+  }
+
+  .label {
+    @apply mb-1.5 block text-[12px] font-bold uppercase tracking-[0.1em] text-uns-muted;
+  }
+
+  /* Botones del tema: rectos, Roboto 700 12px, mayúsculas, 0.075em */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2.5 border px-7 py-3.5 text-[12px] font-bold uppercase tracking-[0.075em] transition-colors duration-300;
+  }
+  .btn--light {
+    @apply border-uns-bg bg-uns-bg text-[#1d2226] hover:bg-transparent hover:text-white;
+  }
+  .btn--dark {
+    @apply border-black bg-black text-white hover:border-coast-red hover:bg-coast-red;
+  }
+}
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  color: #000;
+  transition: color 0.25s var(--ease-out);
+}
+
+/* En la home el header se superpone al hero (section-overlay-header). */
+.site-header--overlay {
+  margin-bottom: calc(-1 * var(--header-height));
+}
+
+.site-header.is-transparent {
+  color: #fff;
+}
+
+.site-header__bar {
+  position: relative;
+  height: var(--header-height);
+}
+
+/* Fondo blanco esmerilado: #ffffffbf + blur 24px, igual que el tema. */
+.site-header__bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #ffffffbf;
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  transition: opacity 0.4s ease-in-out;
+}
+.site-header.is-transparent .site-header__bar::after {
+  opacity: 0;
+}
+/* Con un megamenú abierto el header se funde con el panel (#FCFCFC opaco). */
+.site-header.is-menu-open .site-header__bar::after {
+  background: #fcfcfc;
+}
+
+.site-header__row {
+  /* display lo ponen las clases (grid xl:hidden / hidden xl:grid) */
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 100%;
+  padding-inline: var(--outer);
+}
+
+.nav-menu {
+  display: flex;
+  height: 100%;
+  margin-left: -15px;
+}
+
+/* static a propósito: el megamenú se posiciona contra el header, no contra el item. */
+.nav-menu__item {
+  display: flex;
+  height: 100%;
+}
+
+.navlink {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 15px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: inherit;
+}
+
+/* Pantallas medianas (1280–1535px): menú un poco más compacto para que no
+   choque con el logo centrado. */
+@media (max-width: 1535px) {
+  .nav-menu {
+    margin-left: -10px;
+  }
+  .navlink {
+    padding: 0 10px;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+  }
+}
+
+.navlink--highlight {
+  color: theme('colors.coast.red');
+}
+
+.navtext {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Barrita de 2px ARRIBA del texto que crece desde el centro. */
+.navtext::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -2px;
+  height: 2px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transition: transform 0.25s var(--ease-out);
+}
+.navlink.is-active .navtext::after {
+  transform: scaleX(1);
+}
+/* Todos los :hover del sitio van dentro de este media query: solo aplican con
+   mouse/trackpad. En pantallas táctiles el primer toque haría "hover" en vez
+   de clic (iOS) y el efecto quedaría pegado después de tocar. */
+@media (hover: hover) and (pointer: fine) {
+  .navlink:hover .navtext::after {
+    transform: scaleX(1);
+  }
+}
+
+.nav-caret {
+  transition: transform 0.25s var(--ease-out);
+}
+.navlink.is-active .nav-caret {
+  transform: rotate(180deg);
+}
+
+.header-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: inherit;
+  transition: opacity 0.25s var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .header-icon:hover {
+    opacity: 0.7;
+  }
+}
+.header-icon__count {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  display: flex;
+  min-width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: theme('colors.coast.red');
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.wordmark {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  color: inherit;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.wordmark__name {
+  font-family: theme('fontFamily.barlow');
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.wordmark__sub {
+  margin-top: 2px;
+  padding-left: 0.55em;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.55em;
+  color: theme('colors.coast.red');
+}
+@media (min-width: 1280px) {
+  .wordmark__name {
+    font-size: 32px;
+  }
+}
+
+/* Oscurece la página detrás del megamenú (hover__bg del tema: negro al 40 %). */
+.header-underlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s 0.1s, visibility 0s linear 0.4s;
+}
+.header-underlay.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s 0.1s, visibility 0s;
+}
+
+/* ==========================================================================
+   Megamenú ("grandparent" del tema)
+   ========================================================================== */
+
+.mega {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  color: #000;
+  background: #fcfcfc;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  /* cierre: fade de 0.2s y recién al final se apaga la visibilidad */
+  transition: opacity 0.2s var(--ease-out), visibility 0s 0.2s;
+}
+.mega.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.2s var(--ease-out), visibility 0s;
+}
+
+.mega__inner {
+  display: flex;
+  justify-content: space-between;
+  max-height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+}
+
+.mega__links {
+  flex: 3 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 30px var(--outer);
+}
+
+/* Links: cerrados quedan 5px arriba e invisibles SIN transición (la cascada arranca de cero). */
+.mega__link {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 5px 4px 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #808080;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: none;
+}
+.mega__link::after {
+  content: '';
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  margin-left: 2px;
+  visibility: hidden;
+  background: url("data:image/svg+xml;utf8,<svg fill='none' stroke='black' stroke-width='2.4' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M9 5l7 7-7 7'/></svg>") center / contain no-repeat;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mega__link:hover {
+    color: #000;
+  }
+  .mega__link:hover::after {
+    visibility: visible;
+  }
+}
+.mega.is-visible .mega__link {
+  opacity: 1;
+  transform: translateY(0);
+  transition: transform 0.15s var(--ease-out), opacity 0.35s var(--ease-out), color 0.25s var(--ease-out);
+}
+.mega:not(.is-visible) .mega__link {
+  transition-delay: 0s !important;
+}
+
+.mega__blocks {
+  flex: 9 1 0;
+  display: flex;
+}
+.mega__block {
+  flex: 1 1 0;
+  padding: var(--gap) calc(var(--gap) / 2);
+}
+.mega__block:last-child {
+  padding-right: var(--outer);
+}
+
+.mega__image {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 1;
+  max-height: calc(100vh - var(--header-height) - 40px);
+  opacity: 0;
+  transition: opacity 0.75s var(--ease-out);
+}
+.mega.is-visible .mega__image {
+  opacity: 1;
+}
+
+/* Zoom-out lento 1.06 → 1 en 1.5s desde abajo: el efecto "premium" del tema. */
+.mega__image-wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f2f2f2;
+  transform: scale(1.06);
+  transform-origin: bottom center;
+  transition: transform 0.75s var(--ease-out);
+}
+.mega.is-visible .mega__image-wrapper {
+  transform: scale(1);
+  transition: transform 1.5s var(--ease-out);
+}
+.mega:not(.is-visible) .mega__image,
+.mega:not(.is-visible) .mega__image-wrapper {
+  transition-delay: 0s !important;
+}
+
+.mega__image-img {
+  position: relative;
+  z-index: 1;
+  max-width: 50%;
+  max-height: 58%;
+  object-fit: contain;
+  transform: translateY(-8%);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
+}
+.mega__image-shadow {
+  position: absolute;
+  left: 50%;
+  top: 78%;
+  width: 34%;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--product-shadow);
+  filter: blur(2px);
+}
+.mega__image-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.2);
+  transition: background 0.4s var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .mega__image:hover .mega__image-overlay {
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+.mega__image-title {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 3;
+  font-family: theme('fontFamily.heading');
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 24px rgba(0, 0, 0, 0.35);
+}
+
+/* ==========================================================================
+   Búsqueda desplegable
+   ========================================================================== */
+
+.search-pop {
+  max-height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+  padding: 0 var(--outer) 40px;
+}
+.search-pop__form {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 0 12px;
+  border-bottom: 2px solid #000;
+}
+.search-pop__input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  font-family: theme('fontFamily.heading');
+  font-size: 24px;
+  font-weight: 700;
+  text-transform: uppercase;
+  outline: none;
+}
+.search-pop__input::placeholder {
+  color: #bdbdbd;
+}
+.search-pop__input::-webkit-search-cancel-button {
+  display: none;
+}
+.search-pop__close {
+  opacity: 0.6;
+  transition: opacity 0.25s;
+}
+@media (hover: hover) and (pointer: fine) {
+  .search-pop__close:hover {
+    opacity: 1;
+  }
+}
+.search-pop__layout {
+  display: grid;
+  gap: 30px;
+  padding-top: 30px;
+}
+.search-pop__column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.search-pop__heading {
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #747474;
+}
+.search-pop__grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+@media (min-width: 750px) {
+  .search-pop__input {
+    font-size: 30px;
+  }
+  .search-pop__layout {
+    grid-template-columns: 1fr 3fr;
+    gap: 40px;
+  }
+  .search-pop__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.search-card {
+  display: block;
+  min-width: 0;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+.mega.is-visible .search-card {
+  opacity: 1;
+  transform: none;
+}
+.mega:not(.is-visible) .search-card {
+  transition-delay: 0s !important;
+}
+.search-card__media {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 985 / 888;
+  background: #f2f2f2;
+}
+.search-card__media img {
+  position: relative;
+  z-index: 1;
+  max-width: 46%;
+  max-height: 60%;
+  object-fit: contain;
+  transform: translateY(-8%);
+  transition: transform 0.6s var(--ease-soft);
+}
+@media (hover: hover) and (pointer: fine) {
+  .search-card:hover .search-card__media img {
+    transform: translateY(-12%);
+  }
+}
+.search-card__shadow {
+  position: absolute;
+  left: 50%;
+  top: 80%;
+  width: 30%;
+  height: 10px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--product-shadow);
+  filter: blur(2px);
+}
+.search-card__title,
+.search-card__category,
+.search-card__price {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.search-card__title {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #000;
+}
+.search-card__category {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #747474;
+}
+.search-card__price {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+/* ==========================================================================
+   Drawer mobile
+   ========================================================================== */
+
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+.drawer.is-open {
+  pointer-events: auto;
+}
+.drawer__underlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.drawer.is-open .drawer__underlay {
+  opacity: 1;
+}
+.drawer__panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, 88vw);
+  background: #fcfcfc;
+  color: #000;
+  transform: translateX(-100%);
+  transition: transform 0.45s var(--ease-soft);
+}
+.drawer.is-open .drawer__panel {
+  transform: none;
+}
+.drawer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px var(--outer);
+  border-bottom: 1px solid #eaeaea;
+}
+.drawer__menu {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+.drawer__item {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+}
+.drawer.is-open .drawer__item {
+  opacity: 1;
+  transform: none;
+}
+.drawer.is-open .drawer__item:nth-child(2) { transition-delay: 0.05s; }
+.drawer.is-open .drawer__item:nth-child(3) { transition-delay: 0.1s; }
+.drawer.is-open .drawer__item:nth-child(4) { transition-delay: 0.15s; }
+.drawer.is-open .drawer__item:nth-child(5) { transition-delay: 0.2s; }
+.drawer.is-open .drawer__item:nth-child(6) { transition-delay: 0.25s; }
+.drawer__toplink {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px var(--outer);
+  text-align: left;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.drawer__sub {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s var(--ease-out);
+}
+.drawer__sub.is-open {
+  grid-template-rows: 1fr;
+}
+.drawer__sublink {
+  display: block;
+  padding: 8px var(--outer) 8px calc(var(--outer) + 14px);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #808080;
+}
+@media (hover: hover) and (pointer: fine) {
+  .drawer__sublink:hover {
+    color: #000;
+  }
+}
+.drawer__foot {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px var(--outer) 28px;
+  border-top: 1px solid #eaeaea;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #747474;
+}
+
+/* ==========================================================================
+   Hero (section-hero con parallax)
+   ========================================================================== */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  background: #1e1c1b;
+  color: #fff;
+}
+.hero--three-quarters {
+  height: 550px;
+}
+.hero--two-thirds {
+  height: 50vh;
+  min-height: 420px;
+}
+@media (min-width: 750px) {
+  .hero--three-quarters {
+    height: 75vh;
+    min-height: 520px;
+  }
+  .hero--two-thirds {
+    height: 66.66vh;
+    min-height: 460px;
+  }
+}
+.hero__pane {
+  position: absolute;
+  inset: -6% 0; /* mobile: poco margen de parallax para no recortar la imagen */
+  will-change: transform;
+}
+@media (min-width: 750px) {
+  .hero__pane {
+    inset: -15% 0;
+  }
+}
+.hero__pane picture,
+.hero__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Layout "split": negro fijo + imagen a la derecha que se funde en el negro.
+   Mobile: la imagen arriba y se funde hacia abajo, el texto queda sobre negro. */
+.hero--split {
+  background: #000;
+}
+.hero--split .hero__pane {
+  inset: -15% 0 30% 0;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+}
+.hero--split .hero__shade {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 22%);
+}
+@media (min-width: 750px) {
+  .hero--split .hero__pane {
+    inset: -15% 0 -15% 38%;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 32%, #000 100%);
+    mask-image: linear-gradient(to right, transparent 0%, #000 32%, #000 100%);
+  }
+}
+
+/* Punto de enfoque por imagen (como --focal-point del tema). */
+.hero__img {
+  object-position: var(--focal-mobile, center);
+}
+@media (min-width: 750px) {
+  .hero__img {
+    object-position: var(--focal, center);
+  }
+}
+.hero__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 55%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 22%);
+}
+/* Sombra fuerte para fondos muy cargados (ej. collage de cartas):
+   oscurece todo un poco y bastante más donde va el texto. */
+.hero--shade-strong .hero__shade {
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.35) 55%, rgba(0, 0, 0, 0.15) 100%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 25%);
+}
+@media (min-width: 750px) {
+  .hero--shade-strong .hero__shade {
+    background:
+      linear-gradient(to right, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.35) 45%, rgba(0, 0, 0, 0) 75%),
+      linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 50%),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 25%);
+  }
+}
+.hero__content {
+  position: absolute;
+  left: var(--outer);
+  right: var(--outer);
+  bottom: 30px;
+  z-index: 2;
+  text-align: center;
+}
+.hero__subtitle {
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.hero__title {
+  margin-bottom: 22px;
+  font-family: theme('fontFamily.heading');
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.hero__title--xl {
+  font-size: 45px;
+}
+@media (min-width: 750px) {
+  .hero__content {
+    right: auto;
+    bottom: 50px;
+    max-width: 50%;
+    text-align: left;
+  }
+  .hero__subtitle {
+    font-size: 15px;
+  }
+  .hero__title {
+    font-size: 64px;
+  }
+  .hero__title--xl {
+    font-size: 94px;
+  }
+}
+
+/* ==========================================================================
+   Producto: escenario gris + flotante + sombra separada (product-item)
+   ========================================================================== */
+
+.stage {
+  position: relative;
+  overflow: hidden;
+  background: #f2f2f2;
+}
+.stage--card {
+  aspect-ratio: 5 / 6;
+}
+.stage--detail {
+  aspect-ratio: 1;
+}
+
+/* Entrada "img-in" del tema: fade + leve zoom al cargar. */
+.stage__float {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity 0.8s var(--ease-quart), transform 0.8s var(--ease-quart);
+}
+.stage__float.is-loaded {
+  opacity: 1;
+  transform: scale(1);
+}
+/* Card (medido sobre unsobremas): el producto se centra al ~38% de la altura
+   del escenario, así que el área flotante termina al 77% y queda un hueco
+   claro hasta la sombra (al 71%). */
+.stage--card .stage__float {
+  inset: 0 0 23% 0;
+}
+
+.stage__img {
+  position: relative;
+  z-index: 1;
+  max-width: 52%;
+  max-height: 58%;
+  object-fit: contain;
+  transform: translateY(0);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
+  transition: transform 0.6s var(--ease-soft);
+}
+.stage--detail .stage__img {
+  max-width: 50%;
+  max-height: 60%;
+  transform: translateY(-7%);
+}
+
+.stage__shadow {
+  position: absolute;
+  left: 50%;
+  top: 92%; /* 92% del área flotante (77%) ≈ 71% del escenario */
+  width: 38%;
+  height: 10px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--product-shadow);
+  filter: blur(2px);
+  transition: width 0.6s var(--ease-soft), opacity 0.6s var(--ease-soft);
+}
+.stage--detail .stage__shadow {
+  top: 82%;
+  width: 34%;
+  height: 22px;
+}
+
+/* Hover (solo mouse): el producto "levita" y la sombra se achica. */
+@media (hover: hover) and (pointer: fine) {
+  .group:hover .stage--card .stage__img {
+    transform: translateY(-6%);
+  }
+  .group:hover .stage__shadow {
+    width: 31%;
+    opacity: 0.7;
+  }
+}
+
+.product-item .stage::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: #e8862a; /* naranja, a tono con --product-shadow */
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .product-item:hover .stage::after {
+    opacity: 1;
+  }
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--gap);
+}
+@media (min-width: 750px) {
+  .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+/* Mobile: carrusel a sangre con las medidas de unsobremas (.grid--mobile-slider):
+   card de (ancho de pantalla − margen izq. − 120px), 5px de separación,
+   enganche al inicio de cada card. 375px → 239px · 320px → 184px. */
+@media (max-width: 749px) {
+  .product-grid--mobile-slider {
+    display: flex;
+    gap: 5px;
+    margin-inline: calc(var(--outer) * -1);
+    padding-inline: var(--outer);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--outer);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
+  }
+  .product-grid--mobile-slider > * {
+    flex: 0 0 calc(100% + var(--outer) - 120px);
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+}
+@media (min-width: 1100px) {
+  .product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.product-item__badges {
+  position: absolute;
+  top: 14px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.product-item__badges--left {
+  left: 5px;
+  align-items: flex-start;
+}
+.product-item__badges--right {
+  right: 5px;
+  align-items: flex-end;
+}
+
+.badge-box {
+  display: inline-block;
+  padding: 4px 9px;
+  font-family: theme('fontFamily.heading');
+  font-size: 11px;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+@media (min-width: 750px) {
+  .badge-box {
+    padding: 6px 15px;
+    font-size: 12px;
+  }
+}
+/* Estado en las cards: nombre completo siempre que entre en la card (container
+   query sobre .product-item). Peor caso medido: "Moderately Played" + "Rebajado"
+   = 199px a 11px; 178px a 10px. Por debajo de 178px (grilla de 2 columnas en
+   mobile) va la abreviatura (NM, LP, MP). */
+.product-item {
+  container-type: inline-size;
+}
+.badge-label--full {
+  display: none;
+}
+@container (min-width: 178px) {
+  .badge-label--abbr {
+    display: none;
+  }
+  .badge-label--full {
+    display: inline;
+  }
+}
+/* Tamaño del badge según el ancho de la card (no de la pantalla), así nunca se
+   pisan izquierda y derecha:
+     178–198px → 10px (carrusel en celulares de 320–334px)
+     199–239px → 11px
+     240px+    → 12px (tamaño desktop del tema) */
+.product-item__badges .badge-box {
+  padding: 4px 9px;
+  font-size: 11px;
+}
+@container (min-width: 178px) and (max-width: 198.98px) {
+  .product-item__badges .badge-box {
+    padding: 4px 7px;
+    font-size: 10px;
+  }
+}
+@container (min-width: 240px) {
+  .product-item__badges .badge-box {
+    padding: 6px 15px;
+    font-size: 12px;
+  }
+}
+.badge-box--light {
+  background: #fff;
+  color: #000;
+}
+.badge-box--dark {
+  background: #000;
+  color: #fff;
+}
+.badge-box--outlet {
+  background: theme('colors.coast.red-dark');
+  color: #fff;
+}
+.badge-box--sale {
+  background: theme('colors.coast.red');
+  color: #fff;
+}
+
+.product-item__quick {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+}
+.product-item__quick:focus-within {
+  opacity: 1;
+  transform: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .product-item:hover .product-item__quick {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Táctil: el quick add (que depende del hover) no existe; se compra desde la ficha. */
+@media not all and (hover: hover) and (pointer: fine) {
+  .product-item__quick {
+    display: none;
+  }
+}
+
+.product-item__info {
+  display: block;
+  padding: 20px 0 30px;
+}
+.product-item__title,
+.product-item__category {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.product-item__title {
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: #000;
+}
+.product-item__category {
+  font-size: 12px;
+  color: #747474;
+}
+.product-item__price {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000;
+}
+.product-item__price.is-sale .new-price {
+  color: theme('colors.coast.red-dark');
+}
+.product-item__price .old-price {
+  margin-left: 6px;
+  text-decoration: line-through;
+}
+@media (min-width: 750px) {
+  .product-item__title {
+    font-size: 16px;
+  }
+  .product-item__category {
+    font-size: 15px;
+  }
+  .product-item__price {
+    font-size: 16px;
+  }
+}
+
+/* ==========================================================================
+   WhatsApp flotante: círculo verde liso con el logo, nada más.
+   ========================================================================== */
+
+.wa-float {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 45;
+  display: flex;
+  width: 56px;
+  height: 56px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #25d366;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .wa-float:hover {
+    background: #1ebe5a;
+  }
+}
+@media (max-width: 749px) {
+  .wa-float {
+    right: 14px;
+    bottom: 14px;
+    width: 52px;
+    height: 52px;
+  }
+}
+
+/* ==========================================================================
+   Utilidades
+   ========================================================================== */
+
+/* Títulos del tema: Roboto Condensed 700 siempre en mayúsculas. */
+.font-display,
+.font-heading {
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+/* Sol de franjas (paleta del logo): pantallas de cuenta. */
+.sunset {
+  position: absolute;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 calc(var(--stripe, 22px) * 0.55),
+      theme('colors.coast.cream') calc(var(--stripe, 22px) * 0.55) var(--stripe, 22px)
+    ),
+    linear-gradient(180deg, theme('colors.coast.cream-deep') 0%, theme('colors.coast.sand') 28%, #f0a48f 55%, theme('colors.coast.red') 100%);
+}
+
+.fade-up {
+  animation: fade-up 0.9s var(--ease-soft) both;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Carrusel de productos: scroll nativo, que en táctil se desliza con el dedo
+   (con inercia) y engancha en cada card. pan-x pan-y deja que un gesto vertical
+   siga scrolleando la página. overscroll-behavior-x evita que el swipe al
+   llegar al final dispare el "atrás" del navegador. */
+.rail-track {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+}
+.rail-arrows {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .rail-arrows {
+    display: flex;
+  }
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up {
+    animation: none !important;
+  }
+  .mega__link,
+  .mega__image-wrapper,
+  .stage__img,
+  .stage__float,
+  .search-card,
+  .drawer__item {
+    transform: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}

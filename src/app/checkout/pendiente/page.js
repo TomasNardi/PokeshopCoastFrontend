@@ -1,0 +1,12 @@
+import { Suspense } from 'react';
+import CheckoutResult from '@/components/checkout/CheckoutResult';
+
+export const metadata = { title: 'Pago pendiente', robots: { index: false } };
+
+export default function Page() {
+  return (
+    <Suspense>
+      <CheckoutResult variant="pending" />
+    </Suspense>
+  );
+}

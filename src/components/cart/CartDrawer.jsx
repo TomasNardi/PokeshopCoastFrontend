@@ -1,0 +1,88 @@
+'use client';
+import { useEffect } from 'react';
+import { ShoppingBag, X } from 'lucide-react';
+import { selectSubtotal, useCartStore } from '@/store/cartStore';
+import { formatPrice } from '@/domain/money';
+import { buttonClass } from '@/components/ui/Button';
+import { useHydrated } from '@/hooks/useHydrated';
+import Link from 'next/link';
+import CartLine from './CartLine';
+
+export default function CartDrawer() {
+  const isOpen = useCartStore((s) => s.isOpen);
+  const close = useCartStore((s) => s.close);
+  const hydrated = useHydrated();
+  const storedItems = useCartStore((s) => s.items);
+  const storedSubtotal = useCartStore(selectSubtotal);
+  // El carrito viene de localStorage: en SSR no existe. Hasta hidratar se pinta vacío.
+  const items = hydrated ? storedItems : [];
+  const subtotal = hydrated ? storedSubtotal : 0;
+  const hasUnavailable = items.some((item) => item.in_stock === false);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKey = (e) => e.key === 'Escape' && close();
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, close]);
+
+  return (
+    <div className={`fixed inset-0 z-50 ${isOpen ? '' : 'pointer-events-none'}`} aria-hidden={!isOpen}>
+      <div onClick={close} className={`absolute inset-0 bg-coast-ink/40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`} />
+      <aside
+        role="dialog"
+        aria-label="Carrito"
+        className={`absolute right-0 top-0 flex h-full w-full max-w-[420px] flex-col bg-coast-cream shadow-2xl transition-transform duration-300 ease-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="flex items-center justify-between border-b border-coast-line px-6 py-5">
+          <h2 className="font-display text-xl font-extrabold">Tu carrito</h2>
+          <button type="button" onClick={close} aria-label="Cerrar carrito" className="rounded-full p-2 hover:bg-coast-sand/60">
+            <X size={18} />
+          </button>
+        </div>
+
+        {items.length === 0 ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+            <ShoppingBag size={36} strokeWidth={1.4} className="text-coast-mist" />
+            <p className="text-[14px] text-coast-gray">Tu carrito está vacío.</p>
+            <Link href="/tienda" onClick={close} className={buttonClass({ variant: 'dark' })}>
+              Ir a la tienda
+            </Link>
+          </div>
+        ) : (
+          <>
+            <ul className="flex-1 divide-y divide-coast-line overflow-y-auto px-6">
+              {items.map((item) => (
+                <CartLine key={item.id} item={item} onNavigate={close} />
+              ))}
+            </ul>
+            <div className="space-y-4 border-t border-coast-line bg-white px-6 py-5">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] uppercase tracking-[0.14em] text-coast-gray">Subtotal</span>
+                <span className="text-lg font-bold">{formatPrice(subtotal)}</span>
+              </div>
+              <p className="text-[12px] text-coast-gray">Envío y recargos se calculan en el checkout.</p>
+              <Link
+                href="/checkout"
+                onClick={close}
+                aria-disabled={hasUnavailable}
+                className={buttonClass({ size: 'lg', block: true, className: hasUnavailable ? 'pointer-events-none opacity-50' : '' })}
+              >
+                Finalizar compra
+              </Link>
+              <Link href="/carrito" onClick={close} className="block text-center text-[12px] font-semibold text-coast-gray underline-offset-4 hover:underline">
+                Ver carrito completo
+              </Link>
+            </div>
+          </>
+        )}
+      </aside>
+    </div>
+  );
+}
