@@ -632,6 +632,7 @@ body {
 .drawer.is-open .drawer__underlay {
   opacity: 1;
 }
+/* Panel: a todo el ancho en celulares, 380px desde 480px (--DRAWER-WIDTH del tema). */
 .drawer__panel {
   position: absolute;
   top: 0;
@@ -639,11 +640,17 @@ body {
   left: 0;
   display: flex;
   flex-direction: column;
-  width: min(420px, 88vw);
+  width: 100%;
   background: #fcfcfc;
   color: #000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 3px 12px rgba(0, 0, 0, 0.02);
   transform: translateX(-100%);
   transition: transform 0.45s var(--ease-soft);
+}
+@media (min-width: 480px) {
+  .drawer__panel {
+    max-width: 380px;
+  }
 }
 .drawer.is-open .drawer__panel {
   transform: none;
@@ -651,74 +658,120 @@ body {
 .drawer__head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px var(--outer);
-  border-bottom: 1px solid #eaeaea;
+  padding: 15px;
 }
-.drawer__menu {
+.drawer__close {
+  display: flex;
+  margin-left: -5px;
+  padding: 5px;
+}
+
+/* Sliderule: el primer nivel y cada submenú son paneles superpuestos que se deslizan. */
+.sliderule {
+  position: relative;
   flex: 1;
+  overflow: hidden;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.sliderule__pane {
+  position: absolute;
+  inset: 0;
   overflow-y: auto;
-  padding: 8px 0;
+  overscroll-behavior: contain;
+  transition: transform 0.45s var(--ease-soft), visibility 0s linear 0.45s;
 }
-.drawer__item {
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+.sliderule.is-sub .sliderule__main {
+  visibility: hidden;
+  transform: translateX(-30%);
 }
-.drawer.is-open .drawer__item {
-  opacity: 1;
+.sliderule__panel {
+  visibility: hidden;
+  background: #fcfcfc;
+  transform: translateX(100%);
+}
+.sliderule__panel.is-visible {
+  visibility: visible;
   transform: none;
+  transition: transform 0.45s var(--ease-soft), visibility 0s;
 }
-.drawer.is-open .drawer__item:nth-child(2) { transition-delay: 0.05s; }
-.drawer.is-open .drawer__item:nth-child(3) { transition-delay: 0.1s; }
-.drawer.is-open .drawer__item:nth-child(4) { transition-delay: 0.15s; }
-.drawer.is-open .drawer__item:nth-child(5) { transition-delay: 0.2s; }
-.drawer.is-open .drawer__item:nth-child(6) { transition-delay: 0.25s; }
-.drawer__toplink {
+.sliderule:not(.is-sub) .sliderule__main {
+  transition: transform 0.45s var(--ease-soft), visibility 0s;
+}
+
+.sliderow {
   display: flex;
   width: 100%;
+  min-height: 50px;
   align-items: center;
   justify-content: space-between;
-  padding: 15px var(--outer);
+  padding: 0 15px;
   text-align: left;
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.2;
+  /* Explícito: el preflight de Tailwind resetea text-transform en <button>. */
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
-.drawer__sub {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.35s var(--ease-out);
+.sliderow--highlight {
+  color: theme('colors.coast.red');
 }
-.drawer__sub.is-open {
-  grid-template-rows: 1fr;
+.sliderow__chevron {
+  transition: transform 0.3s var(--ease-out);
 }
-.drawer__sublink {
-  display: block;
-  padding: 8px var(--outer) 8px calc(var(--outer) + 14px);
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #808080;
+.sliderow--back {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  justify-content: center;
+  border-bottom: 1px solid #eaeaea;
+  background: #fcfcfc;
+}
+.sliderow__back-icon {
+  position: absolute;
+  left: 11px;
+  transition: transform 0.3s var(--ease-out);
+}
+.sliderow--link {
+  min-height: 44px;
+  font-size: 15px;
 }
 @media (hover: hover) and (pointer: fine) {
-  .drawer__sublink:hover {
-    color: #000;
+  .sliderow:hover {
+    background: #f2f2f2;
+  }
+  .sliderow:hover .sliderow__chevron {
+    transform: translateX(5px);
+  }
+  .sliderow--back:hover .sliderow__back-icon {
+    transform: translateX(-5px);
   }
 }
-.drawer__foot {
+/* Táctil: feedback al tocar en lugar del hover. */
+.sliderow:active {
+  background: #f2f2f2;
+}
+
+.drawer__bottom {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 20px var(--outer) 28px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px;
   border-top: 1px solid #eaeaea;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #747474;
+}
+.drawer__social {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.drawer__social a {
+  display: flex;
+  padding: 8px;
 }
 
 /* ==========================================================================
@@ -1269,9 +1322,12 @@ body {
   .mega__image-wrapper,
   .stage__img,
   .stage__float,
-  .search-card,
-  .drawer__item {
+  .search-card {
     transform: none !important;
+    transition-duration: 0.01ms !important;
+  }
+  .drawer__panel,
+  .sliderule__pane {
     transition-duration: 0.01ms !important;
   }
 }

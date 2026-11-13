@@ -10,26 +10,6 @@ import MegaMenu from './MegaMenu';
 import SearchPopdown from './SearchPopdown';
 import MobileDrawer from './MobileDrawer';
 import { useSiteHeader } from './useSiteHeader';
-import { PRESENTATION_MODE } from '@/config/env';
-
-/** Modo presentación: header con solo el logo (sin menú, búsqueda, cuenta ni carrito). */
-function PresentationHeader() {
-  const header = useSiteHeader({ overlay: true });
-  return (
-    <div
-      className={`site-header site-header--overlay ${header.isTransparent ? 'is-transparent' : 'is-solid'}`}
-      {...header.hoverHandlers}
-    >
-      <header className="site-header__bar" role="banner">
-        <div className="site-header__row grid">
-          <span />
-          <Wordmark />
-          <span />
-        </div>
-      </header>
-    </div>
-  );
-}
 
 /** Rutas cuyo primer bloque es un hero a todo el ancho: el header va transparente encima. */
 const OVERLAY_ROUTES = new Set(['/']);
@@ -49,11 +29,7 @@ function Caret() {
  *
  * @param {{ menu: Array, popularProducts: Array }} props menú con imágenes ya resueltas (server)
  */
-export default function SiteHeader(props) {
-  return PRESENTATION_MODE ? <PresentationHeader /> : <FullHeader {...props} />;
-}
-
-function FullHeader({ menu, popularProducts = [] }) {
+export default function SiteHeader({ menu, popularProducts = [] }) {
   const pathname = usePathname();
   const overlay = OVERLAY_ROUTES.has(pathname);
   const header = useSiteHeader({ overlay });
@@ -82,7 +58,13 @@ function FullHeader({ menu, popularProducts = [] }) {
               </button>
             </div>
             <Wordmark />
+            {/* Como unsobremas: cuenta + carrito a la derecha. */}
             <div className="flex items-center justify-end">
+              {status !== 'disabled' && (
+                <Link href={accountHref} className="header-icon" aria-label="Mi cuenta">
+                  <User size={22} strokeWidth={2} />
+                </Link>
+              )}
               <button type="button" className="header-icon" onClick={openCart} aria-label={`Carrito (${cartCount})`}>
                 <ShoppingBag size={22} strokeWidth={2} />
                 {cartCount > 0 && <span className="header-icon__count">{cartCount}</span>}

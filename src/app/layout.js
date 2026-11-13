@@ -10,6 +10,7 @@ import Footer from '@/components/layout/Footer';
 import FloatingContact from '@/components/layout/FloatingContact';
 import CartDrawer from '@/components/cart/CartDrawer';
 import { PRESENTATION_MODE } from '@/config/env';
+import PresentationGuard from '@/components/layout/PresentationGuard';
 
 // Mismas familias que unsobremas.com (Wappalyzer → Google Font API).
 const roboto = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-roboto', display: 'swap' });
@@ -54,7 +55,8 @@ export default async function RootLayout({ children }) {
           <SiteHeader menu={menu} popularProducts={featured} />
           <main className="min-h-[60vh]">{children}</main>
           <Footer />
-          {!PRESENTATION_MODE && <CartDrawer />}
+          <CartDrawer />
+          {PRESENTATION_MODE && <PresentationGuard />}
           <FloatingContact />
         </Providers>
       </body>

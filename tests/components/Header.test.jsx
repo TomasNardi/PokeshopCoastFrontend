@@ -118,4 +118,20 @@ describe('<SiteHeader />', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Abrir menú' }));
     expect(container.querySelector('.drawer')).toHaveClass('is-open');
   });
+
+  it('menú mobile tipo sliderule: tocar una categoría desliza su submenú y "atrás" vuelve', () => {
+    const { container } = renderHeader();
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir menú' }));
+    const nav = container.querySelector('.sliderule');
+    const panel = () => container.querySelector('.sliderule__panel.is-visible');
+
+    fireEvent.click(container.querySelector('.sliderule__main button.sliderow'));
+    expect(nav).toHaveClass('is-sub');
+    expect(panel()).not.toBeNull();
+    expect(panel()).toHaveAttribute('aria-hidden', 'false');
+
+    fireEvent.click(panel().querySelector('.sliderow--back'));
+    expect(nav).not.toHaveClass('is-sub');
+    expect(panel()).toBeNull();
+  });
 });
