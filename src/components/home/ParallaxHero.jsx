@@ -14,8 +14,10 @@ const SPEED = 0.35;
  * @param {object} props
  * @param {{ desktop: string, mobile?: string, alt?: string }} props.image
  * @param {'three-quarters'|'two-thirds'} [props.height]
- * @param {'cover'|'split'} [props.layout]
+ * @param {'cover'|'split'|'stage'} [props.layout]
  *   cover: la imagen ocupa todo el hero.
+ *   stage: composición ya armada sobre negro; en desktop se ve entera
+ *          (contain, anclada con focal) y en mobile se encuadra con focalMobile.
  *   split: fondo negro fijo con el texto a la izquierda y la imagen anclada a
  *          la derecha, fundida al negro con un degradado. Sirve para cambiar
  *          la imagen sin tocar el diseño: cualquier arte queda igual.

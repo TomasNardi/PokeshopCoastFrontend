@@ -19,6 +19,10 @@ export const HOME_HEROES = {
     subtitle: 'Certificadas PSA · CGC · BGS',
     title: 'Slabs',
     cta: { label: 'Ver slabs', href: '/tienda?category=slabs' },
-    image: { desktop: '/hero/coast-hero-night.svg', mobile: '/hero/coast-hero-night-mobile.svg', alt: '' },
+    // Fondo: 3 slabs PSA con el Charizard adelante (Figma "Banner 2 PSA", export 2x).
+    // La izquierda queda oscura para el texto; en mobile se encuadra sobre las cartas.
+    // Anterior: /hero/coast-hero-night.svg + /hero/coast-hero-night-mobile.svg.
+    layout: 'stage',
+    image: { desktop: '/hero/slabs-psa.webp', alt: '', focal: '88% 50%', focalMobile: '58% 50%' },
   },
 };

@@ -839,6 +839,32 @@ body {
     mask-image: linear-gradient(to right, transparent 0%, #000 32%, #000 100%);
   }
 }
+/* Layout "stage": composición ya armada (fondo negro propio, ej. los slabs).
+   Desktop: se ve entera (contain) anclada según --focal, sobre el mismo negro
+   del arte, así nunca se recortan las cartas en pantallas anchas o bajas.
+   Mobile: cover encuadrado con --focal-mobile sobre las cartas. */
+.hero--stage {
+  background: #0a0a0c;
+}
+/* Sin parallax: si se mueve, los slabs tocan el borde y se cortan. */
+.hero--stage .hero__pane {
+  inset: 0;
+  transform: none !important;
+}
+@media (min-width: 750px) {
+  /* Más alto que el resto: la composición es la protagonista. */
+  .hero--stage {
+    height: 82vh;
+    min-height: 560px;
+    max-height: 860px;
+  }
+  .hero--stage .hero__img {
+    object-fit: contain;
+    /* Funde los bordes del arte con el fondo para que no se note el corte. */
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 12%, #000 94%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, #000 12%, #000 94%, transparent 100%);
+  }
+}
 
 /* Punto de enfoque por imagen (como --focal-point del tema). */
 .hero__img {
