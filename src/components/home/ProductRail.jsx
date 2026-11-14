@@ -6,8 +6,9 @@ import ProductCard from '@/components/product/ProductCard';
 import { PRESENTATION_MODE } from '@/config/presentation';
 
 /**
- * Fila deslizable de productos (grid-slider del tema): 4 por vista en desktop,
- * ~2 en mobile, flechas para avanzar de a una "página".
+ * Fila deslizable de productos (grid-slider del tema): 4 cards enteras por vista
+ * en PC (mismo tamaño que la grilla del Catálogo), ~1,5 en mobile, flechas para
+ * avanzar de a una "página".
  */
 export default function ProductRail({ id, title, href, products = [], limit = 12 }) {
   const trackRef = useRef(null);
@@ -15,11 +16,15 @@ export default function ProductRail({ id, title, href, products = [], limit = 12
 
   const scroll = (direction) => {
     const track = trackRef.current;
-    if (track) track.scrollBy({ left: direction * track.clientWidth, behavior: 'smooth' });
+    if (!track) return;
+    // Una "página" = las cards visibles: ancho sin el padding lateral + un gap.
+    const cs = getComputedStyle(track);
+    const page = track.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) + (parseFloat(cs.columnGap) || 0);
+    track.scrollBy({ left: direction * page, behavior: 'smooth' });
   };
 
   return (
-    <section id={id} className="scroll-mt-[var(--header-height)] pb-8 pt-12 md:pt-[50px]">
+    <section id={id} className="rail scroll-mt-[var(--header-height)] pb-8 pt-12 md:pt-[50px]">
       <div className="container-site mb-[15px] flex items-end justify-between gap-6">
         <h2 className="section-heading">{title}</h2>
         <div className="flex items-center gap-1">
@@ -39,10 +44,11 @@ export default function ProductRail({ id, title, href, products = [], limit = 12
           </div>
         </div>
       </div>
-      <div ref={trackRef} className="rail-track hide-scrollbar flex snap-x snap-mandatory gap-[5px] overflow-x-auto scroll-px-[var(--outer)] px-[var(--outer)] md:gap-[var(--gap)]">
+      <div ref={trackRef} className="rail-track hide-scrollbar flex snap-x snap-mandatory gap-[5px] overflow-x-auto scroll-px-[var(--outer)] px-[var(--outer)]">
         {products.slice(0, limit).map((product, index) => (
           // Mobile = unsobremas (.grid--mobile-slider): card de (ancho − margen izq. − 120px), 5px de separación (~1,5 por pantalla).
-          <div key={product.id} className="w-[calc(100%+var(--outer)-120px)] shrink-0 snap-start md:w-[calc((100%-2*var(--gap))/3)] xl:w-[calc((100%-3*var(--gap))/4)]">
+          // Tablet/PC: mismo ancho que .product-grid, en .rail-item (globals.css).
+          <div key={product.id} className="rail-item w-[calc(100%+var(--outer)-120px)] shrink-0 snap-start">
             <ProductCard product={product} priority={index < 4} />
           </div>
         ))}

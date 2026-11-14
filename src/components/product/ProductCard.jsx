@@ -23,7 +23,7 @@ export default function ProductCard({ product, priority = false }) {
 
   return (
     <article className="product-item group">
-      <div className="relative">
+      <div className="product-item__media">
         <CardLink href={view.href} className="block" aria-label={view.name}>
           <ProductStage src={view.imageUrl} alt={view.name} priority={priority}>
             <div className="product-item__badges product-item__badges--left">
@@ -35,7 +35,7 @@ export default function ProductCard({ product, priority = false }) {
               {view.certLabel ? <CertBadge label={view.certLabel} /> : <ConditionBadge condition={view.condition} />}
             </div>
             {view.language && (
-              <span className="absolute bottom-3 left-3 z-[3]">
+              <span className="product-item__lang">
                 <LanguageFlag language={view.language} />
               </span>
             )}

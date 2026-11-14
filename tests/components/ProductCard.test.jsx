@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ProductCard from '@/components/product/ProductCard';
 import { useCartStore } from '@/store/cartStore';
@@ -46,11 +46,14 @@ describe('<ProductCard />', () => {
     expect(screen.getByText('Neo Genesis · 1st Edition Holo · Firmada')).toBeInTheDocument();
   });
 
-  it('agregar al carrito suma la unidad y abre el drawer', async () => {
+  it('agregar al carrito: anillo de carga → check → suma la unidad y abre el drawer', async () => {
     useCartStore.setState({ items: [], isOpen: false });
     render(<ProductCard product={bySlug('pikachu-025-151-reverse')} />);
-    await userEvent.click(screen.getByRole('button', { name: /Agregar Pikachu/ }));
+    const button = screen.getByRole('button', { name: /Agregar Pikachu/ });
+    await userEvent.click(button);
+    expect(button).toHaveClass('is-loading');
+    await waitFor(() => expect(button).toHaveClass('is-added'), { timeout: 2000 });
     expect(useCartStore.getState().items[0]).toMatchObject({ id: 3, quantity: 1 });
-    expect(useCartStore.getState().isOpen).toBe(true);
+    await waitFor(() => expect(useCartStore.getState().isOpen).toBe(true), { timeout: 2000 });
   });
 });

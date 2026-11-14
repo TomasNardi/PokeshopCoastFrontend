@@ -5,15 +5,16 @@
  */
 export const HOME_HEROES = {
   main: {
-    subtitle: 'Tu tienda favorita de Pokémon TCG en Argentina',
+    subtitle: 'Desde Mar del Plata, llevando Pokémon TCG a todo el país.',
     title: 'PokeShop Coast',
     cta: { label: 'Comprar', href: '/tienda' },
     // Fondo: collage de cartas Base Set (elegido en Figma), con el mismo look
     // del banner de Figma: negro a la izquierda y la imagen fundiéndose desde
     // la derecha ('split'; en mobile la imagen arriba y se funde hacia abajo).
-    // Anteriores: /hero/banner-pc.webp + /hero/banner-mobile.webp.
+    // Charizard + Ancient Mew, upscale Real-ESRGAN x4 → 2560×1440.
+    // Anteriores: /hero/pokemon-original-2016.avif, /hero/banner-pc.webp + /hero/banner-mobile.webp.
     layout: 'split',
-    image: { desktop: '/hero/pokemon-original-2016.avif', alt: '', focal: '50% 50%', focalMobile: '60% 50%' },
+    image: { desktop: '/hero/pokemon-top-cards.webp', alt: '', focal: '50% 50%', focalMobile: '60% 50%' },
   },
   secondary: {
     subtitle: 'Certificadas PSA · CGC · BGS',

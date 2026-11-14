@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getServices } from '@/services/container';
 import { HOME_HEROES } from '@/config/home';
 import ParallaxHero from '@/components/home/ParallaxHero';
@@ -16,20 +17,41 @@ const secondaryHero = PRESENTATION_MODE ? { ...HOME_HEROES.secondary, cta: null 
 // Stock fresco en cada visita (y en cada vuelta atrás, ver BackForwardRefresh).
 export const dynamic = 'force-dynamic';
 
-/** Home con la misma secuencia que unsobremas: hero → novedades → hero → colección → newsletter. */
+/** Home con la misma secuencia que unsobremas: hero → novedades → hero → sellados → newsletter. */
 export default async function HomePage() {
   const { catalog } = getServices();
-  const [newArrivals, page] = await Promise.all([catalog.getNewArrivals(), catalog.getProductPage({ in_stock: 'true' })]);
+  const [newArrivals, sealed] = await Promise.all([
+    catalog.getNewArrivals(),
+    catalog.getProductPage({ category: 'sellados', in_stock: 'true' }),
+  ]);
+  const sealedHref = '/tienda?category=sellados';
 
   return (
     <>
       <ParallaxHero {...mainHero} priority titleAs="h1" />
       <ProductRail id="nuevos-ingresos" title="Nuevos ingresos" href="/tienda?ordering=-created_at" products={newArrivals} />
       <ParallaxHero {...secondaryHero} height="two-thirds" titleSize="xl" />
-      <section className="container-site pb-[50px] pt-12 md:pt-[50px]">
-        <h2 className="section-heading mb-[15px]">Catálogo</h2>
-        <ProductGrid products={page.items.slice(0, 8)} priorityCount={0} mobileSlider />
-      </section>
+      {/* Como la colección de unsobremas bajo el 2.º hero: título + 4 productos, y "Ver más". */}
+      {sealed.items.length > 0 && (
+        <section id="sellados" className="container-site pb-[50px] pt-12 md:pt-[50px]">
+          <div className="mb-[15px] flex items-end justify-between gap-6">
+            <h2 className="section-heading">Productos sellados</h2>
+            {!PRESENTATION_MODE && (
+              <Link href={sealedHref} className="hidden text-[12px] font-bold uppercase tracking-[0.1em] text-uns-muted hover:text-black md:inline">
+                Ver todo
+              </Link>
+            )}
+          </div>
+          <ProductGrid products={sealed.items.slice(0, 4)} priorityCount={0} mobileSlider />
+          {!PRESENTATION_MODE && (
+            <div className="mt-8 flex justify-center">
+              <Link href={sealedHref} className="btn btn--dark">
+                Ver más
+              </Link>
+            </div>
+          )}
+        </section>
+      )}
       <SocialConnect />
       <Newsletter />
     </>

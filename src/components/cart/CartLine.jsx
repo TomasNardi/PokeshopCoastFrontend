@@ -13,10 +13,11 @@ export default function CartLine({ item, onNavigate }) {
 
   return (
     <li className="flex gap-4 py-4">
-      <Link href={`/tienda/${item.slug}`} onClick={onNavigate} className="relative h-24 w-20 shrink-0 overflow-hidden rounded-lg border border-coast-line bg-white">
+      <Link href={`/tienda/${item.slug}`} onClick={onNavigate} className="relative h-24 w-20 shrink-0">
+        {/* Sin caja: el producto queda suelto sobre el blanco del carrito. */}
         {item.image_url && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.image_url} alt={item.name} className="h-full w-full object-contain p-2" />
+          <img src={item.image_url} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.12)]" />
         )}
       </Link>
       <div className="flex min-w-0 flex-1 flex-col">
@@ -33,7 +34,7 @@ export default function CartLine({ item, onNavigate }) {
           {unavailable ? (
             <span className="text-[12px] font-semibold text-coast-red-dark">Sin stock — quitalo para continuar</span>
           ) : (
-            <div className="flex items-center border border-coast-line bg-white">
+            <div className="flex items-center border border-uns-hairline bg-white">
               <button type="button" className="px-2.5 py-1.5 disabled:opacity-30" onClick={() => setQuantity(item.id, item.quantity - 1)} aria-label="Restar uno">
                 <Minus size={12} />
               </button>

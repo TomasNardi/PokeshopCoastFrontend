@@ -1169,14 +1169,36 @@ body {
   color: #fff;
 }
 
+/* Quick add = unsobremas (.quick-add__holder / .quick-add__button).
+   PC (mouse): barra rojo Coast a todo el ancho, 42px, "AGREGAR AL CARRITO" en
+   condensada 700 12px; sube desde abajo de la foto con el hover de la card
+   (0.25s) y, al pasar por la barra, entra el rojo oscuro desde la izquierda. */
+/* Zonas fijas de la card (nada se tapa, todo siempre visible):
+     arriba izq. → estado (outlet / rebajado / sin stock)
+     arriba der. → condición o certificación
+     abajo       → franja reservada al quick add (--quick-zone)
+     idioma      → abajo a la izquierda, apoyado sobre esa franja */
+.product-item__media {
+  --quick-zone: 42px;
+  position: relative;
+  overflow: hidden;
+}
+.product-item__lang {
+  position: absolute;
+  left: 8px;
+  bottom: calc(var(--quick-zone) + 10px);
+  z-index: 3;
+  display: flex;
+}
 .product-item__quick {
   position: absolute;
+  left: 0;
   right: 0;
   bottom: 0;
   z-index: 4;
   opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+  transform: translateY(100%);
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 .product-item__quick:focus-within {
   opacity: 1;
@@ -1188,10 +1210,179 @@ body {
     transform: none;
   }
 }
-/* Táctil: el quick add (que depende del hover) no existe; se compra desde la ficha. */
+.quick-add-btn {
+  position: relative;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  padding: 15px;
+  background: theme('colors.coast.red');
+  color: #fff;
+  font-family: theme('fontFamily.heading');
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 12px;
+  letter-spacing: 0.075em;
+  text-align: center;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.quick-add-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: theme('colors.coast.red-dark');
+  transform: translateX(-101%);
+  transition: transform 0.5s cubic-bezier(0.33, 0, 0, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .quick-add-btn:hover::after {
+    transform: none;
+  }
+}
+.quick-add-btn__icon {
+  display: none;
+}
+
+/* Click (como unsobremas): el contenido se desvanece, un anillo de 18px se llena
+   en loop (círculo tenue + arco que avanza) y al terminar aparece un check.
+   Mientras dura, la barra queda visible aunque se vaya el mouse. */
+.quick-add-btn__text,
+.quick-add-btn__icon,
+.quick-add-btn__loader,
+.quick-add-btn__added {
+  transition: opacity 0.3s ease;
+}
+.quick-add-btn__loader,
+.quick-add-btn__added {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  fill: none;
+}
+.quick-add-btn__loader circle {
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+.quick-add-btn__loader circle:first-child {
+  opacity: 0.35;
+}
+.quick-add-btn__loader circle + circle {
+  stroke-dasharray: 88;
+  stroke-dashoffset: 88;
+  transform-origin: center;
+  transform: rotate(-90deg);
+  animation: quick-add-ring 0.6s linear infinite paused;
+}
+.quick-add-btn__added path {
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+}
+.quick-add-btn.is-loading,
+.quick-add-btn.is-added {
+  pointer-events: none;
+}
+.quick-add-btn.is-loading::after,
+.quick-add-btn.is-added::after {
+  transform: none; /* rojo oscuro de fondo durante la carga */
+}
+.quick-add-btn.is-loading > .quick-add-btn__text,
+.quick-add-btn.is-loading > .quick-add-btn__icon,
+.quick-add-btn.is-added > .quick-add-btn__text,
+.quick-add-btn.is-added > .quick-add-btn__icon {
+  opacity: 0;
+}
+.quick-add-btn.is-loading > .quick-add-btn__loader {
+  opacity: 1;
+}
+.quick-add-btn.is-loading > .quick-add-btn__loader circle + circle {
+  animation-play-state: running;
+}
+.quick-add-btn.is-added > .quick-add-btn__added {
+  opacity: 1;
+}
+.quick-add-btn.is-added > .quick-add-btn__added path {
+  animation: quick-add-check 0.35s ease-out forwards;
+}
+.product-item__quick:has(.is-loading, .is-added) {
+  opacity: 1;
+  transform: none;
+}
+@keyframes quick-add-ring {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes quick-add-check {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.quick-add-btn:disabled {
+  background: theme('colors.uns.border');
+  cursor: default;
+}
+
+/* Táctil = unsobremas mobile: botón de 36px siempre visible, fondo blanco,
+   radio 3px, a 5px del borde y bolsa de 24px en rojo Coast. Va
+   abajo a la derecha porque abajo a la izquierda está la bandera del idioma. */
 @media not all and (hover: hover) and (pointer: fine) {
+  /* Táctil: la franja de abajo es la fila botón (36px + 5px de margen); el
+     idioma queda en esa misma fila, a la izquierda y centrado con el botón. */
+  .product-item__media {
+    --quick-zone: 0px;
+  }
+  .product-item__lang {
+    bottom: 15px;
+  }
   .product-item__quick {
+    left: auto;
+    right: 5px;
+    bottom: 5px;
+    opacity: 1;
+    transform: none;
+  }
+  .quick-add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 3px;
+    background: #fff;
+    color: theme('colors.coast.red');
+    -webkit-tap-highlight-color: transparent;
+  }
+  .quick-add-btn::after {
     display: none;
+  }
+  .quick-add-btn__text {
+    display: none;
+  }
+  .quick-add-btn__icon {
+    display: block;
+  }
+  .quick-add-btn:active {
+    transform: scale(0.92);
+  }
+  .quick-add-btn.is-added {
+    background: theme('colors.coast.red');
+    color: #fff;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .quick-add-btn:disabled {
+    background: #fff;
+    color: theme('colors.uns.border');
   }
 }
 
@@ -1323,6 +1514,34 @@ body {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   touch-action: pan-x pan-y;
+}
+/* Tablet/PC: cards enteras, mismo ancho y misma alineación que .product-grid
+   (container-site, máx. 1800px): 3 por vista desde 750px, 4 desde 1100px.
+   El track es a sangre para scrollear, así que el padding lateral replica el
+   margen del container: max(--outer, (ancho − 1800px)/2 + --outer).
+   100cqw = ancho de la sección .rail (= 100vw − scrollbar). */
+.rail {
+  container-type: inline-size;
+}
+@media (min-width: 750px) {
+  .rail-track {
+    --rail-side: max(var(--outer), calc((100cqw - 1800px) / 2 + var(--outer)));
+    gap: var(--gap);
+    padding-inline: var(--rail-side);
+    scroll-padding-inline: var(--rail-side);
+    /* Solo cards enteras: la siguiente no asoma por el margen lateral. */
+    clip-path: inset(0 var(--rail-side));
+  }
+  .rail-item {
+    --rail-content: calc(min(100cqw, 1800px) - 2 * var(--outer));
+    --rail-cols: 3;
+    width: calc((var(--rail-content) - (var(--rail-cols) - 1) * var(--gap)) / var(--rail-cols));
+  }
+}
+@media (min-width: 1100px) {
+  .rail-item {
+    --rail-cols: 4;
+  }
 }
 .rail-arrows {
   display: none;

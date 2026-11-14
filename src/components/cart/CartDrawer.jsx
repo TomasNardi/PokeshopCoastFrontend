@@ -36,13 +36,13 @@ export default function CartDrawer() {
       <aside
         role="dialog"
         aria-label="Carrito"
-        className={`absolute right-0 top-0 flex h-full w-full max-w-[420px] flex-col bg-coast-cream shadow-2xl transition-transform duration-300 ease-out ${
+        className={`absolute right-0 top-0 flex h-full w-full max-w-[420px] flex-col bg-white shadow-2xl transition-transform duration-300 ease-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between border-b border-coast-line px-6 py-5">
+        <div className="flex items-center justify-between border-b border-uns-hairline px-6 py-5">
           <h2 className="font-display text-xl font-extrabold">Tu carrito</h2>
-          <button type="button" onClick={close} aria-label="Cerrar carrito" className="rounded-full p-2 hover:bg-coast-sand/60">
+          <button type="button" onClick={close} aria-label="Cerrar carrito" className="rounded-full p-2 hover:bg-uns-stage">
             <X size={18} />
           </button>
         </div>
@@ -57,12 +57,12 @@ export default function CartDrawer() {
           </div>
         ) : (
           <>
-            <ul className="flex-1 divide-y divide-coast-line overflow-y-auto px-6">
+            <ul className="flex-1 divide-y divide-uns-hairline overflow-y-auto px-6">
               {items.map((item) => (
                 <CartLine key={item.id} item={item} onNavigate={close} />
               ))}
             </ul>
-            <div className="space-y-4 border-t border-coast-line bg-white px-6 py-5">
+            <div className="space-y-4 border-t border-uns-hairline bg-white px-6 py-5">
               <div className="flex items-center justify-between">
                 <span className="text-[13px] uppercase tracking-[0.14em] text-coast-gray">Subtotal</span>
                 <span className="text-lg font-bold">{formatPrice(subtotal)}</span>
