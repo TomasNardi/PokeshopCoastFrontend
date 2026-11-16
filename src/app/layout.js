@@ -8,6 +8,7 @@ import Providers from '@/components/layout/Providers';
 import SiteHeader from '@/components/header/SiteHeader';
 import Footer from '@/components/layout/Footer';
 import FloatingContact from '@/components/layout/FloatingContact';
+import SocialRail from '@/components/layout/SocialRail';
 import CartDrawer from '@/components/cart/CartDrawer';
 import { PRESENTATION_MODE } from '@/config/presentation';
 import PresentationGuard from '@/components/layout/PresentationGuard';
@@ -57,6 +58,7 @@ export default async function RootLayout({ children }) {
           <Footer />
           <CartDrawer />
           {PRESENTATION_MODE && <PresentationGuard />}
+          <SocialRail />
           <FloatingContact />
         </Providers>
       </body>

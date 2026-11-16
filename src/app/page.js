@@ -5,7 +5,6 @@ import ParallaxHero from '@/components/home/ParallaxHero';
 import ProductRail from '@/components/home/ProductRail';
 import ProductGrid from '@/components/product/ProductGrid';
 import Newsletter from '@/components/home/Newsletter';
-import SocialConnect from '@/components/home/SocialConnect';
 import { PRESENTATION_MODE } from '@/config/presentation';
 
 // Modo presentación: "Comprar" baja a los productos en vez de ir a la tienda.
@@ -52,7 +51,6 @@ export default async function HomePage() {
           )}
         </section>
       )}
-      <SocialConnect />
       <Newsletter />
     </>
   );

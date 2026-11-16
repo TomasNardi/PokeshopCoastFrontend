@@ -1414,6 +1414,146 @@ body {
    WhatsApp flotante: círculo verde liso con el logo, nada más.
    ========================================================================== */
 
+/* Redes al borde izquierdo (SocialRail): panel glass que entra deslizándose
+   desde la izquierda a los 3 s y se puede cerrar con la ×.
+   Mobile/tablet: solo Instagram. PC ancha (≥1100px): las tres redes. */
+.social-rail {
+  position: fixed;
+  left: 0;
+  top: 58%;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 5px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-left: 0;
+  border-radius: 0 10px 10px 0;
+  background: rgba(255, 255, 255, 0.55);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  color: #000;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-110%, -50%);
+  transition: transform 0.9s var(--ease-soft), opacity 0.6s ease;
+}
+.social-rail.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(0, -50%);
+}
+.social-rail__close {
+  display: flex;
+  padding: 4px;
+  border-radius: 9999px;
+  color: theme('colors.coast.gray');
+  -webkit-tap-highlight-color: transparent;
+}
+.social-rail__label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: theme('fontFamily.heading');
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.social-rail__mobile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 2px 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.social-rail__desktop {
+  display: none;
+}
+@media (min-width: 1100px) {
+  .social-rail {
+    gap: 8px;
+    padding: 8px 4px 10px; /* 18 + 2×6 + 2×4 + borde = 39px: entra en el margen de 40px */
+  }
+  .social-rail__mobile {
+    display: none;
+  }
+  .social-rail__desktop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .social-rail__label {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+  }
+}
+.social-rail__list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.social-rail__link {
+  display: flex;
+  padding: 6px;
+  transition: transform 0.25s var(--ease-soft), opacity 0.25s ease;
+}
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
+  .social-rail__link:hover {
+    transform: translateX(2px);
+    opacity: 0.6;
+  }
+  .social-rail__close:hover {
+    color: #000;
+  }
+}
+/* Cascada interna (como .fade-up de los heros): cada elemento sube 14px y
+   aparece, arrancando cuando el panel ya entró casi entero. Al cerrar se van
+   todos juntos, sin demora. */
+.social-rail__item {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.social-rail.is-visible .social-rail__item {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.9s var(--ease-soft), transform 0.9s var(--ease-soft);
+  transition-delay: calc(0.35s + var(--i, 0) * 0.12s);
+}
+/* La etiqueta vertical ya va rotada: la cascada solo le cambia la opacidad
+   y el desplazamiento va en la dirección de lectura. */
+.social-rail__label.social-rail__item {
+  transform: rotate(180deg) translateY(-14px);
+}
+.social-rail.is-visible .social-rail__label.social-rail__item {
+  transform: rotate(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .social-rail,
+  .social-rail__item,
+  .social-rail.is-visible .social-rail__item {
+    transition: opacity 0.3s ease;
+    transition-delay: 0s;
+  }
+  .social-rail,
+  .social-rail.is-visible {
+    transform: translate(0, -50%);
+  }
+  .social-rail__item,
+  .social-rail.is-visible .social-rail__item {
+    transform: none;
+  }
+  .social-rail__label.social-rail__item,
+  .social-rail.is-visible .social-rail__label.social-rail__item {
+    transform: rotate(180deg);
+  }
+}
+
 .wa-float {
   position: fixed;
   right: 20px;
