@@ -42,8 +42,10 @@ export default function ProductCard({ product, priority = false }) {
           </ProductStage>
         </CardLink>
 
-        {/* Quick add (fuera del <Link>: un botón dentro de un <a> es HTML inválido). */}
-        {view.isAvailable && !PRESENTATION_MODE && (
+        {/* Quick add (fuera del <Link>: un botón dentro de un <a> es HTML inválido).
+            También en modo presentación: se puede armar el carrito, lo que se
+            bloquea es ir al checkout (PresentationGuard). */}
+        {view.isAvailable && (
           <div className="product-item__quick">
             <AddToCartButton product={product} variant="icon" />
           </div>

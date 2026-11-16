@@ -18,6 +18,11 @@ export default function CartDrawer() {
   const items = hydrated ? storedItems : [];
   const subtotal = hydrated ? storedSubtotal : 0;
   const hasUnavailable = items.some((item) => item.in_stock === false);
+  // En modo presentación PresentationGuard frena estos links (preventDefault):
+  // ahí el carrito queda abierto y solo aparece el "Próximamente".
+  const closeOnNavigate = (event) => {
+    if (!event?.defaultPrevented) close();
+  };
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -51,7 +56,7 @@ export default function CartDrawer() {
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
             <ShoppingBag size={36} strokeWidth={1.4} className="text-coast-mist" />
             <p className="text-[14px] text-coast-gray">Tu carrito está vacío.</p>
-            <Link href="/tienda" onClick={close} className={buttonClass({ variant: 'dark' })}>
+            <Link href="/tienda" onClick={closeOnNavigate} className={buttonClass({ variant: 'dark' })}>
               Ir a la tienda
             </Link>
           </div>
@@ -59,7 +64,7 @@ export default function CartDrawer() {
           <>
             <ul className="flex-1 divide-y divide-uns-hairline overflow-y-auto px-6">
               {items.map((item) => (
-                <CartLine key={item.id} item={item} onNavigate={close} />
+                <CartLine key={item.id} item={item} onNavigate={closeOnNavigate} />
               ))}
             </ul>
             <div className="space-y-4 border-t border-uns-hairline bg-white px-6 py-5">
@@ -70,13 +75,13 @@ export default function CartDrawer() {
               <p className="text-[12px] text-coast-gray">Envío y recargos se calculan en el checkout.</p>
               <Link
                 href="/checkout"
-                onClick={close}
+                onClick={closeOnNavigate}
                 aria-disabled={hasUnavailable}
                 className={buttonClass({ size: 'lg', block: true, className: hasUnavailable ? 'pointer-events-none opacity-50' : '' })}
               >
                 Finalizar compra
               </Link>
-              <Link href="/carrito" onClick={close} className="block text-center text-[12px] font-semibold text-coast-gray underline-offset-4 hover:underline">
+              <Link href="/carrito" onClick={closeOnNavigate} className="block text-center text-[12px] font-semibold text-coast-gray underline-offset-4 hover:underline">
                 Ver carrito completo
               </Link>
             </div>
