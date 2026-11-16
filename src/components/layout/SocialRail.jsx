@@ -6,7 +6,8 @@ import WhatsappIcon from './WhatsappIcon';
 import { InstagramIcon, TiktokIcon } from './SocialIcons';
 
 const NETWORKS = [
-  { label: `Instagram ${CONTACT.instagramHandle}`, href: CONTACT.instagram, Icon: InstagramIcon },
+  // Instagram primero y destacado (círculo negro): es la red principal.
+  { label: `Instagram ${CONTACT.instagramHandle}`, href: CONTACT.instagram, Icon: InstagramIcon, featured: true },
   { label: `TikTok ${CONTACT.tiktokHandle}`, href: CONTACT.tiktok, Icon: TiktokIcon },
   { label: `WhatsApp ${CONTACT.whatsappDisplay}`, href: CONTACT.whatsappUrl, Icon: WhatsappIcon },
 ];
@@ -39,8 +40,8 @@ const rememberDismiss = () => {
  * Entra a los pocos segundos en dos tiempos, como los textos de los heros:
  * primero se desliza el panel y después cada elemento hace fade-up
  * escalonado (--i = orden en la cascada).
- *  - Mobile y tablet: pestaña angosta con Instagram ("Instagram" en vertical).
- *  - PC ancha (≥1100px): "Seguinos" en vertical + Instagram, TikTok y WhatsApp.
+ * Igual en mobile y PC: "Seguinos" en vertical + Instagram (destacado),
+ * TikTok y WhatsApp.
  */
 export default function SocialRail() {
   const [state, setState] = useState('hidden'); // hidden | visible | closed
@@ -67,34 +68,24 @@ export default function SocialRail() {
         <X size={13} strokeWidth={2.4} />
       </button>
 
-      {/* Mobile y tablet: solo Instagram. */}
-      <a
-        href={CONTACT.instagram}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`Seguinos en Instagram ${CONTACT.instagramHandle}`}
-        className="social-rail__mobile"
-        tabIndex={visible ? 0 : -1}
-      >
-        <span className="social-rail__item" style={{ '--i': 1 }}>
-          <InstagramIcon size={17} />
-        </span>
-        <span className="social-rail__label social-rail__item" style={{ '--i': 2 }}>Instagram</span>
-      </a>
-
-      {/* PC: las tres redes. */}
-      <div className="social-rail__desktop">
-        <span className="social-rail__label social-rail__item" style={{ '--i': 1 }} aria-hidden="true">Seguinos</span>
-        <ul className="social-rail__list">
-          {NETWORKS.map(({ label, href, Icon }, index) => (
-            <li key={href} className="social-rail__item" style={{ '--i': index + 2 }}>
-              <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} title={label} className="social-rail__link" tabIndex={visible ? 0 : -1}>
-                <Icon size={18} />
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <span className="social-rail__label social-rail__item" style={{ '--i': 1 }} aria-hidden="true">Seguinos</span>
+      <ul className="social-rail__list">
+        {NETWORKS.map(({ label, href, Icon, featured }, index) => (
+          <li key={href} className="social-rail__item" style={{ '--i': index + 2 }}>
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={label}
+              title={label}
+              className={`social-rail__link ${featured ? 'social-rail__link--featured' : ''}`}
+              tabIndex={visible ? 0 : -1}
+            >
+              <Icon size={featured ? 16 : 18} />
+            </a>
+          </li>
+        ))}
+      </ul>
     </aside>
   );
 }

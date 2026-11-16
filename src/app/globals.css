@@ -1461,30 +1461,10 @@ body {
   letter-spacing: 0.22em;
   text-transform: uppercase;
 }
-.social-rail__mobile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 2px 2px 0;
-  -webkit-tap-highlight-color: transparent;
-}
-.social-rail__desktop {
-  display: none;
-}
 @media (min-width: 1100px) {
   .social-rail {
     gap: 8px;
     padding: 8px 4px 10px; /* 18 + 2×6 + 2×4 + borde = 39px: entra en el margen de 40px */
-  }
-  .social-rail__mobile {
-    display: none;
-  }
-  .social-rail__desktop {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
   }
   .social-rail__label {
     font-size: 11px;
@@ -1502,10 +1482,21 @@ body {
   padding: 6px;
   transition: transform 0.25s var(--ease-soft), opacity 0.25s ease;
 }
+/* Instagram: círculo negro con el ícono blanco, mismo alto que los demás. */
+.social-rail__link--featured {
+  padding: 7px;
+  margin-bottom: 2px;
+  border-radius: 9999px;
+  background: #000;
+  color: #fff;
+}
 @media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .social-rail__link:hover {
     transform: translateX(2px);
     opacity: 0.6;
+  }
+  .social-rail__link--featured:hover {
+    opacity: 0.8;
   }
   .social-rail__close:hover {
     color: #000;
