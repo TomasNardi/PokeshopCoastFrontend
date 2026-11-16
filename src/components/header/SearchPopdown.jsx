@@ -18,7 +18,6 @@ function ResultCard({ product, index, onNavigate }) {
     <Link href={view.href} onClick={onNavigate} className="search-card" style={{ transitionDelay: `${300 + index * 60}ms` }}>
       <span className="search-card__media">
         {view.imageUrl && <img src={view.imageUrl} alt="" loading="lazy" />}
-        <span className="search-card__shadow" aria-hidden="true" />
       </span>
       <span className="search-card__title">{view.name}</span>
       <span className="search-card__category">{view.subtitle}</span>

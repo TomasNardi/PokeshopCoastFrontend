@@ -17,7 +17,6 @@
   --header-height: 60px;
   /* Sombra elíptica bajo los productos (cards, megamenú, búsqueda): naranja
      medio, un poco más tostado en el centro para que siga leyendo como sombra. */
-  --product-shadow: radial-gradient(ellipse at center, rgba(196, 96, 18, 0.6) 0%, rgba(240, 140, 40, 0.28) 42%, rgba(240, 140, 40, 0) 70%);
 }
 
 @media (min-width: 750px) {
@@ -35,6 +34,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* Reserva siempre el lugar de la barra de scroll: al bloquear el scroll
+     (carrito, menú, búsqueda) la página no se corre de lugar. */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -199,7 +201,7 @@ body {
 /* Todos los :hover del sitio van dentro de este media query: solo aplican con
    mouse/trackpad. En pantallas táctiles el primer toque haría "hover" en vez
    de clic (iOS) y el efecto quedaría pegado después de tocar. */
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .navlink:hover .navtext::after {
     transform: scaleX(1);
   }
@@ -222,7 +224,7 @@ body {
   color: inherit;
   transition: opacity 0.25s var(--ease-out);
 }
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .header-icon:hover {
     opacity: 0.7;
   }
@@ -350,7 +352,7 @@ body {
   visibility: hidden;
   background: url("data:image/svg+xml;utf8,<svg fill='none' stroke='black' stroke-width='2.4' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M9 5l7 7-7 7'/></svg>") center / contain no-repeat;
 }
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .mega__link:hover {
     color: #000;
   }
@@ -420,18 +422,6 @@ body {
   max-height: 58%;
   object-fit: contain;
   transform: translateY(-8%);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
-}
-.mega__image-shadow {
-  position: absolute;
-  left: 50%;
-  top: 78%;
-  width: 34%;
-  height: 12px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: var(--product-shadow);
-  filter: blur(2px);
 }
 .mega__image-overlay {
   position: absolute;
@@ -440,7 +430,7 @@ body {
   background: rgba(0, 0, 0, 0.2);
   transition: background 0.4s var(--ease-out);
 }
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .mega__image:hover .mega__image-overlay {
     background: rgba(0, 0, 0, 0.1);
   }
@@ -495,7 +485,7 @@ body {
   opacity: 0.6;
   transition: opacity 0.25s;
 }
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .search-pop__close:hover {
     opacity: 1;
   }
@@ -568,21 +558,10 @@ body {
   transform: translateY(-8%);
   transition: transform 0.6s var(--ease-soft);
 }
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .search-card:hover .search-card__media img {
     transform: translateY(-12%);
   }
-}
-.search-card__shadow {
-  position: absolute;
-  left: 50%;
-  top: 80%;
-  width: 30%;
-  height: 10px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: var(--product-shadow);
-  filter: blur(2px);
 }
 .search-card__title,
 .search-card__category,
@@ -736,7 +715,7 @@ body {
   min-height: 44px;
   font-size: 15px;
 }
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .sliderow:hover {
     background: #f2f2f2;
   }
@@ -941,13 +920,15 @@ body {
 }
 
 /* ==========================================================================
-   Producto: escenario gris + flotante + sombra separada (product-item)
+   Producto: escenario crema plano + carta apoyada con tilt 3D
    ========================================================================== */
 
 .stage {
+  --rx: 0deg;
+  --ry: 0deg;
   position: relative;
   overflow: hidden;
-  background: #f2f2f2;
+  background: #f6f3ec;
 }
 .stage--card {
   aspect-ratio: 5 / 6;
@@ -956,13 +937,16 @@ body {
   aspect-ratio: 1;
 }
 
-/* Entrada "img-in" del tema: fade + leve zoom al cargar. */
+/* Entrada "img-in": fade + leve zoom al cargar. Es contenedor de tamaño para
+   que la carta se dimensione con cqw/cqh respetando la proporción de la foto. */
 .stage__float {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  container-type: size;
+  perspective: 900px;
   opacity: 0;
   transform: scale(1.04);
   transition: opacity 0.8s var(--ease-quart), transform 0.8s var(--ease-quart);
@@ -971,55 +955,49 @@ body {
   opacity: 1;
   transform: scale(1);
 }
-/* Card (medido sobre unsobremas): el producto se centra al ~38% de la altura
-   del escenario, así que el área flotante termina al 77% y queda un hueco
-   claro hasta la sombra (al 71%). */
-.stage--card .stage__float {
-  inset: 0 0 23% 0;
+
+/* La carta: caja con la proporción real de la imagen (--ar, por defecto la de
+   una carta Pokémon) que entra en el escenario sin pasarse de ancho ni de alto. */
+.stage__card {
+  --ar: 0.716;
+  --max-w: 62cqw;
+  --max-h: 72cqh;
+  position: relative;
+  z-index: 1;
+  width: min(var(--max-w), calc(var(--max-h) * var(--ar)));
+  aspect-ratio: var(--ar);
+  border-radius: 4.5% / 3.2%;
+  overflow: hidden;
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition: transform 0.7s var(--ease-soft);
+  will-change: transform;
+}
+.stage--detail .stage__card {
+  --max-w: 58cqw;
+  --max-h: 70cqh;
+}
+.stage.is-tilting .stage__card {
+  transition: transform 0.12s linear;
 }
 
 .stage__img {
-  position: relative;
-  z-index: 1;
-  max-width: 52%;
-  max-height: 58%;
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  transform: translateY(0);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
-  transition: transform 0.6s var(--ease-soft);
-}
-.stage--detail .stage__img {
-  max-width: 50%;
-  max-height: 60%;
-  transform: translateY(-7%);
 }
 
-.stage__shadow {
-  position: absolute;
-  left: 50%;
-  top: 92%; /* 92% del área flotante (77%) ≈ 71% del escenario */
-  width: 38%;
-  height: 10px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: var(--product-shadow);
-  filter: blur(2px);
-  transition: width 0.6s var(--ease-soft), opacity 0.6s var(--ease-soft);
+/* Sellados y accesorios: foto de producto sin bordes de carta, zoom lento en hover. */
+.stage--zoom .stage__card {
+  border-radius: 0;
+  overflow: visible;
+  transform: scale(1);
+  transition: transform 0.9s var(--ease-soft);
 }
-.stage--detail .stage__shadow {
-  top: 82%;
-  width: 34%;
-  height: 22px;
-}
-
-/* Hover (solo mouse): el producto "levita" y la sombra se achica. */
-@media (hover: hover) and (pointer: fine) {
-  .group:hover .stage--card .stage__img {
-    transform: translateY(-6%);
-  }
-  .group:hover .stage__shadow {
-    width: 31%;
-    opacity: 0.7;
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
+  .group:hover .stage--zoom .stage__card {
+    transform: scale(1.08);
   }
 }
 
@@ -1030,11 +1008,11 @@ body {
   right: 0;
   bottom: 0;
   height: 3px;
-  background: #e8862a; /* naranja, a tono con --product-shadow */
+  background: #e8862a; /* naranja */
   opacity: 0;
   transition: opacity 0.3s var(--ease-out);
 }
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .product-item:hover .stage::after {
     opacity: 1;
   }
@@ -1204,7 +1182,7 @@ body {
   opacity: 1;
   transform: none;
 }
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .product-item:hover .product-item__quick {
     opacity: 1;
     transform: none;
@@ -1237,7 +1215,7 @@ body {
   transform: translateX(-101%);
   transition: transform 0.5s cubic-bezier(0.33, 0, 0, 1);
 }
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .quick-add-btn:hover::after {
     transform: none;
   }
@@ -1335,7 +1313,7 @@ body {
 /* Táctil = unsobremas mobile: botón de 36px siempre visible, fondo blanco,
    radio 3px, a 5px del borde y bolsa de 24px en rojo Coast. Va
    abajo a la derecha porque abajo a la izquierda está la bandera del idioma. */
-@media not all and (hover: hover) and (pointer: fine) {
+@media not all and (hover: hover) and (pointer: fine) and (min-width: 750px) {
   /* Táctil: la franja de abajo es la fila botón (36px + 5px de margen); el
      idioma queda en esa misma fila, a la izquierda y centrado con el botón. */
   .product-item__media {
@@ -1452,7 +1430,7 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: background-color 0.2s ease;
 }
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .wa-float:hover {
     background: #1ebe5a;
   }
@@ -1546,7 +1524,7 @@ body {
 .rail-arrows {
   display: none;
 }
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .rail-arrows {
     display: flex;
   }
@@ -1567,6 +1545,7 @@ body {
   .mega__image-wrapper,
   .stage__img,
   .stage__float,
+  .stage__card,
   .search-card {
     transform: none !important;
     transition-duration: 0.01ms !important;

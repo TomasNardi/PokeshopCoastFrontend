@@ -13,7 +13,7 @@ function CardLink({ href, children, ...rest }) {
 }
 
 /**
- * Card de producto (estilo product-item de unsobremas): escenario gris 5:6,
+ * Card de producto: escenario crema 5:6 con la carta y tilt holo en hover,
  * título en mayúsculas, categoría gris y precio; rebajado en rojo con el
  * precio anterior tachado. Server Component: solo imagen y botón son de cliente.
  */
@@ -25,7 +25,7 @@ export default function ProductCard({ product, priority = false }) {
     <article className="product-item group">
       <div className="product-item__media">
         <CardLink href={view.href} className="block" aria-label={view.name}>
-          <ProductStage src={view.imageUrl} alt={view.name} priority={priority}>
+          <ProductStage src={view.imageUrl} alt={view.name} effect={view.isCard ? 'tilt' : 'zoom'} priority={priority}>
             <div className="product-item__badges product-item__badges--left">
               <OutletBadge show={view.isOutlet} />
               <SaleBadge show={view.hasDiscount && view.isAvailable && !view.isOutlet} />

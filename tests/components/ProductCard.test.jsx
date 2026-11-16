@@ -35,10 +35,18 @@ describe('<ProductCard />', () => {
     expect(screen.queryByRole('button', { name: /Agregar/ })).not.toBeInTheDocument();
   });
 
-  it('el producto flota sobre el escenario gris con la sombra separada abajo', () => {
+  it('la carta va apoyada en el escenario, sin sombra ni brillo', () => {
     const { container } = render(<ProductCard product={bySlug('charizard-ex-199-151')} />);
-    expect(container.querySelector('.stage.stage--card .stage__float img.stage__img')).toBeInTheDocument();
-    expect(container.querySelector('.stage .stage__shadow')).toBeInTheDocument();
+    expect(container.querySelector('.stage.stage--card .stage__card img.stage__img')).toBeInTheDocument();
+    expect(container.querySelector('.stage__glare')).not.toBeInTheDocument();
+    expect(container.querySelector('.stage__shadow')).not.toBeInTheDocument();
+  });
+
+  it('sellado: zoom en hover, sin tilt', () => {
+    const sealed = MOCK_PRODUCTS.find((p) => p.category?.slug === 'sellados');
+    const { container } = render(<ProductCard product={sealed} />);
+    expect(container.querySelector('.stage.stage--zoom img.stage__img')).toBeInTheDocument();
+    expect(container.querySelector('.stage__glare')).not.toBeInTheDocument();
   });
 
   it('subtítulo: set + particularidades', () => {

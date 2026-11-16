@@ -9,6 +9,9 @@ import { attributesOf, finishLabel, isSpecialFinish, languageOf } from './produc
 
 export const LOW_STOCK_THRESHOLD = 2;
 
+/** Categorías que son cartas (singles y slabs): llevan el tilt 3D. */
+const CARD_CATEGORIES = ['singles', 'slabs'];
+
 const nameOf = (value, key = 'name') =>
   value && typeof value === 'object' ? value[key] ?? null : value ?? null;
 
@@ -56,6 +59,10 @@ export function productView(product) {
     title: catalog?.name ? `${catalog.name}${catalog.number ? ` ${catalog.number}` : ''}` : product.name,
     subtitle: catalog?.set_name || category || '',
     category,
+    // Carta vs sellado/accesorio: decide el efecto de hover del escenario.
+    isCard: nameOf(product.category, 'slug')
+      ? CARD_CATEGORIES.includes(nameOf(product.category, 'slug'))
+      : Boolean(catalog || certLabel),
     imageUrl: product.image_url || null,
     price,
     compareAtPrice: hasDiscount ? listPrice : null,

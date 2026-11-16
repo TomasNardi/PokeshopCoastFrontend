@@ -53,7 +53,7 @@ export default async function ProductPage({ params }) {
 
       <section className="container-site grid gap-10 py-8 lg:grid-cols-2 lg:gap-16">
         <div className="group">
-          <ProductStage src={view.imageUrl} alt={view.name} size="detail" priority>
+          <ProductStage src={view.imageUrl} alt={view.name} size="detail" effect={view.isCard ? 'tilt' : 'zoom'} priority>
             <div className="absolute left-5 top-5 z-10 flex flex-col items-start gap-2">
               <DiscountBadge percent={view.discountPercent} />
               <LanguageFlag language={view.language} />
