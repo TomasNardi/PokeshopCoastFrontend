@@ -6,6 +6,7 @@ import { selectCount, useCartStore } from '@/store/cartStore';
 import { useHydrated } from '@/hooks/useHydrated';
 import { useSession } from '@/components/auth/SessionProvider';
 import Wordmark from '@/components/layout/Wordmark';
+import NotificationBell from '@/components/account/NotificationBell';
 import MegaMenu from './MegaMenu';
 import SearchPopdown from './SearchPopdown';
 import MobileDrawer from './MobileDrawer';
@@ -60,6 +61,7 @@ export default function SiteHeader({ menu, popularProducts = [] }) {
             <Wordmark />
             {/* Como unsobremas: cuenta + carrito a la derecha. */}
             <div className="flex items-center justify-end">
+              {isAuthenticated && <NotificationBell />}
               {status !== 'disabled' && (
                 <Link href={accountHref} className="header-icon" aria-label="Mi cuenta">
                   <User size={22} strokeWidth={2} />
@@ -117,6 +119,7 @@ export default function SiteHeader({ menu, popularProducts = [] }) {
               <button type="button" className="header-icon" onClick={header.toggleSearch} aria-label="Buscar" aria-expanded={header.searchOpen}>
                 <Search size={22} strokeWidth={2} />
               </button>
+              {isAuthenticated && <NotificationBell />}
               {status !== 'disabled' && (
                 <Link href={accountHref} className="header-icon" aria-label="Mi cuenta">
                   <User size={22} strokeWidth={2} />

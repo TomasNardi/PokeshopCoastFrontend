@@ -55,6 +55,8 @@ export const MOCK_PRODUCTS = [
     category: SINGLES,
     price_ars: 289000,
     image_url: card('sv3pt5', '199'),
+    // Fotos extra para ver la galería de la ficha (placeholders de otras cartas).
+    images: [card('sv3pt5', '6'), card('sv4pt5', '234'), card('base1', '4'), card('sv3pt5', '4')],
     condition: { id: 2, name: 'Near Mint' },
     finish: 'Holofoil',
     is_featured: true,

@@ -1,4 +1,5 @@
 import { ApiError, NETWORK_MESSAGE } from './ApiError';
+import { internalHeaders } from './internalHeaders';
 
 /**
  * Cliente HTTP mínimo sobre fetch. Todos los repositorios HTTP lo reciben por
@@ -23,6 +24,7 @@ export function createHttpClient({ baseUrl, getHeaders = () => ({}) }) {
         headers: {
           Accept: 'application/json',
           ...(isFormData || body == null ? {} : { 'Content-Type': 'application/json' }),
+          ...internalHeaders(),
           ...dynamicHeaders,
           ...headers,
         },

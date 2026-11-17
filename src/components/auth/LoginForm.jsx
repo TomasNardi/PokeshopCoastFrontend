@@ -65,6 +65,22 @@ export default function LoginForm() {
     );
   }
 
+  // Login de desarrollo (backend local): usuario de prueba, sin Google ni registro.
+  if (auth.acceptsUsername) {
+    return (
+      <form onSubmit={submit} className="space-y-4">
+        <p className="rounded-xl bg-coast-cream px-4 py-3 text-[13px] text-coast-ink">
+          Modo desarrollo · usuario <strong>tomi</strong> / contraseña <strong>tomi</strong>
+        </p>
+        <Field label="Usuario" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Field label="Contraseña" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+        <button type="submit" disabled={loading} className={buttonClass({ size: 'lg', block: true })}>
+          {loading ? 'Un momento…' : 'Ingresar'}
+        </button>
+      </form>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <GoogleButton auth={auth} returnTo={returnTo} />

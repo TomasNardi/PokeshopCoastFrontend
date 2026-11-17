@@ -64,6 +64,8 @@ export function productView(product) {
       ? CARD_CATEGORIES.includes(nameOf(product.category, 'slug'))
       : Boolean(catalog || certLabel),
     imageUrl: product.image_url || null,
+    // Galería: la principal primero y después las extra, sin repetidas.
+    images: [...new Set([product.image_url, ...(Array.isArray(product.images) ? product.images : [])].filter(Boolean))],
     price,
     compareAtPrice: hasDiscount ? listPrice : null,
     discountPercent: hasDiscount ? discountPercent : 0,

@@ -4,7 +4,7 @@ import { ChevronLeft, Truck, ShieldCheck, CreditCard } from 'lucide-react';
 import { getServices } from '@/services/container';
 import { productView } from '@/domain/product';
 import { formatPrice } from '@/domain/money';
-import ProductStage from '@/components/product/ProductStage';
+import ProductGallery from '@/components/product/ProductGallery';
 import ProductPurchase from '@/components/product/ProductPurchase';
 import ProductRail from '@/components/home/ProductRail';
 import DamageNote from '@/components/product/DamageNote';
@@ -53,12 +53,12 @@ export default async function ProductPage({ params }) {
 
       <section className="container-site grid gap-10 py-8 lg:grid-cols-2 lg:gap-16">
         <div className="group">
-          <ProductStage src={view.imageUrl} alt={view.name} size="detail" effect={view.isCard ? 'tilt' : 'zoom'} priority>
+          <ProductGallery images={view.images} alt={view.name} effect={view.isCard ? 'tilt' : 'zoom'}>
             <div className="absolute left-5 top-5 z-10 flex flex-col items-start gap-2">
               <DiscountBadge percent={view.discountPercent} />
               <LanguageFlag language={view.language} />
             </div>
-          </ProductStage>
+          </ProductGallery>
         </div>
 
         <div className="lg:pt-6">

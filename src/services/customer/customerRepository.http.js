@@ -25,7 +25,13 @@ export function createHttpCustomerRepository(http, { getCustomerToken = async ()
     updateProfile: async (data) => http.patch('/customers/profile/', data, { headers: await withToken() }),
     getAddresses: async () => http.get('/customers/addresses/', { headers: await withToken() }),
     createAddress: async (data) => http.post('/customers/addresses/', data, { headers: await withToken() }),
+    updateAddress: async (id, data) => http.patch(`/customers/addresses/${id}/`, data, { headers: await withToken() }),
     deleteAddress: async (id) => http.delete(`/customers/addresses/${id}/`, { headers: await withToken() }),
-    getOrders: async () => http.get('/customers/orders/', { headers: await withToken() }),
+    getOrders: async () => http.get('/customers/orders/', { headers: await withToken(), cache: 'no-store' }),
+    getOrder: async (code) => http.get(`/customers/orders/${encodeURIComponent(code)}/`, { headers: await withToken(), cache: 'no-store' }),
+    /** Bandeja in-app: { unread, results: [{ id, title, body, url, read_at, created_at }] } */
+    getNotifications: async () => http.get('/notifications/', { headers: await withToken(), cache: 'no-store' }),
+    /** Sin ids marca todas como leídas. */
+    markNotificationsRead: async (ids) => http.post('/notifications/read/', ids ? { ids } : {}, { headers: await withToken() }),
   };
 }

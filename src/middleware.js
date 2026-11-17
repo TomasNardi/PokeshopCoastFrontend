@@ -6,7 +6,9 @@ import { PRESENTATION_MODE } from '@/config/presentation';
  * cualquier otra sección (tienda, producto, carrito, cuenta, etc.) vuelve a "/".
  */
 export function middleware(request) {
-  if (!PRESENTATION_MODE || request.nextUrl.pathname === '/') return NextResponse.next();
+  const { pathname } = request.nextUrl;
+  // /vista-previa: acceso del dueño con el sitio en mantenimiento.
+  if (!PRESENTATION_MODE || pathname === '/' || pathname === '/vista-previa') return NextResponse.next();
   return NextResponse.redirect(new URL('/', request.url));
 }
 

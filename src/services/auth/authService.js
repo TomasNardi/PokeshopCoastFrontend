@@ -34,6 +34,10 @@ export function createAuthService(provider, { origin = browserOrigin } = {}) {
     get enabled() {
       return provider.enabled;
     },
+    /** El login de desarrollo usa usuario (tomi), no email. */
+    get acceptsUsername() {
+      return Boolean(provider.acceptsUsername);
+    },
     getSession: () => provider.getSession().catch(() => null),
     getAccessToken: async () => (await provider.getSession().catch(() => null))?.accessToken ?? null,
     onChange: (callback) => provider.onChange(callback),
@@ -43,7 +47,7 @@ export function createAuthService(provider, { origin = browserOrigin } = {}) {
 
     signInWithPassword: ({ email, password }) =>
       guard(async () => {
-        if (!isValidEmail(email)) throw Object.assign(new Error(''), { code: 'invalid_credentials' });
+        if (!provider.acceptsUsername && !isValidEmail(email)) throw Object.assign(new Error(''), { code: 'invalid_credentials' });
         return provider.signInWithPassword({ email: email.trim().toLowerCase(), password });
       }, 'No pudimos ingresar.'),
 

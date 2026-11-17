@@ -1,10 +1,11 @@
 'use client';
 /* eslint-disable @next/next/no-img-element */
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 const SPEED = 0.35;
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
 /**
  * Hero a todo el ancho con parallax (como section-hero de Broadcast):
@@ -37,17 +38,28 @@ export default function ParallaxHero({
   const paneRef = useRef(null);
   const frameRef = useRef(null);
 
-  useEffect(() => {
+  // Layout effect: si la página se abre ya scrolleada (volver atrás), la
+  // posición se aplica antes del primer pintado y tampoco hay salto.
+  useIsomorphicLayoutEffect(() => {
     const pane = paneRef.current;
     const frame = frameRef.current;
     if (!pane || !frame || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+
+    // Posición de reposo: dónde está el hero con la página arriba de todo. El
+    // desplazamiento se mide desde ahí y no desde el borde de la pantalla: si
+    // no, un hero que arranca debajo de la barra de anuncio y del header
+    // (top ≈ 36px) saltaba 13px apenas hidrataba, sin haber scrolleado.
+    // Los que están más abajo de la primera pantalla siguen centrando el
+    // efecto en el borde superior (ahí el salto no se ve: están fuera de vista).
+    const docTop = frame.getBoundingClientRect().top + window.scrollY;
+    const rest = docTop < window.innerHeight ? docTop : 0;
 
     let raf = 0;
     const update = () => {
       raf = 0;
       const rect = frame.getBoundingClientRect();
       if (rect.bottom < 0 || rect.top > window.innerHeight) return;
-      pane.style.transform = `translate3d(0, ${(-rect.top * SPEED).toFixed(1)}px, 0)`;
+      pane.style.transform = `translate3d(0, ${(-(rect.top - rest) * SPEED).toFixed(1)}px, 0)`;
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);

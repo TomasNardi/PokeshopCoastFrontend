@@ -8,7 +8,8 @@
  *   NEXT_PUBLIC_USE_MOCKS=true  → repositorios en memoria (src/mocks)
  *   NEXT_PUBLIC_USE_MOCKS=false → repositorios HTTP contra NEXT_PUBLIC_API_URL
  *
- * Auth: Supabase si está configurado; si no, mock (en modo mocks) o apagado.
+ * Auth: Supabase si está configurado; si no, mock (en modo mocks), login de
+ * desarrollo contra el backend (NEXT_PUBLIC_DEV_LOGIN) o apagado.
  */
 import { env, isSupabaseConfigured } from '@/config/env';
 import { createHttpClient } from './http/httpClient';
@@ -25,12 +26,14 @@ import { createEngagementService } from './engagement/engagementService';
 import { createSupabaseAuthProvider } from './auth/providers/supabaseAuthProvider';
 import { createMockAuthProvider } from './auth/providers/mockAuthProvider';
 import { createDisabledAuthProvider } from './auth/providers/disabledAuthProvider';
+import { createDevApiAuthProvider } from './auth/providers/devApiAuthProvider';
 import { createAuthService } from './auth/authService';
 import { createPasswordRecoveryService } from './auth/passwordRecoveryService';
 
-function pickAuthProvider({ useMocks, supabase }) {
+function pickAuthProvider({ useMocks, supabase, devLogin, apiUrl }) {
   if (supabase) return createSupabaseAuthProvider(supabase);
   if (useMocks) return createMockAuthProvider();
+  if (devLogin) return createDevApiAuthProvider(createHttpClient({ baseUrl: apiUrl }));
   return createDisabledAuthProvider();
 }
 
@@ -41,7 +44,8 @@ export function createServices({
   useMocks = env.useMocks,
   apiUrl = env.apiUrl,
   supabase = isSupabaseConfigured ? { url: env.supabaseUrl, key: env.supabaseKey } : null,
-  authProvider = pickAuthProvider({ useMocks, supabase }),
+  devLogin = env.devLogin,
+  authProvider = pickAuthProvider({ useMocks, supabase, devLogin, apiUrl }),
 } = {}) {
   const auth = createAuthService(authProvider);
   const passwordRecovery = createPasswordRecoveryService(authProvider);

@@ -15,6 +15,8 @@ export const env = Object.freeze({
   apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1',
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
   useMocks: toBool(process.env.NEXT_PUBLIC_USE_MOCKS, true),
+  // Login de prueba contra el backend local (tomi / tomi). Nunca en producción.
+  devLogin: toBool(process.env.NEXT_PUBLIC_DEV_LOGIN, false),
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '',
   whatsappPhone: process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '5492257554759',

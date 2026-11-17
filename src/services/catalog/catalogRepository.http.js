@@ -1,4 +1,5 @@
 import { toQuery, unwrapList } from '../http/httpClient';
+import { localizeImages } from './imageUrls';
 
 /**
  * Repositorio de catálogo contra Django. Endpoints idénticos a Crack.
@@ -15,15 +16,15 @@ export function createHttpCatalogRepository(http) {
   const cached = { next: { revalidate: 1800 } };
 
   return {
-    listProducts: (filters = {}) => http.get(`/products/${toQuery(filters)}`, fresh),
-    getProduct: (slug) => http.get(`/products/${encodeURIComponent(slug)}/`, fresh),
+    listProducts: async (filters = {}) => localizeImages(await http.get(`/products/${toQuery(filters)}`, fresh)),
+    getProduct: async (slug) => localizeImages(await http.get(`/products/${encodeURIComponent(slug)}/`, fresh)),
     getProductsByIds: async (ids = []) => {
       const clean = [...new Set(ids.map(Number).filter((id) => Number.isInteger(id) && id > 0))];
       if (clean.length === 0) return [];
-      return unwrapList(await http.get(`/products/by-ids/${toQuery({ ids: clean.join(',') })}`, fresh));
+      return localizeImages(unwrapList(await http.get(`/products/by-ids/${toQuery({ ids: clean.join(',') })}`, fresh)));
     },
-    getNewArrivals: async () => unwrapList(await http.get('/products/new-arrivals/', fresh)),
-    getFeatured: async () => unwrapList(await http.get('/products/featured/', fresh)),
+    getNewArrivals: async () => localizeImages(unwrapList(await http.get('/products/new-arrivals/', fresh))),
+    getFeatured: async () => localizeImages(unwrapList(await http.get('/products/featured/', fresh))),
     getCategories: async () => unwrapList(await http.get('/categories/', cached)),
     getConditions: async () => unwrapList(await http.get('/conditions/', cached)),
     getCertificationEntities: async () => unwrapList(await http.get('/certification-entities/', cached)),
