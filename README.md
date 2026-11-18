@@ -4,7 +4,7 @@ Next.js 15 (App Router) · Tailwind 3 · Zustand · Vitest + MSW. Se despliega e
 El backend es el mismo que el de Crack (Django + DRF), así que el front habla **el mismo contrato**.
 
 ```bash
-cp .env.example .env.local   # NEXT_PUBLIC_USE_MOCKS=true para trabajar sin backend
+cp .env.example .env.local   # el front siempre usa el backend de NEXT_PUBLIC_API_URL
 npm install
 npm run dev
 npm test                     # unit + componentes + contrato (MSW)

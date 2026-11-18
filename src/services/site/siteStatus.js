@@ -23,7 +23,6 @@ const OPEN = Object.freeze({ isActive: true, maintenanceMessage: '', showTopBann
 export const PREVIEW_COOKIE = 'psc_preview';
 
 export const getSiteStatus = cache(async () => {
-  if (env.useMocks) return OPEN;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {

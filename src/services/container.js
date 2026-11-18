@@ -1,19 +1,17 @@
 /**
  * Composition root (Abstract Factory + Singleton).
  *
- * El ÚNICO lugar que decide si se usan mocks o el backend real, y que arma
- * las dependencias entre servicios. Páginas y componentes piden servicios
- * con getServices(); nunca importan un repositorio directamente.
- *
- *   NEXT_PUBLIC_USE_MOCKS=true  → repositorios en memoria (src/mocks)
- *   NEXT_PUBLIC_USE_MOCKS=false → repositorios HTTP contra NEXT_PUBLIC_API_URL
+ * El ÚNICO lugar que arma las dependencias entre servicios. Páginas y
+ * componentes piden servicios con getServices(); nunca importan un
+ * repositorio directamente. El sitio siempre habla con el backend
+ * (NEXT_PUBLIC_API_URL); los repositorios en memoria (src/mocks) quedan solo
+ * para los tests, que los piden con createServices({ useMocks: true }).
  *
  * Auth: Supabase si está configurado; si no, mock (en modo mocks), login de
  * desarrollo contra el backend (NEXT_PUBLIC_DEV_LOGIN) o apagado.
  */
 import { env, isSupabaseConfigured } from '@/config/env';
 import { createHttpClient } from './http/httpClient';
-import { withLatency } from './http/withLatency';
 import { createHttpCatalogRepository } from './catalog/catalogRepository.http';
 import { createMockCatalogRepository } from './catalog/catalogRepository.mock';
 import { createCatalogService } from './catalog/catalogService';
@@ -42,8 +40,7 @@ function pickAuthProvider({ useMocks, supabase, devLogin, apiUrl }) {
  * @param {object} [options] todo inyectable para tests
  */
 export function createServices({
-  useMocks = env.useMocks,
-  mockLatencyMs = env.mockLatencyMs,
+  useMocks = false,
   apiUrl = env.apiUrl,
   supabase = isSupabaseConfigured ? { url: env.supabaseUrl, key: env.supabaseKey } : null,
   devLogin = env.devLogin,
@@ -56,10 +53,10 @@ export function createServices({
   const http = createHttpClient({ baseUrl: apiUrl });
   const repos = useMocks
     ? {
-        catalog: withLatency(createMockCatalogRepository(), mockLatencyMs),
-        orders: withLatency(createMockOrderRepository(), mockLatencyMs),
-        customer: withLatency(createMockCustomerRepository(), mockLatencyMs),
-        engagement: withLatency(createMockEngagementRepository(), mockLatencyMs),
+        catalog: createMockCatalogRepository(),
+        orders: createMockOrderRepository(),
+        customer: createMockCustomerRepository(),
+        engagement: createMockEngagementRepository(),
       }
     : {
         catalog: createHttpCatalogRepository(http),

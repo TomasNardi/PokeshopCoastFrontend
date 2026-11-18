@@ -1,5 +1,5 @@
 /**
- * Cuenta del comprador en memoria (NEXT_PUBLIC_USE_MOCKS=true).
+ * Cuenta del comprador en memoria (solo tests).
  * Misma forma que /api/v1/customers/* y /api/v1/notifications/ de Django,
  * con un historial de demo para maquetar el panel sin backend.
  */

@@ -1,7 +1,7 @@
 /**
  * Productos mock con la MISMA forma que el serializer de Django en Crack
  * (`/api/v1/products/`). Los usan:
- *   - el repositorio en memoria (NEXT_PUBLIC_USE_MOCKS=true)
+ *   - el repositorio en memoria (solo tests)
  *   - los handlers de MSW de los tests de contrato
  * Si el serializer cambia, se cambia acá y los tests de contrato lo detectan.
  */
