@@ -61,7 +61,7 @@ export default async function RootLayout({ children }) {
     return (
       <html lang="es" className={fonts}>
         <body>
-          <MaintenancePage message={status.maintenanceMessage} />
+          <MaintenancePage title={status.maintenanceTitle} message={status.maintenanceMessage} />
         </body>
       </html>
     );

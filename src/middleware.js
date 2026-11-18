@@ -7,8 +7,8 @@ import { PRESENTATION_MODE } from '@/config/presentation';
  */
 export function middleware(request) {
   const { pathname } = request.nextUrl;
-  // /vista-previa: acceso del dueño con el sitio en mantenimiento.
-  if (!PRESENTATION_MODE || pathname === '/' || pathname === '/vista-previa') return NextResponse.next();
+  // /vista-previa y /acceso-desarrollo: entrar con el sitio en mantenimiento.
+  if (!PRESENTATION_MODE || pathname === '/' || pathname === '/vista-previa' || pathname === '/acceso-desarrollo') return NextResponse.next();
   return NextResponse.redirect(new URL('/', request.url));
 }
 

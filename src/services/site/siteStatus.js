@@ -18,7 +18,7 @@ import { internalHeaders } from '@/services/http/internalHeaders';
  */
 
 const TIMEOUT_MS = 3000;
-const OPEN = Object.freeze({ isActive: true, maintenanceMessage: '', showTopBanner: true, topBannerMessage: '' });
+const OPEN = Object.freeze({ isActive: true, maintenanceTitle: '', maintenanceMessage: '', showTopBanner: true, topBannerMessage: '' });
 
 export const PREVIEW_COOKIE = 'psc_preview';
 
@@ -31,6 +31,7 @@ export const getSiteStatus = cache(async () => {
     const data = await response.json();
     return {
       isActive: data.is_active !== false,
+      maintenanceTitle: data.maintenance_title || '',
       maintenanceMessage: data.maintenance_message || '',
       showTopBanner: data.show_top_banner !== false,
       topBannerMessage: data.top_banner_message || '',
@@ -44,21 +45,44 @@ export const getSiteStatus = cache(async () => {
 
 /** Huella del token de vista previa: la cookie nunca guarda el token en claro. */
 export async function previewFingerprint(token) {
-  const bytes = new TextEncoder().encode(`psc-preview:${token}`);
-  const digest = await crypto.subtle.digest('SHA-256', bytes);
-  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
+  return sha256Hex(`psc-preview:${token}`);
 }
 
 /**
+ * Acceso de desarrollo desde la página de mantenimiento ("Acceso desarrollo").
+ * Un solo usuario. La contraseña no está en el código: solo su huella SHA-256.
+ */
+const DEV_ACCESS = Object.freeze({
+  username: 'martin',
+  passwordHash: 'd08126b919180c6f1c13b17b27f20b90d02fae0042c87007e63583c1866603b1',
+});
+
+async function sha256Hex(text) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+export async function checkDevCredentials(username, password) {
+  if (String(username || '').trim().toLowerCase() !== DEV_ACCESS.username) return false;
+  return (await sha256Hex(`psc-dev:${password || ''}`)) === DEV_ACCESS.passwordHash;
+}
+
+/** Valor de la cookie que deja pasar al usuario de desarrollo. */
+export const devAccessFingerprint = () => previewFingerprint(`dev:${DEV_ACCESS.username}:${DEV_ACCESS.passwordHash}`);
+
+/**
  * ¿Este navegador puede ver el sitio aunque esté en mantenimiento?
- * Se habilita entrando una vez a /vista-previa?token=<MAINTENANCE_PREVIEW_TOKEN>.
+ * Dos llaves, la misma cookie:
+ *   - el login de desarrollo de la página de mantenimiento
+ *   - /vista-previa?token=<MAINTENANCE_PREVIEW_TOKEN> (si la variable existe)
  */
 export async function hasPreviewAccess() {
-  const token = process.env.MAINTENANCE_PREVIEW_TOKEN;
-  if (!token) return false;
   const store = await cookies();
   const value = store.get(PREVIEW_COOKIE)?.value;
-  return Boolean(value) && value === (await previewFingerprint(token));
+  if (!value) return false;
+  if (value === (await devAccessFingerprint())) return true;
+  const token = process.env.MAINTENANCE_PREVIEW_TOKEN;
+  return Boolean(token) && value === (await previewFingerprint(token));
 }
 
 /** Lo que el layout necesita saber: mostrar mantenimiento o la tienda. */
