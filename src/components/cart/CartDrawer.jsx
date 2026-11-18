@@ -5,6 +5,7 @@ import { selectSubtotal, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/domain/money';
 import { buttonClass } from '@/components/ui/Button';
 import { useHydrated } from '@/hooks/useHydrated';
+import { getServices } from '@/services/container';
 import Link from 'next/link';
 import CartLine from './CartLine';
 
@@ -23,6 +24,15 @@ export default function CartDrawer() {
   const closeOnNavigate = (event) => {
     if (!event?.defaultPrevented) close();
   };
+
+  // Una vez por visita: precios y stock del backend. Lo que ya no existe queda
+  // marcado "sin stock" en vez de venderse con datos viejos.
+  useEffect(() => {
+    if (!hydrated) return;
+    const { items: current, sync } = useCartStore.getState();
+    const ids = current.map((item) => item.id);
+    if (ids.length) getServices().catalog.getProductsByIds(ids).then(sync).catch(() => {});
+  }, [hydrated]);
 
   useEffect(() => {
     if (!isOpen) return undefined;

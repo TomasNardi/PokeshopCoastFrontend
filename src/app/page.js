@@ -37,10 +37,15 @@ async function loadSection(name, fn) {
 
 const railSkeleton = <ProductRailSkeleton id={NEW_ARRIVALS.id} title={NEW_ARRIVALS.title} />;
 
+/** Sin productos: un espacio en blanco para que los dos banners no queden pegados. */
+function ComingSoon() {
+  return <div id={NEW_ARRIVALS.id} className="h-16 md:h-24" aria-hidden="true" />;
+}
+
 async function NewArrivals() {
   const products = await loadSection('nuevos ingresos', () => getServices().catalog.getNewArrivals());
   if (products === FAILED) return <KeepLoading>{railSkeleton}</KeepLoading>;
-  if (!products) return null;
+  if (!products?.length) return <ComingSoon />;
   return <ProductRail {...NEW_ARRIVALS} products={products} />;
 }
 

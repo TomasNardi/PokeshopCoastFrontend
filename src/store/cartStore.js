@@ -33,7 +33,10 @@ export const useCartStore = create(
     }),
     {
       name: 'pokeshop-coast-cart',
-      version: 1,
+      // v2: los carritos de antes de conectar el backend real tenían productos
+      // de prueba que no existen. Se descartan una vez al actualizar.
+      version: 2,
+      migrate: () => ({ items: [], ...NO_DISCOUNT }),
       partialize: ({ items, discountCode, discountPercent, discountFixed }) => ({
         items,
         discountCode,
