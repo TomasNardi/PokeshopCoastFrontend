@@ -5,6 +5,8 @@ import { Bell, LayoutGrid, LogOut, MapPin, Package, UserRound } from 'lucide-rea
 import RequireSession from '@/components/auth/RequireSession';
 import { useSession } from '@/components/auth/SessionProvider';
 import { useNotifications } from './NotificationsProvider';
+import { LoadingRegion, Skeleton } from '@/components/ui/Skeleton';
+import { SkeletonRows } from './ui';
 
 export const ACCOUNT_NAV = [
   { href: '/cuenta', label: 'Resumen', Icon: LayoutGrid, exact: true },
@@ -119,9 +121,51 @@ function Shell({ children }) {
   );
 }
 
+/** Mismo marco que Shell mientras se confirma la sesión: nada salta al entrar. */
+export function AccountShellSkeleton() {
+  return (
+    <LoadingRegion label="Cargando tu cuenta" className="container-site pb-20 pt-8 md:pt-12">
+      <div className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
+        <aside className="hidden lg:block">
+          <div className="flex items-center gap-3 border-b border-coast-line pb-6">
+            <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-40" />
+            </div>
+          </div>
+          <div className="space-y-2 py-4">
+            {ACCOUNT_NAV.map((item) => (
+              <Skeleton key={item.href} className="h-10 w-full" />
+            ))}
+          </div>
+        </aside>
+        <div className="lg:hidden">
+          <div className="mb-5 flex items-center gap-3">
+            <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-5 w-36" />
+              <Skeleton className="h-3 w-44" />
+            </div>
+          </div>
+          <div className="flex gap-2 overflow-hidden">
+            {ACCOUNT_NAV.map((item) => (
+              <Skeleton key={item.href} className="h-9 w-28 shrink-0 rounded-full" />
+            ))}
+          </div>
+        </div>
+        <div className="min-w-0">
+          <Skeleton className="mb-5 h-8 w-48" />
+          <SkeletonRows rows={3} />
+        </div>
+      </div>
+    </LoadingRegion>
+  );
+}
+
 export default function AccountShell({ children }) {
   return (
-    <RequireSession>
+    <RequireSession fallback={<AccountShellSkeleton />}>
       <Shell>{children}</Shell>
     </RequireSession>
   );

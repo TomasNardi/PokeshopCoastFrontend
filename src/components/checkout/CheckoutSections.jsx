@@ -4,6 +4,7 @@ import Field from '@/components/ui/Field';
 import { formatPrice } from '@/domain/money';
 import { PROVINCES, SHIPPING_METHOD_LIST, getShippingMethod, quoteShipping } from '@/services/shipping/shippingMethods';
 import { PAYMENT_METHOD_LIST } from '@/services/payments/paymentMethods';
+import Thumb from '@/components/ui/Thumb';
 
 export function Step({ number, title, children }) {
   return (
@@ -138,8 +139,7 @@ export function OrderSummary({ items, totals, discount, onRedeem, children }) {
         {items.map((item) => (
           <li key={item.id} className="flex items-center gap-3">
             <span className="relative h-14 w-11 shrink-0 rounded-md border border-coast-line bg-white">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              {item.image_url && <img src={item.image_url} alt="" className="h-full w-full object-contain p-1" />}
+              <Thumb src={item.image_url} className="h-full w-full rounded-md object-contain p-1" />
               <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-coast-ink text-[10px] font-bold text-white">{item.quantity}</span>
             </span>
             <span className="line-clamp-2 flex-1 text-[12px] font-semibold">{item.name}</span>

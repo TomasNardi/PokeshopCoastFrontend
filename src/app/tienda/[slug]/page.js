@@ -1,3 +1,4 @@
+import { Suspense, cache } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChevronLeft, Truck, ShieldCheck, CreditCard } from 'lucide-react';
@@ -7,14 +8,25 @@ import { formatPrice } from '@/domain/money';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductPurchase from '@/components/product/ProductPurchase';
 import ProductRail from '@/components/home/ProductRail';
+import { ProductRailSkeleton } from '@/components/product/ProductSkeletons';
 import DamageNote from '@/components/product/DamageNote';
 import { CertBadge, ConditionBadge, DiscountBadge, LanguageFlag, StockStatus } from '@/components/product/ProductBadges';
 
 export const dynamic = 'force-dynamic';
 
+// generateMetadata y la página piden el mismo producto: una sola llamada a la API.
+const loadProduct = cache((slug) => getServices().catalog.getProduct(slug));
+
+const RELATED_TITLE = 'También te puede gustar';
+
+async function RelatedProducts({ product }) {
+  const related = await getServices().catalog.getRelated(product);
+  return <ProductRail title={RELATED_TITLE} products={related} limit={4} />;
+}
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const product = await getServices().catalog.getProduct(slug);
+  const product = await loadProduct(slug);
   if (!product) return { title: 'Producto no encontrado' };
   return {
     title: product.name,
@@ -36,12 +48,10 @@ function DetailRow({ label, value }) {
 
 export default async function ProductPage({ params }) {
   const { slug } = await params;
-  const { catalog } = getServices();
-  const product = await catalog.getProduct(slug);
+  const product = await loadProduct(slug);
   if (!product) notFound();
 
   const view = productView(product);
-  const related = await catalog.getRelated(product);
 
   return (
     <>
@@ -101,7 +111,9 @@ export default async function ProductPage({ params }) {
         </div>
       </section>
 
-      <ProductRail title="También te puede gustar" products={related} limit={4} />
+      <Suspense fallback={<ProductRailSkeleton title={RELATED_TITLE} />}>
+        <RelatedProducts product={product} />
+      </Suspense>
     </>
   );
 }

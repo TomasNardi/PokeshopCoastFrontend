@@ -5,13 +5,14 @@ import { useHydrated } from '@/hooks/useHydrated';
 import { useCheckout } from './useCheckout';
 import { CustomerFields, OrderSummary, PaymentSelector, ShippingSelector, Step } from './CheckoutSections';
 import Button from '@/components/ui/Button';
+import { CheckoutSkeleton } from '@/components/cart/CartSkeletons';
 
 export default function CheckoutForm() {
   const hydrated = useHydrated();
   const checkout = useCheckout();
   const { items, form, errors, config, totals, discount, submitting } = checkout;
 
-  if (!hydrated) return <div className="h-96" />;
+  if (!hydrated) return <CheckoutSkeleton />;
   if (items.length === 0) {
     return (
       <div className="py-16 text-center">

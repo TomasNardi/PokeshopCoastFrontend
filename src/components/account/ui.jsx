@@ -4,6 +4,7 @@
  */
 import { Check } from 'lucide-react';
 import { orderStatus, orderSteps } from '@/domain/orders';
+import { LoadingRegion, Skeleton } from '@/components/ui/Skeleton';
 
 export function Card({ as: Tag = 'section', className = '', children, ...props }) {
   return (
@@ -81,13 +82,11 @@ export function OrderProgress({ status, shippingType, compact = false }) {
   );
 }
 
-export function Skeleton({ className = '' }) {
-  return <span className={`skeleton block rounded-lg ${className}`} aria-hidden="true" />;
-}
+export { Skeleton };
 
-export function SkeletonRows({ rows = 3 }) {
+export function SkeletonRows({ rows = 3, label = 'Cargando' }) {
   return (
-    <div className="space-y-3" aria-busy="true" aria-label="Cargando">
+    <LoadingRegion label={label} className="space-y-3">
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} className="flex items-center gap-4 rounded-2xl border border-coast-line bg-white p-5">
           <Skeleton className="h-14 w-14 shrink-0" />
@@ -98,7 +97,7 @@ export function SkeletonRows({ rows = 3 }) {
           <Skeleton className="h-6 w-20" />
         </div>
       ))}
-    </div>
+    </LoadingRegion>
   );
 }
 

@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { CATEGORIES, ORDERING_OPTIONS } from '@/domain/catalog';
 import { CONDITION_FILTERS } from '@/domain/conditions';
 import { LANGUAGES } from '@/domain/productTraits';
+import { signalNavigationStart } from '@/components/layout/NavigationProgress';
 
 /**
  * Los filtros viven en la URL (compartibles, y el botón atrás los respeta).
@@ -21,6 +22,7 @@ export default function ShopFilters() {
     if (value) next.set(key, value);
     else next.delete(key);
     next.delete('page');
+    signalNavigationStart();
     startTransition(() => router.push(`${pathname}${next.size ? `?${next}` : ''}`, { scroll: false }));
   };
 
@@ -76,7 +78,10 @@ export default function ShopFilters() {
         {hasFilters && (
           <button
             type="button"
-            onClick={() => startTransition(() => router.push(pathname, { scroll: false }))}
+            onClick={() => {
+              signalNavigationStart();
+              startTransition(() => router.push(pathname, { scroll: false }));
+            }}
             className="inline-flex items-center gap-1 text-[12px] font-bold uppercase tracking-[0.1em] text-coast-red-dark hover:underline"
           >
             <X size={13} /> Limpiar filtros

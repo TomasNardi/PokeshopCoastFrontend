@@ -12,6 +12,7 @@ import SocialRail from '@/components/layout/SocialRail';
 import CartDrawer from '@/components/cart/CartDrawer';
 import { PRESENTATION_MODE } from '@/config/presentation';
 import PresentationGuard from '@/components/layout/PresentationGuard';
+import NavigationProgress from '@/components/layout/NavigationProgress';
 import MaintenancePage from '@/components/layout/MaintenancePage';
 import { getMaintenanceState } from '@/services/site/siteStatus';
 
@@ -47,7 +48,7 @@ const BASE_METADATA = {
 export async function generateMetadata() {
   const { status } = await getMaintenanceState();
   if (status.isActive) return BASE_METADATA;
-  return { ...BASE_METADATA, title: `${SITE.name} — Volvemos en un rato`, robots: { index: false, follow: false } };
+  return { ...BASE_METADATA, title: `${SITE.name} — Volvemos pronto`, robots: { index: false, follow: false } };
 }
 
 export default async function RootLayout({ children }) {
@@ -75,6 +76,7 @@ export default async function RootLayout({ children }) {
     <html lang="es" className={fonts}>
       <body>
         <Providers>
+          <NavigationProgress />
           {!status.isActive && (
             <div className="bg-coast-red py-2 text-center text-[11px] font-bold uppercase tracking-[0.1em] text-white">
               Vista previa · el sitio está en mantenimiento para el público ·{' '}

@@ -9,6 +9,7 @@ import { formatDate, PAYMENT_LABELS, timeAgo } from '@/domain/orders';
 import { whatsappLink } from '@/config/site';
 import Button from '@/components/ui/Button';
 import { Card, EmptyState, OrderProgress, Skeleton, StatusPill } from './ui';
+import Thumb from '@/components/ui/Thumb';
 
 function CopyValue({ value }) {
   const [copied, setCopied] = useState(false);
@@ -117,8 +118,7 @@ export default function OrderDetail({ code }) {
               {order.items.map((item) => (
                 <li key={`${item.product_slug}-${item.product_name}`} className="flex items-center gap-4 p-4 md:p-5">
                   <Link href={item.product_slug ? `/tienda/${item.product_slug}` : '#'} className="shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={item.image_url} alt="" className="h-20 w-[60px] rounded-md bg-uns-stage object-contain p-1 transition-transform duration-300 hover:scale-105" />
+                    <Thumb src={item.image_url} className="h-20 w-[60px] rounded-md bg-uns-stage object-contain p-1" />
                   </Link>
                   <div className="min-w-0 flex-1">
                     <p className="text-[14px] font-semibold leading-snug">{item.product_name}</p>

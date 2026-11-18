@@ -9,8 +9,21 @@ import { POPULAR_SEARCH_LINKS } from '@/config/navigation';
 import { productView } from '@/domain/product';
 import { formatPrice } from '@/domain/money';
 import { linkStaggerDelays } from './menuData';
+import { LoadingRegion, Skeleton, SkeletonText } from '@/components/ui/Skeleton';
+import { signalNavigationStart } from '@/components/layout/NavigationProgress';
 
 const MIN_CHARS = 2;
+
+function ResultCardSkeleton() {
+  return (
+    <span className="search-card" aria-hidden="true">
+      <Skeleton as="span" className="search-card__media rounded-none" />
+      <span className="search-card__title"><SkeletonText width="80%" /></span>
+      <span className="search-card__category"><SkeletonText width="50%" /></span>
+      <span className="search-card__price"><SkeletonText width="30%" /></span>
+    </span>
+  );
+}
 
 function ResultCard({ product, index, onNavigate }) {
   const view = productView(product);
@@ -35,6 +48,7 @@ export default function SearchPopdown({ open, onClose, popularProducts = [] }) {
   const inputRef = useRef(null);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState(null);
+  const [searching, setSearching] = useState(false);
   const delays = linkStaggerDelays(POPULAR_SEARCH_LINKS.length);
 
   useEffect(() => {
@@ -49,15 +63,19 @@ export default function SearchPopdown({ open, onClose, popularProducts = [] }) {
     const q = query.trim();
     if (q.length < MIN_CHARS) {
       setResults(null);
+      setSearching(false);
       return undefined;
     }
     let cancelled = false;
+    setSearching(true);
     const timer = setTimeout(async () => {
       try {
         const page = await getServices().catalog.getProductPage({ search: q });
         if (!cancelled) setResults(page.items.slice(0, 4));
       } catch {
         if (!cancelled) setResults([]);
+      } finally {
+        if (!cancelled) setSearching(false);
       }
     }, 250);
     return () => {
@@ -69,6 +87,7 @@ export default function SearchPopdown({ open, onClose, popularProducts = [] }) {
   const submit = (event) => {
     event.preventDefault();
     const q = query.trim();
+    signalNavigationStart();
     router.push(q ? `/tienda?search=${encodeURIComponent(q)}` : '/tienda');
     onClose();
   };
@@ -104,8 +123,14 @@ export default function SearchPopdown({ open, onClose, popularProducts = [] }) {
           ))}
         </div>
         <div className="search-pop__column search-pop__column--wide">
-          <p className="search-pop__heading">{results ? `Resultados para “${query.trim()}”` : 'Productos populares'}</p>
-          {products.length ? (
+          <p className="search-pop__heading">{results || searching ? `Resultados para “${query.trim()}”` : 'Productos populares'}</p>
+          {searching ? (
+            <LoadingRegion label="Buscando" className="search-pop__grid">
+              {[0, 1, 2, 3].map((i) => (
+                <ResultCardSkeleton key={i} />
+              ))}
+            </LoadingRegion>
+          ) : products.length ? (
             <div className="search-pop__grid">
               {products.map((product, index) => (
                 <ResultCard key={product.id} product={product} index={index} onNavigate={onClose} />

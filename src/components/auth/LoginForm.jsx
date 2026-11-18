@@ -10,6 +10,7 @@ import Field from '@/components/ui/Field';
 import { buttonClass } from '@/components/ui/Button';
 import GoogleButton from './GoogleButton';
 import PasswordChecklist from './PasswordChecklist';
+import { LoginFormSkeleton } from './AuthSkeletons';
 
 const MODES = { login: 'Ingresar', signup: 'Crear cuenta' };
 
@@ -29,6 +30,9 @@ export default function LoginForm() {
   useEffect(() => {
     if (isAuthenticated) router.replace(returnTo);
   }, [isAuthenticated, returnTo, router]);
+
+  // Sesión sin confirmar, o ya logueado y a punto de redirigir: sin parpadeo del formulario.
+  if (status === 'loading' || isAuthenticated) return <LoginFormSkeleton />;
 
   if (status === 'disabled') {
     return <p className="text-coast-gray">Las cuentas no están disponibles por ahora. Podés comprar igual como invitado.</p>;

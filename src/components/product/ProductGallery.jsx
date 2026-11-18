@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import ProductStage from './ProductStage';
 import ProductLightbox from './ProductLightbox';
+import Thumb from '@/components/ui/Thumb';
 
 /**
  * Galería de la ficha: imagen grande en el escenario + miniaturas debajo.
@@ -43,8 +44,7 @@ export default function ProductGallery({ images, alt, effect, children }) {
                   i === active ? 'outline outline-2 outline-offset-[-2px] outline-coast-ink' : 'opacity-60 hover:opacity-100'
                 }`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt="" loading="lazy" decoding="async" className="h-full w-full object-contain" />
+                <Thumb src={src} className="h-full w-full object-contain" />
               </button>
             </li>
           ))}

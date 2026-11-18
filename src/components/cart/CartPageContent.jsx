@@ -4,13 +4,14 @@ import { useHydrated } from '@/hooks/useHydrated';
 import { formatPrice } from '@/domain/money';
 import Button from '@/components/ui/Button';
 import CartLine from './CartLine';
+import { CartPageSkeleton } from '@/components/cart/CartSkeletons';
 
 export default function CartPageContent() {
   const hydrated = useHydrated();
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore(selectSubtotal);
 
-  if (!hydrated) return <div className="h-64" />;
+  if (!hydrated) return <CartPageSkeleton />;
   if (items.length === 0) {
     return (
       <div className="py-16 text-center">

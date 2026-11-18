@@ -13,6 +13,7 @@
  */
 import { env, isSupabaseConfigured } from '@/config/env';
 import { createHttpClient } from './http/httpClient';
+import { withLatency } from './http/withLatency';
 import { createHttpCatalogRepository } from './catalog/catalogRepository.http';
 import { createMockCatalogRepository } from './catalog/catalogRepository.mock';
 import { createCatalogService } from './catalog/catalogService';
@@ -42,6 +43,7 @@ function pickAuthProvider({ useMocks, supabase, devLogin, apiUrl }) {
  */
 export function createServices({
   useMocks = env.useMocks,
+  mockLatencyMs = env.mockLatencyMs,
   apiUrl = env.apiUrl,
   supabase = isSupabaseConfigured ? { url: env.supabaseUrl, key: env.supabaseKey } : null,
   devLogin = env.devLogin,
@@ -54,10 +56,10 @@ export function createServices({
   const http = createHttpClient({ baseUrl: apiUrl });
   const repos = useMocks
     ? {
-        catalog: createMockCatalogRepository(),
-        orders: createMockOrderRepository(),
-        customer: createMockCustomerRepository(),
-        engagement: createMockEngagementRepository(),
+        catalog: withLatency(createMockCatalogRepository(), mockLatencyMs),
+        orders: withLatency(createMockOrderRepository(), mockLatencyMs),
+        customer: withLatency(createMockCustomerRepository(), mockLatencyMs),
+        engagement: withLatency(createMockEngagementRepository(), mockLatencyMs),
       }
     : {
         catalog: createHttpCatalogRepository(http),

@@ -1816,6 +1816,40 @@ body {
 .count-pop { animation: count-pop 0.45s var(--ease-soft); }
 
 /* Esqueletos de carga */
+/* ==========================================================================
+   Barra de progreso de navegación (NavigationProgress)
+   Avanza rápido al principio y cada vez más lento (nunca llega sola al 100%);
+   al cambiar la URL completa y se desvanece.
+   ========================================================================== */
+.nav-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  height: 2px;
+  background: theme('colors.coast.red');
+  transform-origin: left;
+  transform: scaleX(0);
+  opacity: 0;
+  pointer-events: none;
+}
+.nav-progress.is-loading {
+  opacity: 1;
+  animation: nav-progress-trickle 8s cubic-bezier(0.08, 0.6, 0.2, 1) forwards;
+}
+.nav-progress.is-done {
+  transform: scaleX(1);
+  opacity: 0;
+  transition: transform 0.2s ease-out, opacity 0.3s ease 0.15s;
+}
+@keyframes nav-progress-trickle {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(0.9); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-progress.is-loading { animation: none; transform: scaleX(0.6); }
+  .nav-progress.is-done { transition: opacity 0.2s ease; }
+}
+
 @keyframes skeleton-shimmer {
   from { background-position: 200% 0; }
   to { background-position: -200% 0; }
@@ -1880,169 +1914,46 @@ body {
 }
 
 /* ==========================================================================
-   Sitio en mantenimiento (MaintenancePage)
-   Negro con el collage de cartas fundido a la derecha, como el hero del home.
+   Sitio en mantenimiento (MaintenancePage): sobria, centrada, sin animaciones.
    ========================================================================== */
 .maintenance {
-  position: relative;
   display: flex;
   min-height: 100svh;
   flex-direction: column;
-  overflow: hidden;
-  background: #000;
-  color: #fff;
-  padding: 28px var(--outer) 24px;
-}
-.maintenance__art {
-  position: absolute;
-  inset: 0 0 38% 0;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
-}
-.maintenance__art img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 38% 50%;
-  opacity: 0.55;
-  animation: maintenance-drift 24s ease-in-out infinite alternate;
-}
-.maintenance__shade {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.6) 45%, rgba(0, 0, 0, 0.25) 100%);
-}
-.maintenance__brand,
-.maintenance__content,
-.maintenance__footer {
-  position: relative;
-  z-index: 1;
-}
-.maintenance__brand {
-  text-align: center;
-}
-.maintenance__content {
-  margin-top: auto;
-  padding-bottom: 40px;
-  text-align: center;
-}
-.maintenance__badge {
-  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  backdrop-filter: blur(6px);
-}
-.maintenance__dot {
-  position: relative;
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: theme('colors.coast.red');
-}
-.maintenance__dot::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: inherit;
-  animation: maintenance-ping 1.8s ease-out infinite;
+  justify-content: center;
+  gap: 28px;
+  padding: 40px var(--outer);
+  background: theme('colors.uns.bg');
+  text-align: center;
 }
 .maintenance__title {
   font-family: theme('fontFamily.heading');
-  font-size: 52px;
+  font-size: 40px;
   font-weight: 700;
-  line-height: 0.92;
+  line-height: 1;
   text-transform: uppercase;
 }
 .maintenance__message {
-  margin: 18px auto 0;
   max-width: 420px;
   font-size: 15px;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.6;
+  color: theme('colors.uns.muted');
 }
-.maintenance__actions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-  margin-top: 30px;
-}
-.maintenance__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+.maintenance__contact {
   font-size: 13px;
+  color: theme('colors.uns.muted');
+}
+.maintenance__contact a {
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
-  transition: color 0.25s;
+  color: #000;
+  text-underline-offset: 4px;
 }
-.maintenance__link:hover {
-  color: theme('colors.coast.red');
-}
-.maintenance__footer {
-  font-size: 11px;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.45);
+.maintenance__contact a:hover {
+  text-decoration: underline;
 }
 @media (min-width: 750px) {
-  .maintenance {
-    padding: 40px var(--outer) 32px;
-  }
-  .maintenance__art {
-    inset: 0 0 0 38%;
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 35%, #000 100%);
-    mask-image: linear-gradient(to right, transparent 0%, #000 35%, #000 100%);
-  }
-  .maintenance__art img {
-    object-position: 50% 50%;
-  }
-  .maintenance__shade {
-    background: linear-gradient(to right, #000 0%, rgba(0, 0, 0, 0.55) 45%, rgba(0, 0, 0, 0.1) 100%);
-  }
-  .maintenance__brand {
-    text-align: left;
-  }
-  .maintenance__content {
-    margin-block: auto;
-    padding-bottom: 0;
-    max-width: 560px;
-    text-align: left;
-  }
   .maintenance__title {
-    font-size: 88px;
-  }
-  .maintenance__message {
-    margin-left: 0;
-    font-size: 16px;
-  }
-  .maintenance__actions {
-    flex-direction: row;
-    gap: 28px;
-  }
-  .maintenance__footer {
-    text-align: left;
-  }
-}
-@keyframes maintenance-drift {
-  from { transform: scale(1.04) translate3d(0, 0, 0); }
-  to { transform: scale(1.1) translate3d(-1.5%, -1%, 0); }
-}
-@keyframes maintenance-ping {
-  from { transform: scale(1); opacity: 0.7; }
-  to { transform: scale(2.6); opacity: 0; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .maintenance__art img,
-  .maintenance__dot::after {
-    animation: none;
+    font-size: 56px;
   }
 }

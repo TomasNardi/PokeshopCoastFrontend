@@ -6,6 +6,7 @@ import { getServices } from '@/services/container';
 import { useCartStore } from '@/store/cartStore';
 import Button from '@/components/ui/Button';
 import { whatsappLink } from '@/config/site';
+import { LoadingRegion, Skeleton, SkeletonText } from '@/components/ui/Skeleton';
 
 const VARIANTS = {
   success: { icon: CheckCircle2, tone: 'text-emerald-600', title: '¡Gracias por tu compra!', clearsCart: true },
@@ -18,10 +19,27 @@ const VARIANTS = {
  * Si viene de MP con payment_id, se verifica contra el backend: la URL la
  * puede tocar cualquiera, el estado real lo dice el servidor.
  */
+/** Mismo bloque centrado que CheckoutResult mientras se leen los parámetros. */
+export function CheckoutResultSkeleton() {
+  return (
+    <LoadingRegion label="Cargando" className="container-site flex flex-col items-center py-24">
+      <Skeleton className="h-14 w-14 rounded-full" />
+      <Skeleton className="mt-6 h-10 w-72 max-w-full sm:h-12" />
+      <Skeleton className="mt-6 h-4 w-80 max-w-full" />
+      <Skeleton className="mt-2 h-4 w-64 max-w-full" />
+      <div className="mt-10 flex gap-3">
+        <Skeleton className="h-[52px] w-44" />
+        <Skeleton className="h-[52px] w-52" />
+      </div>
+    </LoadingRegion>
+  );
+}
+
 export default function CheckoutResult({ variant }) {
   const params = useSearchParams();
   const clear = useCartStore((s) => s.clear);
   const [order, setOrder] = useState(null);
+  const [verifying, setVerifying] = useState(Boolean(params.get('payment_id')));
   const cfg = VARIANTS[variant];
   const isTransfer = params.get('transfer') === '1';
   const Icon = cfg.icon;
@@ -38,7 +56,8 @@ export default function CheckoutResult({ variant }) {
           preference_id: params.get('preference_id'),
         })
         .then((res) => setOrder(res?.order || null))
-        .catch(() => {});
+        .catch(() => {})
+        .finally(() => setVerifying(false));
     } else if (params.get('code')) {
       setOrder({ order_code: params.get('code') });
     }
@@ -48,7 +67,13 @@ export default function CheckoutResult({ variant }) {
     <section className="container-site flex flex-col items-center py-24 text-center">
       <Icon size={56} strokeWidth={1.5} className={cfg.tone} />
       <h1 className="mt-6 font-display text-4xl font-extrabold tracking-[-0.03em] sm:text-5xl">{cfg.title}</h1>
-      {order?.order_code && (
+      {verifying && (
+        <p className="mt-4 text-coast-gray" role="status">
+          <span className="sr-only">Verificando el pago…</span>
+          <SkeletonText width="160px" />
+        </p>
+      )}
+      {!verifying && order?.order_code && (
         <p className="mt-4 text-coast-gray">
           Pedido <strong className="text-coast-ink">{order.order_code}</strong>
         </p>

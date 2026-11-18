@@ -4,6 +4,7 @@ import { Minus, Plus, Trash2 } from 'lucide-react';
 import { formatPrice } from '@/domain/money';
 import { getMaxQuantity } from '@/domain/product';
 import { useCartStore } from '@/store/cartStore';
+import Thumb from '@/components/ui/Thumb';
 
 export default function CartLine({ item, onNavigate }) {
   const setQuantity = useCartStore((s) => s.setQuantity);
@@ -15,10 +16,7 @@ export default function CartLine({ item, onNavigate }) {
     <li className="flex gap-4 py-4">
       <Link href={`/tienda/${item.slug}`} onClick={onNavigate} className="relative h-24 w-20 shrink-0">
         {/* Sin caja: el producto queda suelto sobre el blanco del carrito. */}
-        {item.image_url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.image_url} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.12)]" />
-        )}
+        <Thumb src={item.image_url} alt={item.name} className="h-full w-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.12)]" />
       </Link>
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-start justify-between gap-2">

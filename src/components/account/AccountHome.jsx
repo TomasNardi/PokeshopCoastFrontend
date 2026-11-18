@@ -11,6 +11,7 @@ import { useNotifications } from './NotificationsProvider';
 import NotificationIcon from './NotificationIcon';
 import OrderCard from './OrderCard';
 import { Card, OrderProgress, Skeleton, StatusPill } from './ui';
+import Thumb from '@/components/ui/Thumb';
 
 function greeting() {
   const hour = new Date().getHours();
@@ -52,8 +53,7 @@ function CurrentOrder({ code }) {
         <div className="flex items-center gap-4">
           <div className="flex -space-x-4">
             {order.items.slice(0, 3).map((item) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={item.product_slug} src={item.image_url} alt="" className="h-20 w-[58px] rounded-md border-2 border-white bg-uns-stage object-contain shadow-sm" />
+              <Thumb key={item.product_slug} src={item.image_url} className="h-20 w-[58px] rounded-md border-2 border-white bg-uns-stage object-contain shadow-sm" />
             ))}
           </div>
           <div className="min-w-0 md:max-w-[220px]">
