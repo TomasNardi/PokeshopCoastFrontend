@@ -7,6 +7,7 @@ import ProductRail from '@/components/home/ProductRail';
 import ProductGrid from '@/components/product/ProductGrid';
 import { ProductGridSkeleton, ProductRailSkeleton } from '@/components/product/ProductSkeletons';
 import Newsletter from '@/components/home/Newsletter';
+import KeepLoading from '@/components/ui/KeepLoading';
 import { PRESENTATION_MODE } from '@/config/presentation';
 
 // Modo presentación: "Comprar" baja a los productos en vez de ir a la tienda.
@@ -21,18 +22,24 @@ const SEALED_HREF = '/tienda?category=sellados';
 // Stock fresco en cada visita (y en cada vuelta atrás, ver BackForwardRefresh).
 export const dynamic = 'force-dynamic';
 
-/** Una sección que no carga desaparece sola: la home nunca se cae por un rail. */
+/** Marca de "no cargó" (distinta de "cargó vacío"). */
+const FAILED = Symbol('failed');
+
+/** Una sección que no carga nunca rompe la home: queda su esqueleto y se reintenta sola. */
 async function loadSection(name, fn) {
   try {
     return await fn();
   } catch (error) {
     console.error(`[home] no se pudo cargar "${name}":`, error?.message || error);
-    return null;
+    return FAILED;
   }
 }
 
+const railSkeleton = <ProductRailSkeleton id={NEW_ARRIVALS.id} title={NEW_ARRIVALS.title} />;
+
 async function NewArrivals() {
   const products = await loadSection('nuevos ingresos', () => getServices().catalog.getNewArrivals());
+  if (products === FAILED) return <KeepLoading>{railSkeleton}</KeepLoading>;
   if (!products) return null;
   return <ProductRail {...NEW_ARRIVALS} products={products} />;
 }
@@ -54,10 +61,17 @@ function SealedSection({ children }) {
   );
 }
 
+const sealedSkeleton = (
+  <SealedSection>
+    <ProductGridSkeleton count={4} mobileSlider label="Cargando productos sellados" />
+  </SealedSection>
+);
+
 async function SealedProducts() {
   const sealed = await loadSection('sellados', () =>
     getServices().catalog.getProductPage({ category: 'sellados', in_stock: 'true' })
   );
+  if (sealed === FAILED) return <KeepLoading>{sealedSkeleton}</KeepLoading>;
   if (!sealed?.items.length) return null;
   return (
     <SealedSection>
@@ -82,17 +96,11 @@ export default function HomePage() {
   return (
     <>
       <ParallaxHero {...mainHero} priority titleAs="h1" />
-      <Suspense fallback={<ProductRailSkeleton id={NEW_ARRIVALS.id} title={NEW_ARRIVALS.title} />}>
+      <Suspense fallback={railSkeleton}>
         <NewArrivals />
       </Suspense>
       <ParallaxHero {...secondaryHero} height="two-thirds" titleSize="xl" />
-      <Suspense
-        fallback={
-          <SealedSection>
-            <ProductGridSkeleton count={4} mobileSlider label="Cargando productos sellados" />
-          </SealedSection>
-        }
-      >
+      <Suspense fallback={sealedSkeleton}>
         <SealedProducts />
       </Suspense>
       <Newsletter />
