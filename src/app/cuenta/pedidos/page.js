@@ -9,7 +9,7 @@ export default function PedidosPage() {
     <RequireSession>
       <PageHeader eyebrow="Mi cuenta" title="Mis pedidos" />
       <div className="container-site">
-        <div className="rounded-2xl border border-coast-line bg-white p-6">
+        <div className="fade-up border border-uns-hairline bg-white p-5 sm:p-6">
           <OrdersList />
         </div>
       </div>

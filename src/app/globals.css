@@ -61,7 +61,7 @@ body {
   }
 
   .input {
-    @apply w-full border border-uns-border bg-white px-4 py-3 text-[14px] text-black outline-none transition-colors placeholder:text-[#9a9a9a] focus:border-black;
+    @apply w-full border border-uns-border bg-white px-4 py-3 text-[16px] text-black outline-none transition-colors placeholder:text-[#9a9a9a] focus:border-black md:text-[14px];
   }
 
   .label {
@@ -1559,7 +1559,47 @@ body {
   display: none;
 }
 
+/* Checkout mobile: total + pagar pegados abajo, respetando la barra del iPhone. */
+.checkout-paybar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px var(--outer) calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid theme('colors.uns.hairline');
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  animation: paybar-in 0.6s var(--ease-soft) both;
+}
+@keyframes paybar-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+/* El botón de WhatsApp sube para no tapar el de pagar. */
+@media (max-width: 1023px) {
+  body:has(.checkout-paybar) .wa-float {
+    bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Plegable con alto automático animado (grid 0fr → 1fr). */
+.collapse-rows {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s var(--ease-soft);
+}
+.collapse-rows.is-open {
+  grid-template-rows: 1fr;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .checkout-paybar {
+    animation: none;
+  }
   .fade-up {
     animation: none !important;
   }

@@ -26,7 +26,7 @@ export function OrdersList({ limit }) {
   if (orders.length === 0) return <p className="text-[14px] text-coast-gray">Todavía no hiciste pedidos.</p>;
 
   return (
-    <ul className="divide-y divide-coast-line">
+    <ul className="divide-y divide-uns-hairline">
       {orders.slice(0, limit).map((order) => (
         <li key={order.id} className="flex items-center justify-between gap-4 py-4">
           <div className="flex items-center gap-3">
@@ -52,7 +52,7 @@ export default function AccountOverview() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
-      <div className="rounded-2xl border border-coast-line bg-white p-6">
+      <div className="fade-up border border-uns-hairline bg-white p-5 sm:p-6">
         <p className="eyebrow mb-2">Tu perfil</p>
         <p className="text-xl font-bold">{name}</p>
         <p className="text-[14px] text-coast-gray">{user?.email}</p>
@@ -61,7 +61,7 @@ export default function AccountOverview() {
           <LogOut size={13} /> Cerrar sesión
         </Button>
       </div>
-      <div className="rounded-2xl border border-coast-line bg-white p-6">
+      <div className="fade-up border border-uns-hairline bg-white p-5 sm:p-6">
         <div className="mb-2 flex items-center justify-between">
           <p className="eyebrow">Últimos pedidos</p>
           <Link href="/cuenta/pedidos" className="text-[12px] font-semibold text-coast-gray hover:text-coast-red">Ver todos</Link>

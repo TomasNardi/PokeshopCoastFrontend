@@ -21,13 +21,13 @@ export default function CartPageContent() {
   }
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
-      <ul className="divide-y divide-coast-line rounded-2xl border border-coast-line bg-white px-6">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-10">
+      <ul className="fade-up min-w-0 divide-y divide-uns-hairline border border-uns-hairline bg-white px-4 sm:px-6">
         {items.map((item) => (
           <CartLine key={item.id} item={item} />
         ))}
       </ul>
-      <aside className="h-fit rounded-2xl border border-coast-line bg-white p-6">
+      <aside className="fade-up h-fit border border-uns-hairline bg-white p-5 sm:p-6 lg:sticky lg:top-24" style={{ '--delay': '0.12s' }}>
         <div className="flex justify-between text-lg font-bold">
           <span>Subtotal</span>
           <span>{formatPrice(subtotal)}</span>

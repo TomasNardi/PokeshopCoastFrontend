@@ -3,7 +3,8 @@ import { Lock } from 'lucide-react';
 import { buttonClass } from '@/components/ui/Button';
 import { useHydrated } from '@/hooks/useHydrated';
 import { useCheckout } from './useCheckout';
-import { CustomerFields, OrderSummary, PaymentSelector, ShippingSelector, Step } from './CheckoutSections';
+import { formatPrice } from '@/domain/money';
+import { CustomerFields, MobileSummary, OrderSummary, PaymentSelector, ShippingSelector, Step } from './CheckoutSections';
 import Button from '@/components/ui/Button';
 
 export default function CheckoutForm() {
@@ -25,15 +26,16 @@ export default function CheckoutForm() {
   const payLabel = form.payment_method === 'mercadopago' ? 'Pagar con Mercado Pago' : 'Confirmar pedido';
 
   return (
-    <form onSubmit={checkout.submit} noValidate className="grid gap-8 lg:grid-cols-[1fr_400px]">
-      <div className="space-y-6">
-        <Step number={1} title="Tus datos">
+    <form onSubmit={checkout.submit} noValidate className="grid gap-4 pb-24 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-8 lg:pb-0">
+      <div className="min-w-0 space-y-4 sm:space-y-6">
+        <MobileSummary items={items} totals={totals} discount={discount} />
+        <Step number={1} title="Tus datos" delay={0.05}>
           <CustomerFields form={form} errors={errors} setField={checkout.setField} />
         </Step>
-        <Step number={2} title="Envío">
+        <Step number={2} title="Envío" delay={0.1}>
           <ShippingSelector form={form} errors={errors} config={config} setField={checkout.setField} setShipping={checkout.setShipping} />
         </Step>
-        <Step number={3} title="Pago">
+        <Step number={3} title="Pago" delay={0.15}>
           <PaymentSelector
             form={form}
             errors={errors}
@@ -47,12 +49,24 @@ export default function CheckoutForm() {
 
       <OrderSummary items={items} totals={totals} discount={discount} onRedeem={checkout.redeem}>
         {blocked && <p className="mt-4 text-[12px] text-coast-red-dark">Hay productos sin stock en tu carrito. Quitalos para continuar.</p>}
-        <button type="submit" disabled={submitting || blocked} className={buttonClass({ size: 'lg', block: true, className: 'mt-6' })}>
+        <button type="submit" disabled={submitting || blocked} className={buttonClass({ size: 'lg', block: true, className: 'mt-6 !hidden lg:!inline-flex' })}>
           <Lock size={14} />
           {submitting ? 'Procesando…' : payLabel}
         </button>
-        <p className="mt-3 text-center text-[11px] text-coast-mist">El total final lo confirma el sistema al crear el pedido.</p>
+        <p className="mt-3 text-center text-[11px] text-uns-muted">El total final lo confirma el sistema al crear el pedido.</p>
       </OrderSummary>
+
+      {/* Mobile: el total y el botón de pagar siempre a mano, pegados abajo. */}
+      <div className="checkout-paybar lg:hidden">
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-uns-muted">Total</p>
+          <p className="whitespace-nowrap text-[18px] font-bold leading-tight">{formatPrice(totals.total)}</p>
+        </div>
+        <button type="submit" disabled={submitting || blocked} className={buttonClass({ className: 'flex-1 !px-4' })}>
+          <Lock size={14} />
+          {submitting ? 'Procesando…' : form.payment_method === 'mercadopago' ? 'Pagar' : 'Confirmar'}
+        </button>
+      </div>
     </form>
   );
 }

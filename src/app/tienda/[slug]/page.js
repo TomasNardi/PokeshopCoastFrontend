@@ -61,7 +61,7 @@ export default async function ProductPage({ params }) {
           </ProductStage>
         </div>
 
-        <div className="lg:pt-6">
+        <div className="fade-up min-w-0 lg:pt-6" style={{ '--delay': '0.1s' }}>
           <p className="eyebrow mb-3">{view.subtitle}</p>
           <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em] sm:text-5xl">{view.title}</h1>
           {view.traits.length > 0 && <p className="mt-3 text-[13px] font-semibold text-coast-gray">{view.traits.join(' · ')}</p>}
@@ -71,7 +71,7 @@ export default async function ProductPage({ params }) {
             {view.compareAtPrice && <span className="text-lg text-coast-mist line-through">{formatPrice(view.compareAtPrice)}</span>}
           </div>
 
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 flex flex-col items-start gap-4">
             {view.certLabel && <CertBadge label={view.certLabel} large />}
             <ConditionBadge condition={view.condition} detailed />
             <StockStatus status={view.stockStatus} quantity={view.maxQuantity} />
@@ -83,9 +83,9 @@ export default async function ProductPage({ params }) {
           </div>
 
           <ul className="mt-8 space-y-3 bg-uns-stage p-5 text-[13px] text-uns-muted">
-            <li className="flex items-center gap-3"><Truck size={16} className="text-coast-red" /> Envíos a todo el país o retiro en persona. <Link href="/envios" className="font-semibold text-coast-ink underline-offset-4 hover:underline">Ver opciones</Link></li>
-            <li className="flex items-center gap-3"><CreditCard size={16} className="text-coast-red" /> Pagá con Mercado Pago o transferencia.</li>
-            <li className="flex items-center gap-3"><ShieldCheck size={16} className="text-coast-red" /> La foto es de la carta que recibís.</li>
+            <li className="flex items-start gap-3"><Truck size={16} className="mt-0.5 shrink-0 text-coast-red" /><span>Envíos a todo el país o retiro en persona. <Link href="/envios" className="whitespace-nowrap font-semibold text-black underline underline-offset-4">Ver opciones</Link></span></li>
+            <li className="flex items-start gap-3"><CreditCard size={16} className="mt-0.5 shrink-0 text-coast-red" /> Pagá con Mercado Pago o transferencia.</li>
+            <li className="flex items-start gap-3"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-coast-red" /> La foto es de la carta que recibís.</li>
           </ul>
 
           <dl className="mt-8">

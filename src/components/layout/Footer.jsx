@@ -59,7 +59,7 @@ export default function Footer() {
           </div>
         ))}
       </div>
-      <div className="container-site flex flex-col items-center justify-between gap-3 border-t border-coast-line py-6 text-[11px] text-coast-mist sm:flex-row">
+      <div className="container-site flex flex-col items-center justify-between gap-2 border-t border-coast-line py-6 pb-24 text-center text-[11px] text-coast-mist md:flex-row md:pb-6 md:text-left">
         <p>© {new Date().getFullYear()} {SITE.name}. Todos los derechos reservados.</p>
         <p>Pokémon y sus marcas son propiedad de sus respectivos dueños. Tienda independiente.</p>
       </div>
