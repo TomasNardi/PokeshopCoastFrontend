@@ -5,8 +5,10 @@
  */
 export const HOME_HEROES = {
   main: {
-    subtitle: 'Desde Mar del Plata, llevando Pokémon TCG a todo el país.',
+    subtitle: 'Desde la costa, llevando Pokémon TCG a todo el país.',
     title: 'PokeShop Coast',
+    // El logo va arriba del subtítulo; mientras el hero se ve, el header no lo repite.
+    logo: '/brand/pokeshop-logo.png',
     cta: { label: 'Comprar', href: '/tienda' },
     // Fondo: collage de cartas Base Set (elegido en Figma), con el mismo look
     // del banner de Figma: negro a la izquierda y la imagen fundiéndose desde

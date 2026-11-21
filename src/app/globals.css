@@ -103,6 +103,16 @@ body {
   color: #fff;
 }
 
+/* En la home el logo está en el hero: el header no lo repite hasta que se vuelve sólido. */
+.site-header .wordmark {
+  transition: opacity 0.3s ease, visibility 0s linear 0s;
+}
+.site-header--overlay.is-transparent .wordmark {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+}
+
 .site-header__bar {
   position: relative;
   height: var(--header-height);
@@ -885,6 +895,13 @@ body {
   z-index: 2;
   text-align: center;
 }
+.hero__logo {
+  display: block;
+  width: auto;
+  height: 96px;
+  margin: 0 auto 14px;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.35));
+}
 .hero__subtitle {
   margin-bottom: 10px;
   font-size: 12px;
@@ -908,6 +925,10 @@ body {
     bottom: 50px;
     max-width: 50%;
     text-align: left;
+  }
+  .hero__logo {
+    height: 128px;
+    margin: 0 0 18px;
   }
   .hero__subtitle {
     font-size: 15px;
