@@ -28,7 +28,6 @@ export default function ParallaxHero({
   subtitle,
   title,
   cta,
-  logo = '',
   height = 'three-quarters',
   titleSize = 'large',
   layout = 'cover',
@@ -95,10 +94,6 @@ export default function ParallaxHero({
       </div>
       <div className="hero__shade" aria-hidden="true" />
       <div className="hero__content">
-        {logo && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={logo} alt="" width={190} height={192} className="hero__logo fade-up" style={{ '--delay': '0s' }} />
-        )}
         {subtitle && <p className="hero__subtitle fade-up" style={{ '--delay': '0.15s' }}>{subtitle}</p>}
         <Title className={`hero__title ${titleSize === 'xl' ? 'hero__title--xl' : ''} fade-up`} style={{ '--delay': '0.3s' }}>{title}</Title>
         {cta && (

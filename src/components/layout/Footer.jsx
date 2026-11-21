@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { CONTACT, SITE } from '@/config/site';
 import { CATEGORIES } from '@/domain/catalog';
-import Wordmark from './Wordmark';
+import BrandLogo from './BrandLogo';
 import { PRESENTATION_MODE } from '@/config/presentation';
 
 const ALL_COLUMNS = [
@@ -34,7 +34,7 @@ export default function Footer() {
     <footer className="mt-24 border-t border-coast-line bg-coast-cream-deep">
       <div className="container-site grid grid-cols-2 gap-10 pb-10 pt-16 lg:grid-cols-5">
         <div className="col-span-2 mx-auto flex w-full max-w-sm flex-col items-center text-center">
-          <Wordmark className="wordmark--footer" />
+          <BrandLogo />
           <p className="mt-5 max-w-xs text-[13px] leading-relaxed text-coast-gray">{SITE.description}</p>
           <p className="mt-6 text-[12px] font-semibold text-coast-ink">Pagos seguros con Mercado Pago · Envíos a todo el país</p>
         </div>

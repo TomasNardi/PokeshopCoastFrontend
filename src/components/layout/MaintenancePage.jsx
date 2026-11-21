@@ -40,8 +40,8 @@ export default function MaintenancePage({ title, message }) {
   return (
     <main className="maintenance">
       <span className="wordmark maintenance__brand">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/pokeshop-logo.png" alt="PokeShop Coast" width={190} height={192} className="wordmark__img" />
+        <span className="wordmark__name">PokeShop</span>
+        <span className="wordmark__sub">Coast</span>
       </span>
 
       <div className="maintenance__layout">

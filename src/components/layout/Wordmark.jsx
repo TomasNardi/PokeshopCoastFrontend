@@ -1,14 +1,15 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
 /**
- * Logo de la marca (public/brand/pokeshop-logo.png, 190×192). Chico y sutil:
- * el tamaño lo pone `.wordmark` (header) o la clase que se pase (footer).
+ * Logo tipográfico (el logo del cliente no se usa). Toma el color del header
+ * (`currentColor`): blanco sobre el hero transparente, negro con fondo.
+ * Cuando el cliente elija logo, se reemplaza este componente por su SVG.
  */
 export default function Wordmark({ className = '' }) {
   return (
     <Link href="/" aria-label="PokeShop Coast — inicio" className={`wordmark ${className}`}>
-      <Image src="/brand/pokeshop-logo.png" alt="PokeShop Coast" width={190} height={192} priority className="wordmark__img" />
+      <span className="wordmark__name">PokeShop</span>
+      <span className="wordmark__sub">Coast</span>
     </Link>
   );
 }

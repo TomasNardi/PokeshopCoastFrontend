@@ -103,16 +103,6 @@ body {
   color: #fff;
 }
 
-/* En la home el logo está en el hero: el header no lo repite hasta que se vuelve sólido. */
-.site-header .wordmark {
-  transition: opacity 0.3s ease, visibility 0s linear 0s;
-}
-.site-header--overlay.is-transparent .wordmark {
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
-}
-
 .site-header__bar {
   position: relative;
   height: var(--header-height);
@@ -258,29 +248,47 @@ body {
 
 .wordmark {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  color: inherit;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.wordmark__name {
+  font-family: theme('fontFamily.barlow');
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.wordmark__sub {
+  margin-top: 2px;
+  padding-left: 0.55em;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.55em;
+  color: theme('colors.coast.red');
+}
+@media (min-width: 1280px) {
+  .wordmark__name {
+    font-size: 32px;
+  }
+}
+
+/* Logo real de la marca: grande y centrado en el pie, sobre la descripción. */
+.brand-logo {
+  display: inline-flex;
   line-height: 0;
   transition: opacity 0.2s;
 }
-.wordmark:hover {
-  opacity: 0.85;
+.brand-logo:hover {
+  opacity: 0.9;
 }
-.wordmark__img {
+.brand-logo__img {
   width: auto;
-  height: 46px;
-}
-@media (min-width: 1280px) {
-  .wordmark__img {
-    height: 54px;
-  }
-}
-/* Pie: logo grande y centrado sobre la descripción de la tienda. */
-.wordmark--footer .wordmark__img {
   height: 104px;
 }
 @media (min-width: 1024px) {
-  .wordmark--footer .wordmark__img {
+  .brand-logo__img {
     height: 120px;
   }
 }
@@ -895,13 +903,6 @@ body {
   z-index: 2;
   text-align: center;
 }
-.hero__logo {
-  display: block;
-  width: auto;
-  height: 96px;
-  margin: 0 auto 14px;
-  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.35));
-}
 .hero__subtitle {
   margin-bottom: 10px;
   font-size: 12px;
@@ -925,10 +926,6 @@ body {
     bottom: 50px;
     max-width: 50%;
     text-align: left;
-  }
-  .hero__logo {
-    height: 128px;
-    margin: 0 0 18px;
   }
   .hero__subtitle {
     font-size: 15px;
