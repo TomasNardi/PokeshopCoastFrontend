@@ -33,8 +33,9 @@ export default function Footer() {
   return (
     <footer className="mt-24 border-t border-coast-line bg-coast-cream-deep">
       <div className="container-site grid grid-cols-2 gap-10 pb-10 pt-16 lg:grid-cols-5">
-        <div className="col-span-2">
-          <p className="max-w-xs text-[13px] leading-relaxed text-coast-gray">{SITE.description}</p>
+        <div className="col-span-2 mx-auto flex w-full max-w-sm flex-col items-center text-center">
+          <Wordmark className="wordmark--footer" />
+          <p className="mt-5 max-w-xs text-[13px] leading-relaxed text-coast-gray">{SITE.description}</p>
           <p className="mt-6 text-[12px] font-semibold text-coast-ink">Pagos seguros con Mercado Pago · Envíos a todo el país</p>
         </div>
         {COLUMNS.map((col) => (
@@ -58,10 +59,9 @@ export default function Footer() {
           </div>
         ))}
       </div>
-      <div className="container-site flex flex-col items-center justify-between gap-3 border-t border-coast-line py-6 pb-24 text-center text-[11px] text-coast-mist md:flex-row md:pb-6 md:text-left">
-        <p className="md:flex-1">© {new Date().getFullYear()} {SITE.name}. Todos los derechos reservados.</p>
-        <Wordmark className="wordmark--footer order-first md:order-none" />
-        <p className="md:flex-1 md:text-right">Pokémon y sus marcas son propiedad de sus respectivos dueños. Tienda independiente.</p>
+      <div className="container-site flex flex-col items-center justify-between gap-2 border-t border-coast-line py-6 pb-24 text-center text-[11px] text-coast-mist md:flex-row md:pb-6 md:text-left">
+        <p>© {new Date().getFullYear()} {SITE.name}. Todos los derechos reservados.</p>
+        <p>Pokémon y sus marcas son propiedad de sus respectivos dueños. Tienda independiente.</p>
       </div>
     </footer>
   );

@@ -265,10 +265,14 @@ body {
     height: 54px;
   }
 }
-/* Pie: más chico y apagado, entre los dos textos legales. */
+/* Pie: logo grande y centrado sobre la descripción de la tienda. */
 .wordmark--footer .wordmark__img {
-  height: 36px;
-  opacity: 0.8;
+  height: 104px;
+}
+@media (min-width: 1024px) {
+  .wordmark--footer .wordmark__img {
+    height: 120px;
+  }
 }
 
 /* Oscurece la página detrás del megamenú (hover__bg del tema: negro al 40 %). */
