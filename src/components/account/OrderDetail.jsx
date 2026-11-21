@@ -203,6 +203,14 @@ export default function OrderDetail({ code }) {
           >
             <MessageCircle size={15} /> Consultar por este pedido
           </Button>
+          {order.status === 'paid' && (
+            <Link
+              href={`/arrepentimiento?pedido=${encodeURIComponent(order.order_code)}`}
+              className="block text-center text-[12px] font-semibold text-uns-muted underline underline-offset-4 hover:text-coast-ink"
+            >
+              Botón de arrepentimiento
+            </Link>
+          )}
         </div>
       </div>
     </div>

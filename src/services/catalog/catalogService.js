@@ -49,6 +49,21 @@ export function createCatalogService(repository, { pageSize = PAGE_SIZE } = {}) 
       return page.filter((p) => p.id !== product.id).slice(0, limit);
     },
 
+    /**
+     * Vidrieras de la ficha: "Te puede interesar" y "Completá tu pedido".
+     * Lo elegido en el admin viene primero (lo resuelve el backend). Decorativo:
+     * si falla (o el backend todavía no tiene el endpoint), cae a la lista por
+     * categoría de siempre y nunca rompe la ficha.
+     */
+    async getSuggestions(product) {
+      try {
+        const data = await repository.getSuggestions(product.slug);
+        return { related: data?.related || [], complete: data?.complete || [] };
+      } catch {
+        return { related: await this.getRelated(product, 8), complete: [] };
+      }
+    },
+
     getProductsByIds: (ids) => repository.getProductsByIds(ids),
     getNewArrivals: () => safeList(() => repository.getNewArrivals()),
     getFeatured: () => safeList(() => repository.getFeatured()),

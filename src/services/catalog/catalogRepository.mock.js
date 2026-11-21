@@ -56,6 +56,15 @@ export function createMockCatalogRepository({ products = MOCK_PRODUCTS, pageSize
       if (!found) throw new ApiError('No encontramos lo que buscabas.', { status: 404 });
       return found;
     },
+    async getSuggestions(slug) {
+      const product = products.find((p) => p.slug === slug);
+      if (!product) throw new ApiError('No encontramos lo que buscabas.', { status: 404 });
+      const slugOf = (p) => (typeof p.category === 'object' ? p.category?.slug : p.category);
+      const others = products.filter((p) => p.id !== product.id && p.in_stock !== false);
+      const complete = others.filter((p) => slugOf(p) === 'accesorios').slice(0, 6);
+      const related = others.filter((p) => slugOf(p) === slugOf(product) && !complete.includes(p)).slice(0, 8);
+      return { related, complete };
+    },
     async getProductsByIds(ids = []) {
       const set = new Set(ids.map(Number));
       return products.filter((p) => set.has(p.id));

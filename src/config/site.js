@@ -20,7 +20,8 @@ export const CONTACT = Object.freeze({
   instagramHandle: '@pokeshopcoast',
   tiktok: 'https://www.tiktok.com/@pokeshop.coast',
   tiktokHandle: '@pokeshop.coast',
-  location: 'Costa Atlántica, Buenos Aires, Argentina',
+  location: 'Santa Teresita, La Costa, Buenos Aires',
+  locationShort: 'Santa Teresita, La Costa',
   hours: 'Lunes a sábados de 10 a 19 h',
 });
 

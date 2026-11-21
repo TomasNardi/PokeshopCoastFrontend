@@ -17,6 +17,16 @@ const ALL_COLUMNS = [
     ],
   },
   {
+    title: 'Contacto',
+    links: [
+      { label: CONTACT.email, href: `mailto:${CONTACT.email}`, external: true },
+      { label: CONTACT.whatsappDisplay, href: CONTACT.whatsappUrl, external: true },
+      { label: CONTACT.locationShort },
+      // Res. 424/2020: acceso directo desde cualquier página, sin registrarse.
+      { label: 'Botón de arrepentimiento', href: '/arrepentimiento', strong: true },
+    ],
+  },
+  {
     title: 'Seguinos',
     links: [
       { label: 'Instagram', href: CONTACT.instagram, external: true },
@@ -32,7 +42,7 @@ const COLUMNS = PRESENTATION_MODE ? ALL_COLUMNS.filter((col) => col.title === 'S
 export default function Footer() {
   return (
     <footer className="mt-24 border-t border-coast-line bg-coast-cream-deep">
-      <div className="container-site grid grid-cols-2 gap-10 pb-10 pt-16 lg:grid-cols-5">
+      <div className="container-site grid grid-cols-2 gap-10 pb-10 pt-16 lg:grid-cols-6">
         <div className="col-span-2 mx-auto flex w-full max-w-sm flex-col items-center text-center">
           <BrandLogo />
           <p className="mt-5 max-w-xs text-[13px] leading-relaxed text-coast-gray">{SITE.description}</p>
@@ -44,8 +54,14 @@ export default function Footer() {
             <ul className="space-y-3">
               {col.links.map((link) => (
                 <li key={link.label}>
-                  {link.external ? (
-                    <a href={link.href} target="_blank" rel="noopener noreferrer" className="text-[13px] text-coast-gray hover:text-coast-ink">
+                  {!link.href ? (
+                    <span className="text-[13px] text-coast-gray">{link.label}</span>
+                  ) : link.strong ? (
+                    <Link href={link.href} className="inline-flex items-center gap-1.5 border border-coast-ink px-2.5 py-1.5 text-[12px] font-bold uppercase tracking-[0.04em] text-coast-ink hover:bg-coast-ink hover:text-white">
+                      {link.label}
+                    </Link>
+                  ) : link.external ? (
+                    <a href={link.href} target="_blank" rel="noopener noreferrer" className="break-all text-[13px] text-coast-gray hover:text-coast-ink">
                       {link.label}
                     </a>
                   ) : (

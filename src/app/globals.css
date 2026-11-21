@@ -2280,3 +2280,87 @@ body {
   border-color: #000;
 }
 
+
+/* ==========================================================================
+   Ficha de producto (como unsobremas): desplegables, "Completá tu pedido" y
+   barra de compra fija abajo.
+   ========================================================================== */
+.product-info { border-top: 1px solid theme('colors.coast.line'); }
+.product-info__summary {
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.product-info__summary:focus-visible { outline: 2px solid theme('colors.coast.ink'); outline-offset: 2px; }
+.product-info__icon { flex-shrink: 0; transition: transform 0.45s var(--ease-soft); }
+.product-info.is-open .product-info__icon { transform: rotate(45deg); }
+/* Alto animado: la fila del grid va de 0fr a 1fr (abre y cierra suave). */
+.product-info__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s var(--ease-soft);
+}
+.product-info.is-open .product-info__panel { grid-template-rows: 1fr; }
+.product-info__inner { min-height: 0; overflow: hidden; }
+.product-info__body {
+  padding-bottom: 18px;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.3s var(--ease-out), transform 0.45s var(--ease-soft);
+}
+.product-info.is-open .product-info__body { opacity: 1; transform: none; transition-delay: 0.08s; }
+
+.complete-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.complete-track::-webkit-scrollbar { display: none; }
+.complete-item {
+  display: flex;
+  flex: 0 0 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
+  scroll-snap-align: start;
+}
+.complete-add {
+  display: flex;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid theme('colors.coast.ink');
+  background: #fff;
+  transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
+}
+.complete-add:hover { background: theme('colors.coast.ink'); color: #fff; }
+.complete-add.is-added { border-color: #059669; background: #059669; color: #fff; }
+
+.buy-bar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 44;
+  border-top: 1px solid theme('colors.coast.line');
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+  transform: translateY(105%);
+  transition: transform 0.35s var(--ease-soft);
+}
+.buy-bar.is-visible { transform: none; box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.06); }
+.buy-bar button { min-height: 44px; padding-top: 10px; padding-bottom: 10px; white-space: nowrap; }
+/* El WhatsApp sube para no tapar la barra. */
+html.has-buy-bar .wa-float { bottom: calc(84px + env(safe-area-inset-bottom)); transition: bottom 0.35s var(--ease-soft); }
+@media (prefers-reduced-motion: reduce) {
+  .buy-bar, .product-info__icon, .product-info__panel, .product-info__body { transition: none; }
+}

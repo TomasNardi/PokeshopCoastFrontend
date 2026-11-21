@@ -19,7 +19,7 @@ export const env = Object.freeze({
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '',
   whatsappPhone: process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '5492257554759',
-  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hola@pokeshopcoast.com',
+  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'pokeshopcoast@gmail.com',
 });
 
 export const isSupabaseConfigured = Boolean(env.supabaseUrl && env.supabaseKey);

@@ -18,6 +18,11 @@ export function createHttpCatalogRepository(http) {
   return {
     listProducts: async (filters = {}) => localizeImages(await http.get(`/products/${toQuery(filters)}`, fresh)),
     getProduct: async (slug) => localizeImages(await http.get(`/products/${encodeURIComponent(slug)}/`, fresh)),
+    // Las dos vidrieras de la ficha: { related: [], complete: [] }.
+    getSuggestions: async (slug) => {
+      const data = await http.get(`/products/${encodeURIComponent(slug)}/suggestions/`, fresh);
+      return { related: localizeImages(data?.related || []), complete: localizeImages(data?.complete || []) };
+    },
     getProductsByIds: async (ids = []) => {
       const clean = [...new Set(ids.map(Number).filter((id) => Number.isInteger(id) && id > 0))];
       if (clean.length === 0) return [];

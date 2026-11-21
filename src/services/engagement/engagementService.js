@@ -15,6 +15,16 @@ export function validateContact(form) {
   return errors;
 }
 
+const ORDER_CODE_RE = /^[A-Za-z]{2,4}-?[A-Za-z0-9]{4,10}$/;
+
+export function validateWithdrawal(form) {
+  const errors = {};
+  if (!form.name?.trim()) errors.name = 'Ingresá tu nombre y apellido.';
+  if (!isValidEmail(form.email)) errors.email = 'Ingresá el email con el que compraste.';
+  if (!ORDER_CODE_RE.test(form.order_code?.trim() || '')) errors.order_code = 'Revisá el código (por ejemplo PSC-AB12CD). Está en el mail de la compra.';
+  return errors;
+}
+
 export function createEngagementService(repository) {
   return {
     async sendContact(form) {
@@ -26,6 +36,17 @@ export function createEngagementService(repository) {
         email: form.email.trim(),
         phone: form.phone?.trim() || '',
         message: subject ? `[${subject}] ${form.message.trim()}` : form.message.trim(),
+      });
+    },
+    async sendWithdrawal(form) {
+      const errors = validateWithdrawal(form);
+      if (Object.keys(errors).length) throw Object.assign(new Error('Revisá los datos marcados.'), { fieldErrors: errors });
+      return repository.sendWithdrawal({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone?.trim() || '',
+        order_code: form.order_code.trim().toUpperCase(),
+        reason: form.reason?.trim() || '',
       });
     },
     async subscribe(email) {
