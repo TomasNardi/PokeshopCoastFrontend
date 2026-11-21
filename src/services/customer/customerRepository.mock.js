@@ -108,6 +108,27 @@ const clone = (value) => JSON.parse(JSON.stringify(value));
 const summary = ({ id, order_code, status, status_label, total, payment_method, created_at, items_count }) =>
   ({ id, order_code, status, status_label, total, payment_method, created_at, items_count });
 
+/** Mismo cálculo que Customer.setup_status() del backend. */
+const withSetup = (profile, addresses) => {
+  if (!profile) return profile;
+  const done = {
+    name: Boolean(profile.first_name?.trim() && profile.last_name?.trim()),
+    phone: Boolean(profile.phone?.trim()),
+    address: addresses.length > 0,
+  };
+  const completed = Object.values(done).filter(Boolean).length;
+  return {
+    ...profile,
+    setup: {
+      steps: ['name', 'phone', 'address'].map((key) => ({ key, done: done[key] })),
+      completed,
+      total: 3,
+      is_complete: completed === 3,
+      dismissed: Boolean(profile.setup_dismissed_at),
+    },
+  };
+};
+
 export function createMockCustomerRepository() {
   let profile = null;
   const addresses = clone(DEMO_ADDRESSES);
@@ -123,13 +144,14 @@ export function createMockCustomerRepository() {
 
   return {
     async syncSession(token, { email = 'demo@pokeshopcoast.com' } = {}) {
-      profile = profile || { email, first_name: 'Tomi', last_name: 'Coast', full_name: 'Tomi Coast', phone: '223 555-0101', marketing_opt_in: false, provider: 'email', created_at: ago(2000) };
+      profile = profile || { email, first_name: 'Tomi', last_name: 'Coast', full_name: 'Tomi Coast', phone: '', marketing_opt_in: false, provider: 'email', created_at: ago(2000) };
       return { profile, linked_orders: 0 };
     },
-    getProfile: async () => profile,
-    async updateProfile(data) {
+    getProfile: async () => withSetup(profile, addresses),
+    async updateProfile({ setup_dismissed: dismissed, ...data }) {
       profile = { ...profile, ...data, full_name: [data.first_name ?? profile.first_name, data.last_name ?? profile.last_name].filter(Boolean).join(' ') };
-      return profile;
+      if (dismissed !== undefined) profile.setup_dismissed_at = dismissed ? new Date().toISOString() : null;
+      return withSetup(profile, addresses);
     },
     getAddresses: async () => clone(addresses),
     async createAddress(data) {

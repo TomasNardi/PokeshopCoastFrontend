@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { thumbOf } from '@/domain/images';
 
 const ZOOM = 2.5;
 const SWIPE = 50; // px para cambiar de foto
@@ -231,7 +232,7 @@ export default function ProductLightbox({ images, index, alt, onIndexChange, onC
                 }`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt="" loading="lazy" className="h-full w-full object-contain" />
+                <img src={thumbOf(src)} onError={(e) => { if (e.currentTarget.src !== src) e.currentTarget.src = src; }} alt="" loading="lazy" className="h-full w-full object-contain" />
               </button>
             </li>
           ))}

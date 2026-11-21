@@ -63,7 +63,7 @@ export default function OrdersSection() {
           title={orders.length ? 'Nada por acá' : 'Todavía no hiciste pedidos'}
           action={!orders.length && <Button href="/tienda">Ir a la tienda</Button>}
         >
-          {orders.length ? 'No hay pedidos con este filtro.' : 'Cuando compres, vas a poder seguir tus pedidos desde acá.'}
+          {orders.length ? 'No hay pedidos con este filtro.' : 'Cuando compres, acá vas a seguir cada paso: pago, preparación, envío y entrega.'}
         </EmptyState>
       ) : (
         <div key={filterId} className="stagger space-y-3">

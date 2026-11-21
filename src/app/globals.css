@@ -2364,3 +2364,6 @@ html.has-buy-bar .wa-float { bottom: calc(84px + env(safe-area-inset-bottom)); t
 @media (prefers-reduced-motion: reduce) {
   .buy-bar, .product-info__icon, .product-info__panel, .product-info__body { transition: none; }
 }
+
+/* "Terminá de configurar tu cuenta": la barra avanza con transición al completar un paso. */
+.setup-progress { transition: width 0.6s var(--ease-soft); }

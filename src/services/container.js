@@ -40,7 +40,7 @@ function pickAuthProvider({ useMocks, supabase, devLogin, apiUrl }) {
  * @param {object} [options] todo inyectable para tests
  */
 export function createServices({
-  useMocks = false,
+  useMocks = process.env.NEXT_PUBLIC_TMP_MOCKS === '1',
   apiUrl = env.apiUrl,
   supabase = isSupabaseConfigured ? { url: env.supabaseUrl, key: env.supabaseKey } : null,
   devLogin = env.devLogin,

@@ -57,7 +57,7 @@ export default function NotificationsSection() {
         <SkeletonRows rows={4} />
       ) : visible.length === 0 ? (
         <EmptyState icon={Bell} title={onlyUnread ? 'Estás al día' : 'Sin notificaciones'}>
-          {onlyUnread ? 'Leíste todas tus notificaciones.' : 'Acá te vamos a avisar cada novedad de tus pedidos.'}
+          {onlyUnread ? 'Leíste todas tus notificaciones.' : 'Cuando tu pedido avance (pago confirmado, en camino, listo para retirar) te avisamos acá y por mail.'}
         </EmptyState>
       ) : (
         <div key={String(onlyUnread)} className="space-y-4 md:space-y-6">

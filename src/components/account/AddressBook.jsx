@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Home, MapPin, Pencil, Plus, Star, Trash2, X } from 'lucide-react';
 import { getServices } from '@/services/container';
@@ -127,6 +127,11 @@ function AddressCard({ address, onEdit, onDelete, onDefault, style }) {
 export default function AddressBook() {
   const { data, loading, reload } = useAsync(() => getServices().customer.getAddresses(), []);
   const [editing, setEditing] = useState(null); // null | {} (nueva) | address
+
+  // "?nueva=1" (desde "Terminá de configurar tu cuenta") abre el formulario directo.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('nueva')) setEditing({});
+  }, []);
   const addresses = Array.isArray(data) ? data : [];
 
   const remove = async (address) => {
@@ -176,7 +181,7 @@ export default function AddressBook() {
         <SkeletonRows rows={2} />
       ) : addresses.length === 0 && !editing ? (
         <EmptyState icon={MapPin} title="Sin direcciones guardadas" action={<Button onClick={() => setEditing({})}><Plus size={14} /> Agregar dirección</Button>}>
-          Agregá una y comprás más rápido la próxima vez.
+          Guardá tu casa o tu sucursal de correo: en el checkout se completan solas según el envío que elijas.
         </EmptyState>
       ) : (
         <div className="stagger grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">

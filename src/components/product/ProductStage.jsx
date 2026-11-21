@@ -1,6 +1,7 @@
 'use client';
 import { useRef, useState } from 'react';
 import { ImageOff } from 'lucide-react';
+import { IMAGE_SIZES, imageRenditions } from '@/domain/images';
 
 const MAX_TILT = 10; // grados
 const PC_HOVER = '(hover: hover) and (pointer: fine) and (min-width: 750px)';
@@ -19,6 +20,11 @@ const PC_HOVER = '(hover: hover) and (pointer: fine) and (min-width: 750px)';
 export default function ProductStage({ src, alt, size = 'card', effect = 'tilt', priority = false, className = '', children }) {
   const tilt = effect === 'tilt';
   const [state, setState] = useState(src ? 'loading' : 'empty');
+  // Versiones del bucket (chica / mediana / grande): el navegador baja la que
+  // necesita según el ancho en pantalla. Si alguna falla, se usa la original.
+  const renditions = imageRenditions(src);
+  const [useRenditions, setUseRenditions] = useState(true);
+  const responsive = renditions && useRenditions;
   const [ratio, setRatio] = useState(null);
   const stageRef = useRef(null);
   const frame = useRef(0);
@@ -65,13 +71,15 @@ export default function ProductStage({ src, alt, size = 'card', effect = 'tilt',
           <div className="stage__card" style={ratio ? { '--ar': ratio } : undefined}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={src}
+              src={responsive ? renditions.medium : src}
+              srcSet={responsive ? renditions.srcSet : undefined}
+              sizes={responsive ? IMAGE_SIZES[size] || IMAGE_SIZES.card : undefined}
               alt={alt}
               loading={priority ? 'eager' : 'lazy'}
               fetchPriority={priority ? 'high' : 'auto'}
               decoding="async"
               onLoad={(e) => markLoaded(e.currentTarget)}
-              onError={() => setState('error')}
+              onError={() => (responsive ? setUseRenditions(false) : setState('error'))}
               ref={(img) => {
                 // Si la imagen ya estaba en caché, onLoad no dispara antes de hidratar.
                 if (img?.complete && img.naturalWidth > 0 && state === 'loading') markLoaded(img);

@@ -11,6 +11,7 @@ import { formatPrice } from '@/domain/money';
 import { linkStaggerDelays } from './menuData';
 import { LoadingRegion, Skeleton, SkeletonText } from '@/components/ui/Skeleton';
 import { signalNavigationStart } from '@/components/layout/NavigationProgress';
+import { thumbOf } from '@/domain/images';
 
 const MIN_CHARS = 2;
 
@@ -30,7 +31,7 @@ function ResultCard({ product, index, onNavigate }) {
   return (
     <Link href={view.href} onClick={onNavigate} className="search-card" style={{ transitionDelay: `${300 + index * 60}ms` }}>
       <span className="search-card__media">
-        {view.imageUrl && <img src={view.imageUrl} alt="" loading="lazy" />}
+        {view.imageUrl && <img src={thumbOf(view.imageUrl)} onError={(e) => { if (e.currentTarget.src !== view.imageUrl) e.currentTarget.src = view.imageUrl; }} alt="" loading="lazy" />}
       </span>
       <span className="search-card__title">{view.name}</span>
       <span className="search-card__category">{view.subtitle}</span>

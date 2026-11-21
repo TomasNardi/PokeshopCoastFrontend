@@ -12,6 +12,7 @@ import NotificationIcon from './NotificationIcon';
 import OrderCard from './OrderCard';
 import { Card, Collapsible, OrderProgress, Skeleton, StatusPill } from './ui';
 import Thumb from '@/components/ui/Thumb';
+import AccountSetup from './AccountSetup';
 
 function greeting() {
   const hour = new Date().getHours();
@@ -88,6 +89,8 @@ export default function AccountHome() {
         </h1>
       </header>
 
+      <AccountSetup />
+
       <div className="stagger grid grid-cols-3 gap-2 md:gap-4">
         <Stat label="Pedidos" value={loading ? '–' : list.length} href="/cuenta/pedidos" Icon={Package} />
         <Stat label="En curso" value={loading ? '–' : active.length} href="/cuenta/pedidos?filtro=en-curso" Icon={ShoppingBag} />
@@ -106,7 +109,8 @@ export default function AccountHome() {
             <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-[84px] w-full rounded-2xl" />)}</div>
           ) : list.length === 0 ? (
             <Card className="p-8 text-center">
-              <p className="text-[14px] text-uns-muted">Todavía no hiciste pedidos.</p>
+              <p className="text-[14px] font-semibold">Todavía no hiciste pedidos</p>
+              <p className="mx-auto mt-1 max-w-xs text-[13px] text-uns-muted">Cuando compres, acá vas a seguir cada paso: pago, preparación, envío y entrega.</p>
               <Button href="/tienda" className="mt-5">Ir a la tienda</Button>
             </Card>
           ) : (
@@ -123,7 +127,7 @@ export default function AccountHome() {
           action={<Link href="/cuenta/notificaciones" className="text-[12px] font-bold uppercase tracking-[0.075em] text-uns-muted hover:text-coast-red">Ver todas</Link>}
         >
           <Card as="ul" className="divide-y divide-uns-hairline">
-            {notifications.length === 0 && <li className="p-6 text-[13px] text-uns-muted">Sin novedades por ahora.</li>}
+            {notifications.length === 0 && <li className="p-6 text-[13px] text-uns-muted">Sin novedades por ahora. Te avisamos acá y por mail cada vez que tu pedido avance.</li>}
             {notifications.slice(0, 4).map((n) => (
               <li key={n.id}>
                 <Link href={n.url || '/cuenta/notificaciones'} className="flex gap-3 p-3 transition-colors hover:bg-uns-bg md:p-4">
