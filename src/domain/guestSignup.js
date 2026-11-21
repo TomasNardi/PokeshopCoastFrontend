@@ -31,3 +31,40 @@ export function forgetGuestEmail() {
 }
 
 export const SIGNUP_HREF = '/cuenta/ingresar?modo=crear&next=/cuenta/pedidos';
+
+/**
+ * Constancias de pedidos hechos como invitado EN ESTE NAVEGADOR (firmadas por
+ * el backend). Al entrar con cualquier cuenta se mandan y esos pedidos pasan a
+ * "Mi cuenta", aunque haya comprado con otro mail (ej. Hotmail y entra con Google).
+ * localStorage: sobrevive a cerrar el navegador; el backend las acepta 30 días.
+ */
+const CLAIMS_KEY = 'pokeshop:order-claims';
+const MAX_CLAIMS = 20;
+
+export function rememberOrderClaim(token) {
+  if (!token) return;
+  try {
+    const list = readOrderClaims().filter((t) => t !== token);
+    list.push(token);
+    localStorage.setItem(CLAIMS_KEY, JSON.stringify(list.slice(-MAX_CLAIMS)));
+  } catch {
+    /* sin storage: queda el camino del mismo mail verificado */
+  }
+}
+
+export function readOrderClaims() {
+  try {
+    const list = JSON.parse(localStorage.getItem(CLAIMS_KEY) || '[]');
+    return Array.isArray(list) ? list.filter((t) => typeof t === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+export function forgetOrderClaims() {
+  try {
+    localStorage.removeItem(CLAIMS_KEY);
+  } catch {
+    /* nada */
+  }
+}

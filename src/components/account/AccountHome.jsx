@@ -73,9 +73,14 @@ function CurrentOrder({ code }) {
 }
 
 export default function AccountHome() {
-  const { user, profile } = useSession();
+  const { user, profile, syncVersion } = useSession();
   const { unread, results: notifications } = useNotifications();
-  const { data: orders, loading } = useAsync(() => getServices().customer.getOrders(), []);
+  // Espera la sincronización de la sesión: ahí se suman los pedidos hechos como invitado.
+  const { data: orders, loading: loadingOrders } = useAsync(
+    () => (syncVersion ? getServices().customer.getOrders() : Promise.resolve(null)),
+    [syncVersion]
+  );
+  const loading = loadingOrders || !syncVersion;
   const list = Array.isArray(orders) ? orders : orders?.results || [];
   const active = list.filter(isActiveOrder);
   const firstName = profile?.first_name || user?.name?.split(' ')[0] || '';

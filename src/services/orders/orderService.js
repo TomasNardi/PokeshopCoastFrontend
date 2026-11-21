@@ -114,7 +114,7 @@ export function createOrderService(repository) {
       const response = await repository.createOrder(
         buildOrderPayload(form, items, { discountCode, receipt, origin, checkoutToken })
       );
-      return { order: response?.order || response, next: payment.nextStep(response) };
+      return { order: response?.order || response, claimToken: response?.claim_token || '', next: payment.nextStep(response) };
     },
   };
 }

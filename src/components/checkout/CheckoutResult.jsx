@@ -95,10 +95,10 @@ export default function CheckoutResult({ variant }) {
         <div className="result-rise mt-8 w-full max-w-md border border-coast-line bg-uns-stage p-5 text-left [animation-delay:.25s]">
           <p className="flex items-center gap-2 text-[14px] font-bold"><PackageSearch size={18} /> Seguí tu pedido desde tu cuenta</p>
           <p className="mt-1.5 text-[13px] leading-relaxed text-uns-muted">
-            Creá tu cuenta con <strong className="break-all text-coast-ink">{guestEmail}</strong> y este pedido aparece solo en
+            Entrá o creá tu cuenta desde este dispositivo, con Google o con tu mail, y este pedido aparece solo en
             Mi cuenta, con su estado y el seguimiento del envío. Es opcional.
           </p>
-          <Button href={SIGNUP_HREF} size="sm" className="mt-4">Crear mi cuenta</Button>
+          <Button href={SIGNUP_HREF} size="sm" className="mt-4">Crear cuenta o ingresar</Button>
         </div>
       )}
       <div className="mt-10 flex flex-wrap justify-center gap-3">

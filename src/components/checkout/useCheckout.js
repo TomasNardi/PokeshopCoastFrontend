@@ -10,7 +10,7 @@ import { cardSurchargePercent } from '@/domain/pricing';
 import { computeTotals, freeShippingStatus, subtotalOf } from '@/domain/cart';
 import { useCartStore } from '@/store/cartStore';
 import { useSession } from '@/components/auth/SessionProvider';
-import { forgetGuestEmail, rememberGuestEmail } from '@/domain/guestSignup';
+import { forgetGuestEmail, rememberGuestEmail, rememberOrderClaim } from '@/domain/guestSignup';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -235,7 +235,7 @@ export function useCheckout() {
     }
     setSubmitting(true);
     try {
-      const { next } = await services.orders.placeOrder({
+      const { next, claimToken } = await services.orders.placeOrder({
         form: state.form,
         items,
         discountCode: discount.code,
@@ -246,6 +246,8 @@ export function useCheckout() {
       writeToken(null);
       // Invitado: en la confirmación le ofrecemos crear la cuenta con este email.
       if (user) forgetGuestEmail(); else rememberGuestEmail(state.form.customer_email);
+      // Constancia del pedido en este navegador: al entrar con cualquier cuenta, aparece en "Mi cuenta".
+      rememberOrderClaim(claimToken);
       // El carrito se vacía en la confirmación: si MP falla, el comprador vuelve con su carrito.
       if (next.type === 'redirect') window.location.assign(next.url);
       else router.push(next.href);

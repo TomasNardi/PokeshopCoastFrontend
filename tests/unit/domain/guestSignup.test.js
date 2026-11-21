@@ -16,3 +16,25 @@ describe('guestSignup', () => {
     expect(SIGNUP_HREF).not.toMatch(/@|email/);
   });
 });
+
+describe('constancias de pedidos de invitado', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('se guardan sin repetir, se leen y se olvidan', async () => {
+    const { forgetOrderClaims, readOrderClaims, rememberOrderClaim } = await import('@/domain/guestSignup');
+    rememberOrderClaim('a');
+    rememberOrderClaim('b');
+    rememberOrderClaim('a');
+    expect(readOrderClaims()).toEqual(['b', 'a']);
+    forgetOrderClaims();
+    expect(readOrderClaims()).toEqual([]);
+  });
+
+  it('ignora vacíos y basura en el storage', async () => {
+    const { readOrderClaims, rememberOrderClaim } = await import('@/domain/guestSignup');
+    rememberOrderClaim('');
+    expect(readOrderClaims()).toEqual([]);
+    localStorage.setItem('pokeshop:order-claims', '{no es json');
+    expect(readOrderClaims()).toEqual([]);
+  });
+});

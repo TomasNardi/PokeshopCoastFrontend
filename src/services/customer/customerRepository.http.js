@@ -19,8 +19,12 @@ export function createHttpCustomerRepository(http, { getCustomerToken = async ()
 
   return {
     /** Crea la cuenta si es nueva y vincula compras hechas como invitado. */
-    syncSession: async (token, { marketingOptIn = false } = {}) =>
-      http.post('/customers/session/', { marketing_opt_in: marketingOptIn }, { headers: await withToken(token) }),
+    syncSession: async (token, { marketingOptIn = false, claimTokens = [] } = {}) =>
+      http.post(
+        '/customers/session/',
+        { marketing_opt_in: marketingOptIn, claim_tokens: claimTokens },
+        { headers: await withToken(token) }
+      ),
     getProfile: async () => http.get('/customers/profile/', { headers: await withToken() }),
     updateProfile: async (data) => http.patch('/customers/profile/', data, { headers: await withToken() }),
     getAddresses: async () => http.get('/customers/addresses/', { headers: await withToken() }),

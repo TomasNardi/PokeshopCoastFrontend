@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Package } from 'lucide-react';
 import { getServices } from '@/services/container';
 import { useAsync } from '@/hooks/useAsync';
+import { useSession } from '@/components/auth/SessionProvider';
 import { isActiveOrder, orderStatus } from '@/domain/orders';
 import Button from '@/components/ui/Button';
 import OrderCard from './OrderCard';
@@ -21,7 +22,13 @@ export default function OrdersSection() {
   const pathname = usePathname();
   const params = useSearchParams();
   const filterId = FILTERS.some((f) => f.id === params.get('filtro')) ? params.get('filtro') : 'todos';
-  const { data, loading, error, reload } = useAsync(() => getServices().customer.getOrders(), []);
+  // Espera la sincronización de la sesión: ahí se suman los pedidos hechos como invitado.
+  const { syncVersion } = useSession();
+  const { data, loading: loadingOrders, error, reload } = useAsync(
+    () => (syncVersion ? getServices().customer.getOrders() : Promise.resolve(null)),
+    [syncVersion]
+  );
+  const loading = loadingOrders || !syncVersion;
   const orders = useMemo(() => (Array.isArray(data) ? data : data?.results || []), [data]);
   const visible = orders.filter(FILTERS.find((f) => f.id === filterId).test);
 
