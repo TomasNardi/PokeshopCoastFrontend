@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useReducer, useState } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { getServices } from '@/services/container';
@@ -30,12 +30,36 @@ function reducer(state, action) {
         errors: {},
       };
     }
+    case 'restore':
+      // Link del recordatorio: lo guardado manda sobre el formulario vacío.
+      return { ...state, form: { ...state.form, ...Object.fromEntries(Object.entries(action.values).filter(([, v]) => v)) } };
     case 'prefill':
       return { ...state, form: Object.fromEntries(Object.entries(state.form).map(([k, v]) => [k, v || action.values[k] || ''])) };
     case 'errors':
       return { ...state, errors: action.errors };
     default:
       return state;
+  }
+}
+
+// Token del checkout pendiente (carrito abandonado). Sobrevive recargas.
+const CHECKOUT_TOKEN_KEY = 'pokeshop:checkout-token';
+const SAVE_DELAY_MS = 1500;
+
+function readToken() {
+  try {
+    return window.localStorage.getItem(CHECKOUT_TOKEN_KEY) || null;
+  } catch {
+    return null;
+  }
+}
+
+function writeToken(token) {
+  try {
+    if (token) window.localStorage.setItem(CHECKOUT_TOKEN_KEY, token);
+    else window.localStorage.removeItem(CHECKOUT_TOKEN_KEY);
+  } catch {
+    /* sin storage: el recordatorio igual sale, solo no se reusa el token */
   }
 }
 
@@ -57,6 +81,10 @@ export function useCheckout() {
   );
   const applyDiscount = useCartStore((s) => s.applyDiscount);
   const sync = useCartStore((s) => s.sync);
+  const addToCart = useCartStore((s) => s.add);
+  const clearCart = useCartStore((s) => s.clear);
+  const checkoutToken = useRef(null);
+  const [recovering, setRecovering] = useState(false);
   const { profile, user } = useSession();
 
   const [state, dispatch] = useReducer(reducer, { form: { ...EMPTY_CHECKOUT_FORM }, errors: {} });
@@ -71,6 +99,71 @@ export function useCheckout() {
     if (ids.length) services.catalog.getProductsByIds(ids).then(sync).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Link del mail de recordatorio (`/checkout?recuperar=<token>`): rearma el
+  // carrito con lo que siga en stock y completa el formulario como lo dejó.
+  useEffect(() => {
+    checkoutToken.current = readToken();
+    const token = new URLSearchParams(window.location.search).get('recuperar');
+    if (!token) return;
+    setRecovering(true);
+    (async () => {
+      try {
+        const saved = await services.orders.recoverCheckout(token);
+        if (saved.finished) {
+          toast('Esa compra ya se completó. ¡Gracias!');
+          return;
+        }
+        const products = saved.items.length
+          ? await services.catalog.getProductsByIds(saved.items.map((i) => i.product_id))
+          : [];
+        const byId = new Map(products.map((p) => [p.id, p]));
+        clearCart();
+        saved.items.forEach((i) => byId.has(i.product_id) && addToCart(byId.get(i.product_id), i.quantity));
+        dispatch({ type: 'restore', values: saved.form || {} });
+        checkoutToken.current = saved.token;
+        writeToken(saved.token);
+        if (saved.items.length < (saved.items_total ?? saved.items.length) || !saved.items.length) {
+          toast.error('Algunos productos de tu carrito ya no tienen stock.');
+        } else {
+          toast.success('Recuperamos tu carrito.');
+        }
+      } catch {
+        toast.error('Este link ya no está disponible.');
+      } finally {
+        setRecovering(false);
+        router.replace('/checkout');
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Carrito abandonado: con email válido y carrito, guarda el checkout (con
+  // espera, para no pegarle al backend en cada tecla). Si se va sin comprar,
+  // el backend le manda UN recordatorio por mail.
+  const { form } = state;
+  useEffect(() => {
+    if (recovering || !items.length) return undefined;
+    const timer = setTimeout(async () => {
+      try {
+        const token = await services.orders.savePendingCheckout({
+          form, items, discountCode: discount.code, token: checkoutToken.current,
+        });
+        if (token && token !== checkoutToken.current) {
+          checkoutToken.current = token;
+          writeToken(token);
+        }
+      } catch {
+        /* nunca frena el checkout */
+      }
+    }, SAVE_DELAY_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    recovering, items, discount.code, form.customer_email, form.customer_name, form.customer_phone,
+    form.shipping_method, form.shipping_address, form.shipping_city, form.shipping_province,
+    form.shipping_zip, form.payment_method,
+  ]);
 
   // Con sesión, completa lo vacío una sola vez. Nunca pisa lo que tipeó.
   useEffect(() => {
@@ -111,7 +204,9 @@ export function useCheckout() {
         discountCode: discount.code,
         receiptFile,
         origin: window.location.origin,
+        checkoutToken: checkoutToken.current,
       });
+      writeToken(null);
       // El carrito se vacía en la confirmación: si MP falla, el comprador vuelve con su carrito.
       if (next.type === 'redirect') window.location.assign(next.url);
       else router.push(next.href);

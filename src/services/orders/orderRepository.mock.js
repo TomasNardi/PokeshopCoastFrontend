@@ -37,6 +37,12 @@ export function createMockOrderRepository() {
       }
       return { order };
     },
+    async savePendingCheckout(payload) {
+      return { token: payload?.token || `mock-checkout-${Date.now()}` };
+    },
+    async recoverCheckout() {
+      throw new ApiError('Este link ya no está disponible.', { status: 404 });
+    },
     async uploadReceipt(file) {
       return { token: `receipt-${Date.now()}`, name: file?.name || 'comprobante', content_type: file?.type || '', size: file?.size || 0 };
     },

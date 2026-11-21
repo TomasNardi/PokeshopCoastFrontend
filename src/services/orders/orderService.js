@@ -39,7 +39,7 @@ export function validateCheckout(form, { receipt } = {}) {
  * el origen llega por parámetro. El backend solo confía en product_id+quantity
  * y recalcula precios, stock y descuentos.
  */
-export function buildOrderPayload(form, items, { discountCode = '', receipt = null, origin = '' } = {}) {
+export function buildOrderPayload(form, items, { discountCode = '', receipt = null, origin = '', checkoutToken = '' } = {}) {
   const shipping = getShippingMethod(form.shipping_method);
   if (!shipping) throw new Error(`Método de envío desconocido: ${form.shipping_method}`);
 
@@ -52,6 +52,7 @@ export function buildOrderPayload(form, items, { discountCode = '', receipt = nu
     discount_code: discountCode || '',
     notes: form.notes?.trim() || '',
     ...(origin ? { frontend_origin: origin } : {}),
+    ...(checkoutToken ? { checkout_token: checkoutToken } : {}),
     ...(receipt
       ? { receipt_token: receipt.token, receipt_name: receipt.name, receipt_content_type: receipt.content_type }
       : {}),
@@ -70,7 +71,34 @@ export function createOrderService(repository) {
      * el paso siguiente que decide la estrategia de pago.
      * @returns {Promise<{ order: object, next: { type: 'redirect'|'route', url?: string, href?: string } }>}
      */
-    async placeOrder({ form, items, discountCode, receiptFile, origin }) {
+    /**
+     * Carrito abandonado: guarda lo tipeado + el carrito para que el backend
+     * pueda mandar el recordatorio. Sin email válido o sin carrito no hace nada.
+     * @returns {Promise<string|null>} token del checkout pendiente
+     */
+    async savePendingCheckout({ form, items, discountCode, token }) {
+      if (!isValidEmail(form.customer_email) || !items?.length) return token || null;
+      const response = await repository.savePendingCheckout({
+        token: token || undefined,
+        customer_name: form.customer_name?.trim() || '',
+        customer_email: form.customer_email.trim().toLowerCase(),
+        customer_phone: form.customer_phone?.trim() || '',
+        shipping_method: form.shipping_method || '',
+        shipping_address: form.shipping_address || '',
+        shipping_city: form.shipping_city || '',
+        shipping_province: form.shipping_province || '',
+        shipping_zip: form.shipping_zip || '',
+        payment_method: form.payment_method || '',
+        discount_code: discountCode || '',
+        items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
+      });
+      return response?.token || token || null;
+    },
+
+    /** El link `?recuperar=<token>` del mail de recordatorio. */
+    recoverCheckout: (token) => repository.recoverCheckout(token),
+
+    async placeOrder({ form, items, discountCode, receiptFile, origin, checkoutToken }) {
       const payment = getPaymentMethod(form.payment_method);
       const errors = validateCheckout(form, { receipt: payment?.requiresReceipt ? receiptFile : true });
       if (Object.keys(errors).length > 0) {
@@ -80,7 +108,7 @@ export function createOrderService(repository) {
 
       const receipt = payment.requiresReceipt ? await repository.uploadReceipt(receiptFile) : null;
       const response = await repository.createOrder(
-        buildOrderPayload(form, items, { discountCode, receipt, origin })
+        buildOrderPayload(form, items, { discountCode, receipt, origin, checkoutToken })
       );
       return { order: response?.order || response, next: payment.nextStep(response) };
     },

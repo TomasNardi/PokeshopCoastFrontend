@@ -96,3 +96,32 @@ describe('orderService.placeOrder', () => {
     expect(create).not.toHaveBeenCalled();
   });
 });
+
+describe('orderService.savePendingCheckout (carrito abandonado)', () => {
+  const items = [{ id: 7, quantity: 2 }];
+
+  it('no guarda nada sin email válido', async () => {
+    const repo = { savePendingCheckout: vi.fn() };
+    const token = await createOrderService(repo).savePendingCheckout({ form: { ...EMPTY_CHECKOUT_FORM, customer_email: 'misty@' }, items });
+    expect(token).toBeNull();
+    expect(repo.savePendingCheckout).not.toHaveBeenCalled();
+  });
+
+  it('manda email normalizado, carrito y el token previo', async () => {
+    const repo = { savePendingCheckout: vi.fn().mockResolvedValue({ token: 'abc' }) };
+    const form = { ...EMPTY_CHECKOUT_FORM, customer_email: ' Misty@Coast.com ', customer_name: 'Misty' };
+    const token = await createOrderService(repo).savePendingCheckout({ form, items, discountCode: 'COAST10', token: 'abc' });
+    expect(token).toBe('abc');
+    expect(repo.savePendingCheckout).toHaveBeenCalledWith(expect.objectContaining({
+      token: 'abc', customer_email: 'misty@coast.com', discount_code: 'COAST10', items: [{ product_id: 7, quantity: 2 }],
+    }));
+  });
+
+  it('el token del checkout viaja en la orden', () => {
+    const payload = buildOrderPayload(
+      { ...EMPTY_CHECKOUT_FORM, customer_name: 'Misty', customer_email: 'm@c.com', customer_phone: '2235555555', shipping_method: 'pickup_store' },
+      items, { checkoutToken: 'abc' },
+    );
+    expect(payload.checkout_token).toBe('abc');
+  });
+});

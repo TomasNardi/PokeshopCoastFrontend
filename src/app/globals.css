@@ -248,30 +248,27 @@ body {
 
 .wordmark {
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
-  color: inherit;
-  line-height: 1;
-  text-transform: uppercase;
+  justify-content: center;
+  line-height: 0;
+  transition: opacity 0.2s;
 }
-.wordmark__name {
-  font-family: theme('fontFamily.barlow');
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+.wordmark:hover {
+  opacity: 0.85;
 }
-.wordmark__sub {
-  margin-top: 2px;
-  padding-left: 0.55em;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.55em;
-  color: theme('colors.coast.red');
+.wordmark__img {
+  width: auto;
+  height: 46px;
 }
 @media (min-width: 1280px) {
-  .wordmark__name {
-    font-size: 32px;
+  .wordmark__img {
+    height: 54px;
   }
+}
+/* Pie: más chico y apagado, entre los dos textos legales. */
+.wordmark--footer .wordmark__img {
+  height: 36px;
+  opacity: 0.8;
 }
 
 /* Oscurece la página detrás del megamenú (hover__bg del tema: negro al 40 %). */

@@ -7,6 +7,8 @@ import { CUSTOMER_TOKEN_HEADER } from '../customer/customerRepository.http';
  *   getPaymentConfig() → { card_surcharge_*, shipping_prices, transfer }
  *   verifyPayment({ payment_id, external_reference, ... }) → { status, order }
  *   validateDiscount(code) → { code, percent, fixed, expires_at }
+ *   savePendingCheckout(payload) → { token }   (carrito abandonado: el recordatorio por mail)
+ *   recoverCheckout(token) → { token, finished, items: [{product_id, quantity}], form, discount_code }
  *
  * @param {ReturnType<import('../http/httpClient').createHttpClient>} http
  * @param {{ getCustomerToken: () => Promise<string|null> }} deps
@@ -28,5 +30,7 @@ export function createHttpOrderRepository(http, { getCustomerToken = async () =>
     getPaymentConfig: () => http.get('/payments/config/', { cache: 'no-store' }),
     verifyPayment: (params) => http.post('/payments/verify/', params),
     validateDiscount: (code) => http.post('/payments/validate-discount/', { code }),
+    savePendingCheckout: (payload) => http.post('/orders/pending-checkout/', payload),
+    recoverCheckout: (token) => http.get(`/orders/pending-checkout/${encodeURIComponent(token)}/`, { cache: 'no-store' }),
   };
 }
