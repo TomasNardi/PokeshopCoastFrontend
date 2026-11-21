@@ -3,13 +3,14 @@ import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { getServices } from '@/services/container';
-import { EMPTY_CHECKOUT_FORM } from '@/services/orders/orderService';
+import { EMPTY_CHECKOUT_FORM, validateCheckout } from '@/services/orders/orderService';
 import { getShippingMethod, quoteShipping } from '@/services/shipping/shippingMethods';
 import { enabledPaymentMethods, getPaymentMethod } from '@/services/payments/paymentMethods';
 import { cardSurchargePercent } from '@/domain/pricing';
 import { computeTotals, subtotalOf } from '@/domain/cart';
 import { useCartStore } from '@/store/cartStore';
 import { useSession } from '@/components/auth/SessionProvider';
+import { forgetGuestEmail, rememberGuestEmail } from '@/domain/guestSignup';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -85,12 +86,14 @@ export function useCheckout() {
   const clearCart = useCartStore((s) => s.clear);
   const checkoutToken = useRef(null);
   const [recovering, setRecovering] = useState(false);
-  const { profile, user } = useSession();
+  const { profile, user, status: sessionStatus } = useSession();
 
   const [state, dispatch] = useReducer(reducer, { form: { ...EMPTY_CHECKOUT_FORM }, errors: {} });
   const [config, setConfig] = useState(null);
   const [receiptFile, setReceiptFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  // Transferencia: paso final con datos bancarios + comprobante. La orden se crea recién ahí.
+  const [transferOpen, setTransferOpen] = useState(false);
 
   // Config de pagos/envíos + precios y stock frescos del carrito.
   useEffect(() => {
@@ -196,6 +199,17 @@ export function useCheckout() {
 
   const submit = async (event) => {
     event?.preventDefault();
+    if (state.form.payment_method === 'transfer' && !transferOpen) {
+      // Primero se validan los datos (sin comprobante) y se abre el paso de transferencia.
+      const errors = validateCheckout(state.form, { receipt: true });
+      dispatch({ type: 'errors', errors });
+      if (Object.keys(errors).length) {
+        toast.error('Revisá los datos marcados.');
+        return;
+      }
+      setTransferOpen(true);
+      return;
+    }
     setSubmitting(true);
     try {
       const { next } = await services.orders.placeOrder({
@@ -207,11 +221,17 @@ export function useCheckout() {
         checkoutToken: checkoutToken.current,
       });
       writeToken(null);
+      // Invitado: en la confirmación le ofrecemos crear la cuenta con este email.
+      if (user) forgetGuestEmail(); else rememberGuestEmail(state.form.customer_email);
       // El carrito se vacía en la confirmación: si MP falla, el comprador vuelve con su carrito.
       if (next.type === 'redirect') window.location.assign(next.url);
       else router.push(next.href);
     } catch (error) {
-      if (error.fieldErrors) dispatch({ type: 'errors', errors: error.fieldErrors });
+      if (error.fieldErrors) {
+        dispatch({ type: 'errors', errors: error.fieldErrors });
+        // Si el problema está en los datos (no en el comprobante), volvemos al formulario.
+        if (Object.keys(error.fieldErrors).some((k) => k !== 'receipt')) setTransferOpen(false);
+      }
       toast.error(error.message || 'No pudimos crear el pedido.');
       setSubmitting(false);
     }
@@ -238,6 +258,9 @@ export function useCheckout() {
     submitting,
     receiptFile,
     setReceiptFile,
+    transferOpen,
+    guest: sessionStatus === 'anonymous',
+    closeTransfer: () => setTransferOpen(false),
     setField: (name, value) => dispatch({ type: 'field', name, value }),
     setShipping: (value) => dispatch({ type: 'shipping', value }),
     redeem,

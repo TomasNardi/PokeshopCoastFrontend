@@ -8,6 +8,7 @@ import Providers from '@/components/layout/Providers';
 import SiteHeader from '@/components/header/SiteHeader';
 import Footer from '@/components/layout/Footer';
 import FloatingContact from '@/components/layout/FloatingContact';
+import CookieBanner from '@/components/layout/CookieBanner';
 import SocialRail from '@/components/layout/SocialRail';
 import CartDrawer from '@/components/cart/CartDrawer';
 import { PRESENTATION_MODE } from '@/config/presentation';
@@ -107,6 +108,7 @@ export default async function RootLayout({ children }) {
           {PRESENTATION_MODE && <PresentationGuard />}
           <SocialRail />
           <FloatingContact />
+          <CookieBanner />
         </Providers>
       </body>
     </html>

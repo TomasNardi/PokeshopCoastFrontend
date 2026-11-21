@@ -1,7 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { CheckCircle2, Clock, PackageSearch, XCircle } from 'lucide-react';
+import { useSession } from '@/components/auth/SessionProvider';
+import { SIGNUP_HREF, readGuestEmail } from '@/domain/guestSignup';
 import { getServices } from '@/services/container';
 import { useCartStore } from '@/store/cartStore';
 import Button from '@/components/ui/Button';
@@ -43,6 +45,10 @@ export default function CheckoutResult({ variant }) {
   const cfg = VARIANTS[variant];
   const isTransfer = params.get('transfer') === '1';
   const Icon = cfg.icon;
+  const { status } = useSession();
+  const [guestEmail, setGuestEmail] = useState('');
+  useEffect(() => setGuestEmail(readGuestEmail()), []);
+  const offerAccount = variant !== 'error' && status === 'anonymous' && guestEmail;
 
   useEffect(() => {
     if (cfg.clearsCart) clear();
@@ -65,8 +71,8 @@ export default function CheckoutResult({ variant }) {
 
   return (
     <section className="container-site flex flex-col items-center py-24 text-center">
-      <Icon size={56} strokeWidth={1.5} className={cfg.tone} />
-      <h1 className="mt-6 font-display text-4xl font-extrabold tracking-[-0.03em] sm:text-5xl">{cfg.title}</h1>
+      <span className="result-pop"><Icon size={56} strokeWidth={1.5} className={cfg.tone} /></span>
+      <h1 className="result-rise mt-6 font-display text-4xl font-extrabold tracking-[-0.03em] sm:text-5xl">{cfg.title}</h1>
       {verifying && (
         <p className="mt-4 text-coast-gray" role="status">
           <span className="sr-only">Verificando el pago…</span>
@@ -85,6 +91,16 @@ export default function CheckoutResult({ variant }) {
         {variant === 'pending' && 'Mercado Pago está procesando el pago. Te avisamos por email apenas se acredite.'}
         {variant === 'error' && 'No se realizó ningún cobro. Tu carrito sigue guardado para que vuelvas a intentar.'}
       </p>
+      {offerAccount && (
+        <div className="result-rise mt-8 w-full max-w-md border border-coast-line bg-uns-stage p-5 text-left [animation-delay:.25s]">
+          <p className="flex items-center gap-2 text-[14px] font-bold"><PackageSearch size={18} /> Seguí tu pedido desde tu cuenta</p>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-uns-muted">
+            Creá tu cuenta con <strong className="break-all text-coast-ink">{guestEmail}</strong> y este pedido aparece solo en
+            Mi cuenta, con su estado y el seguimiento del envío. Es opcional.
+          </p>
+          <Button href={SIGNUP_HREF} size="sm" className="mt-4">Crear mi cuenta</Button>
+        </div>
+      )}
       <div className="mt-10 flex flex-wrap justify-center gap-3">
         {variant === 'error' ? <Button href="/checkout" size="lg">Reintentar pago</Button> : <Button href="/tienda" size="lg">Seguir comprando</Button>}
         <Button href={whatsappLink(`¡Hola, PokeShop Coast! 👋 Tengo una consulta por mi pedido ${order?.order_code || ''}`.trim())} variant="outline" size="lg" target="_blank" rel="noopener noreferrer">

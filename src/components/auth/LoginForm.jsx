@@ -1,4 +1,5 @@
 'use client';
+import { readGuestEmail } from '@/domain/guestSignup';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -21,8 +22,9 @@ export default function LoginForm() {
   const { isAuthenticated, status } = useSession();
   const returnTo = auth.safePath(params.get('next') || AUTH_ROUTES.account);
 
-  const [mode, setMode] = useState('login');
-  const [email, setEmail] = useState('');
+  const [mode, setMode] = useState(params.get('modo') === 'crear' ? 'signup' : 'login');
+  // Viene de una compra como invitado: el email ya cargado (se guardó en la sesión, no en la URL).
+  const [email, setEmail] = useState(() => (params.get('modo') === 'crear' ? readGuestEmail() : ''));
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [sentTo, setSentTo] = useState('');

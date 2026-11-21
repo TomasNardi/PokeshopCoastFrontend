@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import Field from '@/components/ui/Field';
 import { formatPrice } from '@/domain/money';
@@ -52,10 +53,17 @@ function PriceBadge({ tone, label, children }) {
   );
 }
 
-export function CustomerFields({ form, errors, setField }) {
+export function CustomerFields({ form, errors, setField, guest = false }) {
   const bind = (name) => ({ value: form[name], onChange: (e) => setField(name, e.target.value), error: errors[name] });
   return (
     <div className="grid gap-4 sm:grid-cols-2">
+      {guest && (
+        <p className="sm:col-span-2 -mt-1 text-[13px] text-uns-muted">
+          ¿Tenés cuenta?{' '}
+          <Link href="/cuenta/ingresar?next=/checkout" className="font-bold text-coast-ink underline underline-offset-2">Ingresá</Link>
+          {' '}y seguí tu pedido desde Mi cuenta. También podés comprar como invitado.
+        </p>
+      )}
       <Field label="Nombre y apellido" autoComplete="name" className="sm:col-span-2" {...bind('customer_name')} />
       <Field label="Email" type="email" autoComplete="email" {...bind('customer_email')} />
       <Field label="Teléfono / WhatsApp" type="tel" autoComplete="tel" {...bind('customer_phone')} />
@@ -106,7 +114,7 @@ export function ShippingSelector({ form, errors, config, setField, setShipping }
   );
 }
 
-export function PaymentSelector({ form, errors, config, methods, totals, setField, receiptFile, setReceiptFile }) {
+export function PaymentSelector({ form, errors, methods, totals, setField }) {
   // El precio publicado es el de transferencia; MP suma el recargo del
   // backoffice solo sobre los productos. Si el recargo está apagado o hay un
   // solo medio activo, no hay diferencia que mostrar.
@@ -145,25 +153,9 @@ export function PaymentSelector({ form, errors, config, methods, totals, setFiel
       {errors.payment_method && <p className="text-[12px] text-coast-red-dark" role="alert">{errors.payment_method}</p>}
 
       {form.payment_method === 'transfer' && (
-        <div className="fade-up space-y-3 bg-uns-stage p-4 text-[13px] sm:p-5">
-          {config?.transfer?.alias && (
-            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
-              <dt className="text-uns-muted">Titular</dt><dd className="font-bold">{config.transfer.holder}</dd>
-              <dt className="text-uns-muted">Alias</dt><dd className="break-all font-bold">{config.transfer.alias}</dd>
-              <dt className="text-uns-muted">CBU</dt><dd className="break-all font-bold">{config.transfer.cbu}</dd>
-            </dl>
-          )}
-          <label className="label !mb-0 pt-2" htmlFor="receipt">Comprobante (imagen o PDF)</label>
-          <input
-            id="receipt"
-            type="file"
-            accept="image/*,application/pdf"
-            onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
-            className="block w-full text-[13px] file:mr-3 file:cursor-pointer file:border file:border-black file:bg-white file:px-4 file:py-2.5 file:text-[11px] file:font-bold file:uppercase file:tracking-[0.1em]"
-          />
-          {receiptFile && <p className="truncate text-uns-muted">Adjunto: {receiptFile.name}</p>}
-          {errors.receipt && <p className="text-coast-red-dark" role="alert">{errors.receipt}</p>}
-        </div>
+        <p className="fade-up bg-uns-stage p-4 text-[13px] leading-relaxed text-uns-muted sm:p-5">
+          Al confirmar te mostramos los datos para transferir y ahí subís el comprobante. Recién entonces se genera tu pedido.
+        </p>
       )}
     </div>
   );

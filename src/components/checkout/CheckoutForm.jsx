@@ -7,6 +7,7 @@ import { formatPrice } from '@/domain/money';
 import { CustomerFields, MobileSummary, OrderSummary, PaymentSelector, ShippingSelector, Step } from './CheckoutSections';
 import Button from '@/components/ui/Button';
 import { CheckoutSkeleton } from '@/components/cart/CartSkeletons';
+import TransferStep from './TransferStep';
 
 export default function CheckoutForm() {
   const hydrated = useHydrated();
@@ -31,7 +32,7 @@ export default function CheckoutForm() {
       <div className="min-w-0 space-y-4 sm:space-y-6">
         <MobileSummary items={items} totals={totals} discount={discount} paymentMethod={form.payment_method} />
         <Step number={1} title="Tus datos" delay={0.05}>
-          <CustomerFields form={form} errors={errors} setField={checkout.setField} />
+          <CustomerFields form={form} errors={errors} setField={checkout.setField} guest={checkout.guest} />
         </Step>
         <Step number={2} title="Envío" delay={0.1}>
           <ShippingSelector form={form} errors={errors} config={config} setField={checkout.setField} setShipping={checkout.setShipping} />
@@ -44,8 +45,6 @@ export default function CheckoutForm() {
             methods={paymentMethods}
             totals={totals}
             setField={checkout.setField}
-            receiptFile={checkout.receiptFile}
-            setReceiptFile={checkout.setReceiptFile}
           />
         </Step>
       </div>
@@ -70,6 +69,19 @@ export default function CheckoutForm() {
           {submitting ? 'Procesando…' : form.payment_method === 'mercadopago' ? 'Pagar' : 'Confirmar'}
         </button>
       </div>
+
+      {form.payment_method === 'transfer' && (
+        <TransferStep
+          open={checkout.transferOpen}
+          total={totals.total}
+          transfer={config?.transfer}
+          receiptFile={checkout.receiptFile}
+          setReceiptFile={checkout.setReceiptFile}
+          submitting={submitting}
+          onConfirm={() => checkout.submit()}
+          onBack={checkout.closeTransfer}
+        />
+      )}
     </form>
   );
 }
