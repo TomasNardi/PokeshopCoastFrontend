@@ -4,18 +4,21 @@ import { notFound } from 'next/navigation';
 import { ChevronLeft, Truck, ShieldCheck, CreditCard } from 'lucide-react';
 import { getServices } from '@/services/container';
 import { productView } from '@/domain/product';
-import { formatPrice } from '@/domain/money';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductPurchase from '@/components/product/ProductPurchase';
 import ProductRail from '@/components/home/ProductRail';
 import { ProductRailSkeleton } from '@/components/product/ProductSkeletons';
 import DamageNote from '@/components/product/DamageNote';
+import PaymentPrices from '@/components/product/PaymentPrices';
 import { CertBadge, ConditionBadge, DiscountBadge, LanguageFlag, StockStatus } from '@/components/product/ProductBadges';
 
 export const dynamic = 'force-dynamic';
 
 // generateMetadata y la página piden el mismo producto: una sola llamada a la API.
 const loadProduct = cache((slug) => getServices().catalog.getProduct(slug));
+// Recargo de Mercado Pago del backoffice. Se pide en paralelo con el producto
+// (no suma espera) y si falla la página sale igual, con el precio solo.
+const loadPaymentConfig = () => getServices().orders.getPaymentConfig().catch(() => null);
 
 const RELATED_TITLE = 'También te puede gustar';
 
@@ -48,7 +51,7 @@ function DetailRow({ label, value }) {
 
 export default async function ProductPage({ params }) {
   const { slug } = await params;
-  const product = await loadProduct(slug);
+  const [product, paymentConfig] = await Promise.all([loadProduct(slug), loadPaymentConfig()]);
   if (!product) notFound();
 
   const view = productView(product);
@@ -76,10 +79,13 @@ export default async function ProductPage({ params }) {
           <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em] sm:text-5xl">{view.title}</h1>
           {view.traits.length > 0 && <p className="mt-3 text-[13px] font-semibold text-coast-gray">{view.traits.join(' · ')}</p>}
 
-          <div className="mt-6 flex items-baseline gap-3">
-            <span className={`text-3xl font-bold ${view.hasDiscount ? 'text-coast-red' : ''}`}>{formatPrice(view.price)}</span>
-            {view.compareAtPrice && <span className="text-lg text-coast-mist line-through">{formatPrice(view.compareAtPrice)}</span>}
-          </div>
+          <PaymentPrices
+            price={view.price}
+            compareAtPrice={view.compareAtPrice}
+            hasDiscount={view.hasDiscount}
+            inStock={view.stockStatus !== 'out'}
+            config={paymentConfig}
+          />
 
           <div className="mt-6 flex flex-col items-start gap-4">
             {view.certLabel && <CertBadge label={view.certLabel} large />}

@@ -5,7 +5,8 @@ import toast from 'react-hot-toast';
 import { getServices } from '@/services/container';
 import { EMPTY_CHECKOUT_FORM } from '@/services/orders/orderService';
 import { getShippingMethod, quoteShipping } from '@/services/shipping/shippingMethods';
-import { getPaymentMethod } from '@/services/payments/paymentMethods';
+import { enabledPaymentMethods, getPaymentMethod } from '@/services/payments/paymentMethods';
+import { cardSurchargePercent } from '@/domain/pricing';
 import { computeTotals, subtotalOf } from '@/domain/cart';
 import { useCartStore } from '@/store/cartStore';
 import { useSession } from '@/components/auth/SessionProvider';
@@ -78,6 +79,15 @@ export function useCheckout() {
     dispatch({ type: 'prefill', values: { customer_name: name, customer_email: user.email, customer_phone: profile?.phone } });
   }, [user, profile]);
 
+  // Si el dueño apagó un medio en el backoffice, se elige solo el que queda.
+  const paymentMethods = useMemo(() => enabledPaymentMethods(config), [config]);
+  useEffect(() => {
+    if (!config || !paymentMethods.length) return;
+    if (!paymentMethods.some((m) => m.id === state.form.payment_method)) {
+      dispatch({ type: 'field', name: 'payment_method', value: paymentMethods[0].id });
+    }
+  }, [config, paymentMethods, state.form.payment_method]);
+
   const totals = useMemo(() => {
     const payment = getPaymentMethod(state.form.payment_method);
     return computeTotals({
@@ -86,8 +96,10 @@ export function useCheckout() {
       discountFixed: discount.fixed,
       shipping: quoteShipping(state.form.shipping_method, state.form, config),
       surchargePercent: payment?.surchargePercent(config) || 0,
+      // Solo para comparar: con los dos medios activos se muestra la diferencia.
+      cardSurchargePercent: paymentMethods.length > 1 ? cardSurchargePercent(config) : 0,
     });
-  }, [items, discount.percent, discount.fixed, state.form, config]);
+  }, [items, discount.percent, discount.fixed, state.form, config, paymentMethods]);
 
   const submit = async (event) => {
     event?.preventDefault();
@@ -125,6 +137,7 @@ export function useCheckout() {
     form: state.form,
     errors: state.errors,
     config,
+    paymentMethods,
     totals,
     discount,
     submitting,

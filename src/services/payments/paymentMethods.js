@@ -11,12 +11,14 @@
  *   /checkout/confirmacion · /checkout/pendiente · /checkout/error
  */
 
+import { cardSurchargePercent, isPaymentEnabled } from '@/domain/pricing';
+
 export const MERCADOPAGO = {
   id: 'mercadopago',
   label: 'Mercado Pago',
-  description: 'Tarjeta de crédito o débito, cuotas o dinero en cuenta.',
+  description: 'Crédito, débito y saldo en cuenta. Pago online inmediato.',
   requiresReceipt: false,
-  surchargePercent: (config) => (config?.card_surcharge_enabled ? Number(config.card_surcharge_percent) || 0 : 0),
+  surchargePercent: (config) => cardSurchargePercent(config),
   nextStep(response) {
     const url = response?.checkout?.init_point || response?.checkout?.sandbox_init_point;
     if (!url) throw new Error('No recibimos el link de pago de Mercado Pago. Volvé a intentar.');
@@ -27,7 +29,7 @@ export const MERCADOPAGO = {
 export const TRANSFER = {
   id: 'transfer',
   label: 'Transferencia bancaria',
-  description: 'Sin recargo. Adjuntás el comprobante y confirmamos a mano.',
+  description: 'Desde tu home banking o billetera virtual. Adjuntás el comprobante y lo confirmamos.',
   requiresReceipt: true,
   surchargePercent: () => 0,
   nextStep(response) {
@@ -40,6 +42,8 @@ export const TRANSFER = {
 export const PAYMENT_METHODS = Object.freeze({ [MERCADOPAGO.id]: MERCADOPAGO, [TRANSFER.id]: TRANSFER });
 export const PAYMENT_METHOD_LIST = Object.values(PAYMENT_METHODS);
 export const getPaymentMethod = (id) => PAYMENT_METHODS[id] || null;
+/** Los medios que el dueño dejó activos en el backoffice. */
+export const enabledPaymentMethods = (config) => PAYMENT_METHOD_LIST.filter((m) => isPaymentEnabled(m.id, config));
 
 /** Estados que MP manda en la back_url (?status=...) → a qué página va el comprador. */
 export function routeForMercadoPagoStatus(status) {

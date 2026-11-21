@@ -5,6 +5,7 @@
  */
 import { toNumber } from './money';
 import { getMaxQuantity } from './product';
+import { surchargeOn } from './pricing';
 
 export function clampQuantity(quantity, maxQuantity) {
   const qty = Math.max(0, Math.floor(quantity));
@@ -73,23 +74,37 @@ export const subtotalOf = (items) =>
   items.reduce((sum, item) => sum + toNumber(item.final_price ?? item.price_ars) * item.quantity, 0);
 
 /**
+ * Totales del checkout. Misma regla que Crack y que el backend:
+ * el recargo de Mercado Pago va solo sobre los productos (después del
+ * cupón), nunca sobre el envío. Ver domain/pricing.js.
+ *
  * @param {object} p
  * @param {number} p.subtotal
  * @param {number} [p.discountPercent]
  * @param {number} [p.discountFixed]
  * @param {number|null} [p.shipping]  null = "a cotizar"
- * @param {number} [p.surchargePercent] recargo del medio de pago (ej. tarjeta en MP)
+ * @param {number} [p.surchargePercent]      recargo del medio ELEGIDO (0 en transferencia)
+ * @param {number} [p.cardSurchargePercent]  recargo de MP según el backoffice, para comparar
+ *                                           los dos medios ("Ahorrás $X", total del otro medio)
  */
-export function computeTotals({ subtotal, discountPercent = 0, discountFixed = 0, shipping = 0, surchargePercent = 0 }) {
+export function computeTotals({ subtotal, discountPercent = 0, discountFixed = 0, shipping = 0, surchargePercent = 0, cardSurchargePercent = surchargePercent }) {
   const discount = Math.min(subtotal, subtotal * (discountPercent / 100) + discountFixed);
   const afterDiscount = subtotal - discount;
   const shippingCost = shipping == null ? 0 : shipping;
-  const surcharge = Math.round((afterDiscount + shippingCost) * (surchargePercent / 100));
+  const surcharge = surchargeOn(afterDiscount, surchargePercent);
+  const cardSurcharge = surchargeOn(afterDiscount, cardSurchargePercent);
+  const transferTotal = Math.max(0, afterDiscount + shippingCost);
   return {
     subtotal,
     discount,
     shipping,
     surcharge,
+    surchargePercent,
     total: Math.max(0, afterDiscount + shippingCost + surcharge),
+    // Para comparar los dos medios, elija el que elija.
+    cardSurcharge,
+    cardSurchargePercent,
+    transferTotal,
+    cardTotal: transferTotal + cardSurcharge,
   };
 }

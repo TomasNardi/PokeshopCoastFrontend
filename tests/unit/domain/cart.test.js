@@ -51,11 +51,31 @@ describe('totales', () => {
     expect(itemCount(items)).toBe(2);
   });
 
-  it('aplica descuento, envío y recargo de tarjeta en ese orden', () => {
+  it('el recargo de tarjeta va solo sobre los productos con el cupón, nunca sobre el envío (como Crack)', () => {
     const t = computeTotals({ subtotal: 10000, discountPercent: 10, shipping: 1000, surchargePercent: 10 });
     expect(t.discount).toBe(1000);
-    expect(t.surcharge).toBe(1000); // 10% de (9000 + 1000)
+    expect(t.surcharge).toBe(900); // 10% de 9000; el envío no suma recargo
+    expect(t.total).toBe(10900); // 9000 + 900 + 1000
+  });
+
+  it('con transferencia no hay recargo pero se calcula cuánto te ahorrás y el total con MP', () => {
+    const t = computeTotals({ subtotal: 10000, shipping: 1000, surchargePercent: 0, cardSurchargePercent: 10 });
+    expect(t.surcharge).toBe(0);
     expect(t.total).toBe(11000);
+    expect(t.cardSurcharge).toBe(1000);
+    expect(t.transferTotal).toBe(11000);
+    expect(t.cardTotal).toBe(12000);
+  });
+
+  it('con MP el total del otro medio es el de transferencia', () => {
+    const t = computeTotals({ subtotal: 20000, shipping: 0, surchargePercent: 15 });
+    expect(t.total).toBe(23000);
+    expect(t.transferTotal).toBe(20000);
+    expect(t.cardTotal).toBe(23000);
+  });
+
+  it('redondea el recargo a pesos enteros, igual que el backend', () => {
+    expect(computeTotals({ subtotal: 999, surchargePercent: 12.5 }).surcharge).toBe(125);
   });
 
   it('envío "a calcular" (null) no suma', () => {

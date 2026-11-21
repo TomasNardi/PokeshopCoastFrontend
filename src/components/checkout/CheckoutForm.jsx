@@ -11,7 +11,7 @@ import { CheckoutSkeleton } from '@/components/cart/CartSkeletons';
 export default function CheckoutForm() {
   const hydrated = useHydrated();
   const checkout = useCheckout();
-  const { items, form, errors, config, totals, discount, submitting } = checkout;
+  const { items, form, errors, config, paymentMethods, totals, discount, submitting } = checkout;
 
   if (!hydrated) return <CheckoutSkeleton />;
   if (items.length === 0) {
@@ -29,7 +29,7 @@ export default function CheckoutForm() {
   return (
     <form onSubmit={checkout.submit} noValidate className="grid gap-4 pb-24 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-8 lg:pb-0">
       <div className="min-w-0 space-y-4 sm:space-y-6">
-        <MobileSummary items={items} totals={totals} discount={discount} />
+        <MobileSummary items={items} totals={totals} discount={discount} paymentMethod={form.payment_method} />
         <Step number={1} title="Tus datos" delay={0.05}>
           <CustomerFields form={form} errors={errors} setField={checkout.setField} />
         </Step>
@@ -41,6 +41,8 @@ export default function CheckoutForm() {
             form={form}
             errors={errors}
             config={config}
+            methods={paymentMethods}
+            totals={totals}
             setField={checkout.setField}
             receiptFile={checkout.receiptFile}
             setReceiptFile={checkout.setReceiptFile}
@@ -48,7 +50,7 @@ export default function CheckoutForm() {
         </Step>
       </div>
 
-      <OrderSummary items={items} totals={totals} discount={discount} onRedeem={checkout.redeem}>
+      <OrderSummary items={items} totals={totals} discount={discount} paymentMethod={form.payment_method} onRedeem={checkout.redeem}>
         {blocked && <p className="mt-4 text-[12px] text-coast-red-dark">Hay productos sin stock en tu carrito. Quitalos para continuar.</p>}
         <button type="submit" disabled={submitting || blocked} className={buttonClass({ size: 'lg', block: true, className: 'mt-6 !hidden lg:!inline-flex' })}>
           <Lock size={14} />

@@ -4,7 +4,6 @@ import { ChevronDown } from 'lucide-react';
 import Field from '@/components/ui/Field';
 import { formatPrice } from '@/domain/money';
 import { PROVINCES, SHIPPING_METHOD_LIST, getShippingMethod, quoteShipping } from '@/services/shipping/shippingMethods';
-import { PAYMENT_METHOD_LIST } from '@/services/payments/paymentMethods';
 import Thumb from '@/components/ui/Thumb';
 
 export function Step({ number, title, children, delay = 0 }) {
@@ -20,7 +19,7 @@ export function Step({ number, title, children, delay = 0 }) {
   );
 }
 
-function OptionCard({ name, value, checked, onChange, title, description, aside }) {
+function OptionCard({ name, value, checked, onChange, title, description, aside, badge }) {
   return (
     <label
       className={`flex min-h-[56px] cursor-pointer items-start gap-3 border p-4 transition-colors duration-300 sm:gap-4 ${
@@ -34,8 +33,22 @@ function OptionCard({ name, value, checked, onChange, title, description, aside 
           {aside && <span className="whitespace-nowrap text-[13px] font-bold">{aside}</span>}
         </span>
         <span className="mt-1 block text-[12px] leading-snug text-uns-muted">{description}</span>
+        {badge}
       </span>
     </label>
+  );
+}
+
+/**
+ * Diferencia entre medios de pago (la lógica de Crack con los badges del
+ * sitio: caja recta, itálica, mayúsculas; blanco y negro como unsobremas).
+ */
+function PriceBadge({ tone, label, children }) {
+  return (
+    <span className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+      <span className={`badge-box ${tone === 'saving' ? 'badge-box--dark' : 'border border-black bg-white text-black'}`}>{label}</span>
+      <span className={`text-[12px] ${tone === 'saving' ? 'font-bold text-black' : 'text-uns-muted'}`}>{children}</span>
+    </span>
   );
 }
 
@@ -93,24 +106,43 @@ export function ShippingSelector({ form, errors, config, setField, setShipping }
   );
 }
 
-export function PaymentSelector({ form, errors, config, setField, receiptFile, setReceiptFile }) {
+export function PaymentSelector({ form, errors, config, methods, totals, setField, receiptFile, setReceiptFile }) {
+  // El precio publicado es el de transferencia; MP suma el recargo del
+  // backoffice solo sobre los productos. Si el recargo está apagado o hay un
+  // solo medio activo, no hay diferencia que mostrar.
+  const percent = totals?.cardSurchargePercent || 0;
+  const difference = totals?.cardSurcharge || 0;
+  const badgeFor = (id) => {
+    if (!percent || !difference) return null;
+    if (id === 'mercadopago') {
+      return (
+        <PriceBadge tone="surcharge" label={`+${percent}% recargo`}>
+          Suma {formatPrice(difference)} a los productos
+        </PriceBadge>
+      );
+    }
+    return (
+      <PriceBadge tone="saving" label="Sin recargo">
+        Ahorrás {formatPrice(difference)}
+      </PriceBadge>
+    );
+  };
+
   return (
     <div className="space-y-3">
-      {PAYMENT_METHOD_LIST.map((m) => {
-        const surcharge = m.surchargePercent(config);
-        return (
-          <OptionCard
-            key={m.id}
-            name="payment_method"
-            value={m.id}
-            checked={form.payment_method === m.id}
-            onChange={(v) => setField('payment_method', v)}
-            title={m.label}
-            description={m.description}
-            aside={surcharge ? `+${surcharge}%` : 'Sin recargo'}
-          />
-        );
-      })}
+      {methods.map((m) => (
+        <OptionCard
+          key={m.id}
+          name="payment_method"
+          value={m.id}
+          checked={form.payment_method === m.id}
+          onChange={(v) => setField('payment_method', v)}
+          title={m.label}
+          description={m.description}
+          badge={badgeFor(m.id)}
+        />
+      ))}
+      {errors.payment_method && <p className="text-[12px] text-coast-red-dark" role="alert">{errors.payment_method}</p>}
 
       {form.payment_method === 'transfer' && (
         <div className="fade-up space-y-3 bg-uns-stage p-4 text-[13px] sm:p-5">
@@ -154,20 +186,32 @@ function SummaryLines({ items }) {
   );
 }
 
-function Totals({ totals, discount }) {
+function Totals({ totals, discount, paymentMethod }) {
   const row = (label, value, strong = false) => (
     <div className={`flex justify-between gap-4 ${strong ? 'text-lg font-bold' : 'text-[13px] text-uns-muted'}`}>
       <span>{label}</span>
       <span className={strong ? '' : 'text-black'}>{value}</span>
     </div>
   );
+  const compare = totals.cardSurcharge > 0;
   return (
     <div className="space-y-2 border-t border-uns-hairline pt-4">
       {row('Subtotal', formatPrice(totals.subtotal))}
       {totals.discount > 0 && row(`Descuento ${discount.code || ''}`, `-${formatPrice(totals.discount)}`)}
+      {totals.surcharge > 0 && row(`Recargo Mercado Pago (${totals.surchargePercent}%)`, `+${formatPrice(totals.surcharge)}`)}
       {row('Envío', totals.shipping == null ? 'A calcular' : totals.shipping === 0 ? 'Gratis' : formatPrice(totals.shipping))}
-      {totals.surcharge > 0 && row('Recargo tarjeta', formatPrice(totals.surcharge))}
-      <div className="pt-2">{row('Total', formatPrice(totals.total), true)}</div>
+      <div className="pt-2">
+        {row('Total', formatPrice(totals.total), true)}
+        {/* El total con el otro medio, para que se vea la diferencia (como Crack). */}
+        {compare && (
+          <div className="mt-2 flex justify-between gap-4 border-t border-dashed border-uns-hairline pt-2 text-[12px] text-uns-muted">
+            <span>{paymentMethod === 'mercadopago' ? 'Pagando por transferencia' : 'Pagando con Mercado Pago'}</span>
+            <span className="whitespace-nowrap font-bold text-black">
+              {formatPrice(paymentMethod === 'mercadopago' ? totals.transferTotal : totals.cardTotal)}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -176,7 +220,7 @@ function Totals({ totals, discount }) {
  * Resumen plegable arriba del formulario, solo en mobile: el total se ve desde
  * el primer momento sin bajar hasta el final.
  */
-export function MobileSummary({ items, totals, discount }) {
+export function MobileSummary({ items, totals, discount, paymentMethod }) {
   const [open, setOpen] = useState(false);
   const count = items.reduce((n, i) => n + i.quantity, 0);
   return (
@@ -197,7 +241,7 @@ export function MobileSummary({ items, totals, discount }) {
         <div className="overflow-hidden">
           <div className="space-y-4 px-5 pb-5">
             <SummaryLines items={items} />
-            <Totals totals={totals} discount={discount} />
+            <Totals totals={totals} discount={discount} paymentMethod={paymentMethod} />
           </div>
         </div>
       </div>
@@ -205,7 +249,7 @@ export function MobileSummary({ items, totals, discount }) {
   );
 }
 
-export function OrderSummary({ items, totals, discount, onRedeem, children }) {
+export function OrderSummary({ items, totals, discount, paymentMethod, onRedeem, children }) {
   const [code, setCode] = useState('');
   const redeem = () => code.trim() && onRedeem(code.trim());
 
@@ -237,7 +281,7 @@ export function OrderSummary({ items, totals, discount, onRedeem, children }) {
         </div>
       )}
 
-      <Totals totals={totals} discount={discount} />
+      <Totals totals={totals} discount={discount} paymentMethod={paymentMethod} />
       {children}
     </aside>
   );
