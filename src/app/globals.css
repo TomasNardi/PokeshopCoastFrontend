@@ -135,6 +135,23 @@ body {
   padding-inline: var(--outer);
 }
 
+/* Celulares angostos: logueado hay 3 íconos a la derecha (campanita, cuenta,
+   carrito) y "1fr auto 1fr" pide ~365px para centrar el logo; el carrito
+   quedaba cortado. Debajo de 400px los costados toman su ancho real y el logo
+   se centra en el espacio que queda; debajo de 360px los íconos se achican. */
+@media (max-width: 399px) {
+  .site-header__row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    column-gap: 4px;
+  }
+  .site-header__row > .wordmark { justify-self: center; }
+  .site-header__row .header-icon { width: 40px; }
+}
+@media (max-width: 359px) {
+  .site-header__row { padding-inline: 10px; }
+  .site-header__row .header-icon { width: 34px; }
+}
+
 .nav-menu {
   display: flex;
   height: 100%;
@@ -1793,6 +1810,53 @@ body {
 .account-nav-link.is-active { background: theme('colors.coast.cream'); color: theme('colors.coast.ink'); font-weight: 700; }
 .account-nav-link.is-active::before { transform: scaleY(1); }
 
+/* Barra de secciones del panel en celular/tablet: 5 ítems fijos (ícono + rótulo corto) */
+.account-bar {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid theme('colors.coast.line');
+  border-radius: 16px;
+  background: #fff;
+}
+.account-bar__item {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 2px 6px;
+  border-radius: 12px;
+  color: theme('colors.coast.gray');
+  transition: background-color 0.25s var(--ease-out), color 0.25s var(--ease-out);
+}
+.account-bar__item.is-active { background: theme('colors.coast.ink'); color: #fff; }
+.account-bar__label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.account-bar__count {
+  position: absolute;
+  top: -6px;
+  right: -9px;
+  min-width: 16px;
+  border-radius: 999px;
+  background: theme('colors.coast.red');
+  padding: 0 4px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  color: #fff;
+}
+
 /* Pestañas deslizables en celular */
 .account-tabs {
   display: flex;
@@ -1844,6 +1908,18 @@ body {
   transform: translateY(-6px) scale(0.98);
   transform-origin: top right;
   transition: opacity 0.22s var(--ease-out), transform 0.3s var(--ease-soft), visibility 0s linear 0.3s;
+}
+/* Celular: el panel se ancla al header (no a la campanita) y ocupa el ancho
+   de la pantalla; anclado a la campanita se salía por la izquierda. */
+@media (max-width: 767px) {
+  .bell-panel {
+    left: 8px;
+    right: 8px;
+    top: 100%;
+    width: auto;
+    transform-origin: top center;
+  }
+  .bell-panel ul { max-height: min(380px, calc(100svh - var(--header-height) - 140px)); }
 }
 .bell-panel.is-open {
   opacity: 1;

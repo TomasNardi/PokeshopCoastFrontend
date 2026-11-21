@@ -8,7 +8,7 @@ import { formatDate } from '@/domain/orders';
 import { useSession } from '@/components/auth/SessionProvider';
 import Field from '@/components/ui/Field';
 import { buttonClass } from '@/components/ui/Button';
-import { Card, SectionTitle, Skeleton } from './ui';
+import { Card, Collapsible, SectionTitle, Skeleton } from './ui';
 
 const PROVIDERS = { google: 'Google', email: 'email y contraseña', github: 'GitHub' };
 
@@ -53,8 +53,8 @@ export default function ProfileForm() {
   return (
     <div>
       <SectionTitle eyebrow="Mi cuenta" title="Perfil" />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <Card as="form" onSubmit={submit} className="p-5 md:p-7">
+      <div className="grid grid-cols-1 gap-4 md:gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <Card as="form" onSubmit={submit} className="p-4 md:p-7">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Nombre" autoComplete="given-name" value={form.first_name} onChange={set('first_name')} error={errors.first_name} />
             <Field label="Apellido" autoComplete="family-name" value={form.last_name} onChange={set('last_name')} error={errors.last_name} />
@@ -62,7 +62,7 @@ export default function ProfileForm() {
             <Field label="Teléfono" type="tel" autoComplete="tel" value={form.phone} onChange={set('phone')} error={errors.phone} />
           </div>
 
-          <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-xl border border-coast-line p-4 transition-colors hover:bg-uns-bg">
+          <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-xl border border-coast-line p-3 transition-colors hover:bg-uns-bg md:mt-6 md:p-4">
             <span className="toggle mt-0.5">
               <input type="checkbox" checked={form.marketing_opt_in} onChange={set('marketing_opt_in')} />
               <span aria-hidden="true" />
@@ -73,7 +73,7 @@ export default function ProfileForm() {
             </span>
           </label>
 
-          <div className="mt-7 flex items-center gap-4">
+          <div className="mt-5 flex items-center gap-4 md:mt-7">
             <button type="submit" disabled={saving || !dirty} className={buttonClass({ size: 'md' })}>
               {saving ? 'Guardando…' : 'Guardar cambios'}
             </button>
@@ -81,15 +81,16 @@ export default function ProfileForm() {
           </div>
         </Card>
 
-        <Card className="h-fit p-5 md:p-6">
-          <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-coast-cream"><ShieldCheck size={18} /></span>
-          <p className="font-heading text-[20px] font-bold">Tu cuenta</p>
-          <dl className="mt-3 space-y-2 text-[13px]">
+        <Collapsible title="Tu cuenta" defaultOpen={false}>
+        <Card className="h-fit p-4 md:p-6">
+          <span className="mb-4 hidden h-10 w-10 items-center justify-center rounded-full bg-coast-cream lg:flex"><ShieldCheck size={18} /></span>
+          <dl className="space-y-2 text-[13px]">
             <div className="flex justify-between gap-3"><dt className="text-uns-muted">Ingresás con</dt><dd className="font-semibold">{PROVIDERS[profile?.provider || user?.provider] || 'email'}</dd></div>
             {profile?.created_at && <div className="flex justify-between gap-3"><dt className="text-uns-muted">Cliente desde</dt><dd className="font-semibold">{formatDate(profile.created_at)}</dd></div>}
           </dl>
           <p className="mt-4 text-[12px] leading-relaxed text-coast-mist">El email lo maneja tu cuenta de acceso. Para cambiarlo escribinos.</p>
         </Card>
+        </Collapsible>
       </div>
     </div>
   );

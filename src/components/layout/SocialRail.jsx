@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { X } from 'lucide-react';
 import { CONTACT } from '@/config/site';
 import WhatsappIcon from './WhatsappIcon';
@@ -45,6 +46,8 @@ const rememberDismiss = () => {
  */
 export default function SocialRail() {
   const [state, setState] = useState('hidden'); // hidden | visible | closed
+  // En "Mi cuenta" el panel ocupa todo el ancho del celular: el riel taparía los datos.
+  const inAccount = usePathname()?.startsWith('/cuenta');
 
   useEffect(() => {
     if (wasDismissed()) return undefined;
@@ -63,7 +66,7 @@ export default function SocialRail() {
   const visible = state === 'visible';
 
   return (
-    <aside className={`social-rail ${visible ? 'is-visible' : ''}`} aria-label="Seguinos en redes" aria-hidden={!visible}>
+    <aside className={`social-rail ${visible ? 'is-visible' : ''} ${inAccount ? 'max-lg:hidden' : ''}`} aria-label="Seguinos en redes" aria-hidden={!visible}>
       <button type="button" onClick={close} className="social-rail__close social-rail__item" style={{ '--i': 0 }} aria-label="Cerrar redes" tabIndex={visible ? 0 : -1}>
         <X size={13} strokeWidth={2.4} />
       </button>

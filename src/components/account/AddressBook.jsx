@@ -47,7 +47,7 @@ function AddressForm({ initial, onCancel, onSaved }) {
   };
 
   return (
-    <Card as="form" onSubmit={submit} className="form-reveal p-5 md:p-6" noValidate>
+    <Card as="form" onSubmit={submit} className="form-reveal p-4 md:p-6" noValidate>
       <div className="mb-5 flex items-center justify-between">
         <p className="font-heading text-[22px] font-bold">{form.id ? 'Editar dirección' : 'Nueva dirección'}</p>
         <button type="button" onClick={onCancel} className="header-icon -mr-2" aria-label="Cerrar"><X size={18} /></button>
@@ -97,7 +97,7 @@ function AddressForm({ initial, onCancel, onSaved }) {
 function AddressCard({ address, onEdit, onDelete, onDefault, style }) {
   const { Icon, label } = KINDS[address.kind] || KINDS.home;
   return (
-    <Card style={style} className={`group relative flex flex-col p-5 transition-all duration-300 hover:shadow-card ${address.is_default ? 'border-coast-ink/40' : ''}`}>
+    <Card style={style} className={`group relative flex flex-col p-4 transition-all duration-300 hover:shadow-card md:p-5 ${address.is_default ? 'border-coast-ink/40' : ''}`}>
       <div className="mb-3 flex items-center justify-between">
         <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.1em] text-uns-muted">
           <Icon size={14} /> {label}
@@ -108,14 +108,14 @@ function AddressCard({ address, onEdit, onDelete, onDefault, style }) {
           </span>
         )}
       </div>
-      <p className="font-heading text-[20px] font-bold leading-tight">{address.label || address.branch_name || address.address}</p>
+      <p className="font-heading text-[17px] font-bold leading-tight md:text-[20px]">{address.label || address.branch_name || address.address}</p>
       <p className="mt-1 text-[13px] leading-relaxed text-uns-muted">
         {address.branch_name && address.label && <>{address.branch_name}<br /></>}
         {address.address}<br />
         {address.city}, {address.province} ({address.zip_code})
         {address.recipient_name && <><br />Recibe: {address.recipient_name}</>}
       </p>
-      <div className="mt-auto flex flex-wrap gap-x-4 gap-y-2 pt-5 text-[12px] font-bold uppercase tracking-[0.075em]">
+      <div className="mt-auto flex flex-wrap gap-x-4 gap-y-2 pt-3 text-[11px] font-bold uppercase tracking-[0.075em] md:pt-5 md:text-[12px]">
         <button type="button" onClick={onEdit} className="inline-flex items-center gap-1.5 hover:text-coast-red"><Pencil size={13} /> Editar</button>
         {!address.is_default && <button type="button" onClick={onDefault} className="inline-flex items-center gap-1.5 hover:text-coast-red"><Star size={13} /> Predeterminar</button>}
         <button type="button" onClick={onDelete} className="inline-flex items-center gap-1.5 text-uns-muted hover:text-coast-red-dark"><Trash2 size={13} /> Borrar</button>
@@ -156,7 +156,7 @@ export default function AddressBook() {
         title="Direcciones"
         action={!editing && <Button size="sm" onClick={() => setEditing({})}><Plus size={14} /> Agregar</Button>}
       />
-      <p className="-mt-2 mb-6 max-w-xl text-[14px] text-uns-muted">Guardá tu casa y tu sucursal de correo: en el checkout se completan solas según el envío que elijas.</p>
+      <p className="-mt-2 mb-4 max-w-xl text-[13px] text-uns-muted md:mb-6 md:text-[14px]">Guardá tu casa y tu sucursal de correo: en el checkout se completan solas según el envío que elijas.</p>
 
       {editing && (
         <div className="mb-6">
@@ -179,7 +179,7 @@ export default function AddressBook() {
           Agregá una y comprás más rápido la próxima vez.
         </EmptyState>
       ) : (
-        <div className="stagger grid gap-4 md:grid-cols-2">
+        <div className="stagger grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
           {addresses.map((address) => (
             <AddressCard
               key={address.id}

@@ -8,7 +8,7 @@ import { formatPrice } from '@/domain/money';
 import { formatDate, PAYMENT_LABELS, timeAgo } from '@/domain/orders';
 import { whatsappLink } from '@/config/site';
 import Button from '@/components/ui/Button';
-import { Card, EmptyState, OrderProgress, Skeleton, StatusPill } from './ui';
+import { Card, Collapsible, EmptyState, OrderProgress, Skeleton, StatusPill } from './ui';
 import Thumb from '@/components/ui/Thumb';
 
 function CopyValue({ value }) {
@@ -65,15 +65,15 @@ export default function OrderDetail({ code }) {
   const timeline = [...(order.timeline || [])].reverse();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <Link href="/cuenta/pedidos" className="inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.075em] text-uns-muted transition-colors hover:text-coast-ink">
         <ArrowLeft size={14} /> Mis pedidos
       </Link>
 
-      <header className="flex flex-wrap items-end justify-between gap-4">
+      <header className="flex flex-wrap items-end justify-between gap-3 md:gap-4">
         <div>
-          <p className="eyebrow mb-2">Pedido del {formatDate(order.created_at)}</p>
-          <h1 className="font-heading text-[40px] font-bold leading-none tracking-wide md:text-[52px]">{order.order_code}</h1>
+          <p className="eyebrow mb-1.5 md:mb-2">Pedido del {formatDate(order.created_at)}</p>
+          <h1 className="font-heading text-[28px] font-bold leading-none tracking-wide md:text-[52px]">{order.order_code}</h1>
         </div>
         <StatusPill status={order.status} />
       </header>
@@ -91,14 +91,14 @@ export default function OrderDetail({ code }) {
           </div>
         </Card>
       ) : (
-        <Card className="p-6 md:px-8">
+        <Card className="px-3 py-4 sm:p-6 md:px-8">
           <OrderProgress status={order.status} shippingType={order.shipping?.type} />
         </Card>
       )}
 
       {/* Datos para transferir mientras se revisa */}
       {order.transfer && (
-        <Card className="border-amber-200 bg-amber-50/50 p-5 md:p-6">
+        <Card className="border-amber-200 bg-amber-50/50 p-4 md:p-6">
           <p className="eyebrow mb-3 text-amber-800">Estamos revisando tu comprobante</p>
           <p className="mb-4 text-[14px] text-coast-ink/80">Te avisamos apenas confirmemos el pago. Si todavía no transferiste, estos son los datos:</p>
           <dl className="grid gap-3 text-[14px] sm:grid-cols-2">
@@ -110,25 +110,26 @@ export default function OrderDetail({ code }) {
         </Card>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-4 md:gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-6">
           {/* Productos y totales */}
+          <Collapsible title="Productos" meta={`(${order.items.length}) · ${formatPrice(order.total)}`}>
           <Card>
             <ul className="stagger divide-y divide-uns-hairline">
               {order.items.map((item) => (
-                <li key={`${item.product_slug}-${item.product_name}`} className="flex items-center gap-4 p-4 md:p-5">
+                <li key={`${item.product_slug}-${item.product_name}`} className="flex items-center gap-3 p-3 md:gap-4 md:p-5">
                   <Link href={item.product_slug ? `/tienda/${item.product_slug}` : '#'} className="shrink-0">
-                    <Thumb src={item.image_url} className="h-20 w-[60px] rounded-md bg-uns-stage object-contain p-1" />
+                    <Thumb src={item.image_url} className="h-14 w-[42px] rounded-md bg-uns-stage object-contain p-0.5 md:h-20 md:w-[60px] md:p-1" />
                   </Link>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[14px] font-semibold leading-snug">{item.product_name}</p>
-                    <p className="mt-1 text-[12px] text-uns-muted">{item.quantity} × {formatPrice(item.unit_price)}</p>
+                    <p className="line-clamp-2 text-[13px] font-semibold leading-snug md:text-[14px]">{item.product_name}</p>
+                    <p className="mt-1 text-[11px] text-uns-muted md:text-[12px]">{item.quantity} × {formatPrice(item.unit_price)}</p>
                   </div>
-                  <p className="text-[15px] font-bold">{formatPrice(item.line_total)}</p>
+                  <p className="shrink-0 text-[14px] font-bold md:text-[15px]">{formatPrice(item.line_total)}</p>
                 </li>
               ))}
             </ul>
-            <div className="border-t border-coast-line bg-uns-bg px-5 py-4 md:px-6">
+            <div className="border-t border-coast-line bg-uns-bg px-4 py-3 md:px-6 md:py-4">
               <Row label="Subtotal" value={formatPrice(order.subtotal)} />
               {Number(order.discount_amount) > 0 && <Row label={`Descuento ${order.discount_code}`} value={`-${formatPrice(order.discount_amount)}`} />}
               <Row label="Envío" value={Number(order.shipping_cost) ? formatPrice(order.shipping_cost) : 'Sin cargo'} />
@@ -139,12 +140,13 @@ export default function OrderDetail({ code }) {
               <p className="mt-1 text-[12px] text-uns-muted">Pagado con {PAYMENT_LABELS[order.payment_method] || order.payment_method}</p>
             </div>
           </Card>
+          </Collapsible>
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-4 md:space-y-6">
           {/* Entrega */}
-          <Card className="p-5 md:p-6">
-            <p className="eyebrow mb-4">Entrega</p>
+          <Card className="p-4 md:p-6">
+            <p className="eyebrow mb-3 md:mb-4">Entrega</p>
             <div className="flex gap-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-coast-cream">
                 {pickup ? <Store size={18} /> : <MapPin size={18} />}
@@ -177,9 +179,9 @@ export default function OrderDetail({ code }) {
             )}
           </Card>
 
-          {/* Historial */}
-          <Card className="p-5 md:p-6">
-            <p className="eyebrow mb-4">Historial</p>
+          {/* Historial: plegado en celular, siempre visible en escritorio */}
+          <Collapsible title="Historial" meta={timeline.length > 0 && `(${timeline.length})`} defaultOpen={false}>
+          <Card className="p-4 md:p-6">
             <ol className="relative space-y-5 before:absolute before:bottom-2 before:left-[5px] before:top-2 before:w-px before:bg-coast-line">
               {timeline.map((event, index) => (
                 <li key={`${event.at}-${index}`} className="timeline-item relative pl-6" style={{ animationDelay: `${index * 80}ms` }}>
@@ -190,6 +192,7 @@ export default function OrderDetail({ code }) {
               ))}
             </ol>
           </Card>
+          </Collapsible>
 
           <Button
             href={whatsappLink(`Hola! Tengo una consulta por mi pedido ${order.order_code}`)}

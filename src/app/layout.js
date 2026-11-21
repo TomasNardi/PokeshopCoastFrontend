@@ -39,6 +39,18 @@ const BASE_METADATA = {
   title: { default: `${SITE.name} — Cartas Pokémon TCG en Argentina`, template: `%s | ${SITE.name}` },
   description: SITE.description,
   applicationName: SITE.name,
+  // Paquete de RealFaviconGenerator en /public. Sin favicon.svg a propósito:
+  // el que venía pesaba 1,6 MB (un PNG embebido) y los navegadores lo preferirían.
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '48x48' },
+      { url: '/favicon-96x96.png', type: 'image/png', sizes: '96x96' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: { url: '/apple-touch-icon.png', sizes: '180x180' },
+  },
+  manifest: '/site.webmanifest',
+  appleWebApp: { title: SITE.name },
   openGraph: { type: 'website', locale: SITE.locale, siteName: SITE.name, url: SITE.url },
   robots: { index: true, follow: true },
 };

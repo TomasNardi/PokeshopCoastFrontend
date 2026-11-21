@@ -44,7 +44,7 @@ export default function NotificationsSection() {
         }
       />
 
-      <div role="tablist" className="mb-5 flex gap-2">
+      <div role="tablist" className="mb-4 flex gap-2 md:mb-5">
         <button type="button" role="tab" aria-selected={!onlyUnread} onClick={() => setOnlyUnread(false)} className={`filter-chip ${!onlyUnread ? 'is-active' : ''}`}>
           Todas <span className="ml-1.5 opacity-60">{results.length}</span>
         </button>
@@ -60,7 +60,7 @@ export default function NotificationsSection() {
           {onlyUnread ? 'Leíste todas tus notificaciones.' : 'Acá te vamos a avisar cada novedad de tus pedidos.'}
         </EmptyState>
       ) : (
-        <div key={String(onlyUnread)} className="space-y-6">
+        <div key={String(onlyUnread)} className="space-y-4 md:space-y-6">
           {Object.entries(groups).map(([name, items]) => (
             <section key={name}>
               <p className="eyebrow mb-2.5">{name}</p>
@@ -70,15 +70,15 @@ export default function NotificationsSection() {
                     <Link
                       href={n.url || '#'}
                       onClick={() => !n.read_at && markRead([n.id])}
-                      className={`flex gap-4 p-4 transition-colors duration-300 hover:bg-uns-bg md:p-5 ${n.read_at ? '' : 'bg-coast-cream/40'}`}
+                      className={`flex gap-3 p-3 transition-colors duration-300 hover:bg-uns-bg md:gap-4 md:p-5 ${n.read_at ? '' : 'bg-coast-cream/40'}`}
                     >
                       <NotificationIcon event={n.event} unread={!n.read_at} size={40} />
                       <span className="min-w-0 flex-1">
                         <span className="flex items-start justify-between gap-3">
-                          <span className={`text-[14px] ${n.read_at ? 'font-semibold' : 'font-bold'}`}>{n.title}</span>
+                          <span className={`text-[13px] md:text-[14px] ${n.read_at ? 'font-semibold' : 'font-bold'}`}>{n.title}</span>
                           <span className="shrink-0 text-[11px] text-coast-mist">{timeAgo(n.created_at)}</span>
                         </span>
-                        <span className="mt-1 block text-[13px] leading-relaxed text-uns-muted">{n.body}</span>
+                        <span className="mt-0.5 line-clamp-2 block text-[12px] leading-snug text-uns-muted md:mt-1 md:line-clamp-none md:text-[13px] md:leading-relaxed">{n.body}</span>
                       </span>
                       <span className={`mt-2 h-2 w-2 shrink-0 rounded-full transition-all duration-500 ${n.read_at ? 'scale-0 bg-transparent' : 'bg-coast-red'}`} aria-hidden="true" />
                     </Link>

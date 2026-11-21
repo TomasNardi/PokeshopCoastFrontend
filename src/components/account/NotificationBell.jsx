@@ -53,7 +53,7 @@ export default function NotificationBell() {
   };
 
   return (
-    <div ref={root} className="relative">
+    <div ref={root} className="md:relative">
       <button
         type="button"
         className="header-icon"

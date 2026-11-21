@@ -2,7 +2,9 @@
  * Piezas visuales del panel de cuenta: tarjeta, título de sección, estado,
  * progreso del pedido, esqueletos y vacío. Todo con la paleta del sitio.
  */
-import { Check } from 'lucide-react';
+'use client';
+import { useId, useState } from 'react';
+import { Check, ChevronDown } from 'lucide-react';
 import { orderStatus, orderSteps } from '@/domain/orders';
 import { LoadingRegion, Skeleton } from '@/components/ui/Skeleton';
 
@@ -16,10 +18,10 @@ export function Card({ as: Tag = 'section', className = '', children, ...props }
 
 export function SectionTitle({ eyebrow, title, action }) {
   return (
-    <div className="mb-5 flex items-end justify-between gap-4">
+    <div className="mb-4 flex items-end justify-between gap-4 md:mb-5">
       <div>
-        {eyebrow && <p className="eyebrow mb-1.5">{eyebrow}</p>}
-        <h2 className="font-heading text-[26px] font-bold leading-none md:text-[30px]">{title}</h2>
+        {eyebrow && <p className="eyebrow mb-1.5 hidden lg:block">{eyebrow}</p>}
+        <h2 className="font-heading text-[22px] font-bold leading-none md:text-[30px]">{title}</h2>
       </div>
       {action}
     </div>
@@ -52,19 +54,24 @@ export function OrderProgress({ status, shippingType, compact = false }) {
   const steps = orderSteps(shippingType);
   const percent = (step / (steps.length - 1)) * 100;
 
+  // Cada paso es una columna igual con el punto centrado; la línea va del
+  // centro del primer punto al del último (medio ancho de columna de cada lado).
+  const inset = `calc(100% / ${steps.length * 2})`;
+
   return (
-    <div className={compact ? '' : 'pt-1'}>
-      <div className="relative mx-3 h-[3px] rounded-full bg-coast-line">
+    <div className={`relative ${compact ? '' : 'pt-1'}`}>
+      {/* z-0: la línea queda debajo de los puntos (antes, al ser absolute, se pintaba encima del check). */}
+      <div className="absolute z-0 h-[3px] rounded-full bg-coast-line" style={{ left: inset, right: inset, top: compact ? 8 : 12 }} aria-hidden="true">
         <div className="progress-fill absolute inset-y-0 left-0 rounded-full bg-coast-red" style={{ '--progress': `${percent}%` }} />
       </div>
-      <ol className="-mt-[11px] grid" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
+      <ol className="relative z-10 grid" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
         {steps.map((label, index) => {
           const done = index <= step;
           const current = index === step;
           return (
-            <li key={label} className={`flex flex-col ${index === 0 ? 'items-start' : index === steps.length - 1 ? 'items-end' : 'items-center'}`}>
+            <li key={label} className="flex min-w-0 flex-col items-center px-0.5 text-center" aria-current={current ? 'step' : undefined}>
               <span
-                className={`progress-dot flex h-[19px] w-[19px] items-center justify-center rounded-full border-2 transition-colors duration-500 ${
+                className={`progress-dot flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-500 ${
                   done ? 'border-coast-red bg-coast-red text-white' : 'border-coast-line bg-white'
                 } ${current ? 'is-current' : ''}`}
                 style={{ transitionDelay: `${index * 120}ms` }}
@@ -72,7 +79,7 @@ export function OrderProgress({ status, shippingType, compact = false }) {
                 {done && <Check size={11} strokeWidth={3.5} />}
               </span>
               {!compact && (
-                <span className={`mt-2 text-[11px] font-semibold uppercase tracking-[0.06em] ${done ? 'text-coast-ink' : 'text-coast-mist'}`}>{label}</span>
+                <span className={`mt-2 text-[10px] font-semibold uppercase leading-tight tracking-[0.04em] sm:text-[11px] sm:tracking-[0.06em] ${done ? 'text-coast-ink' : 'text-coast-mist'}`}>{label}</span>
               )}
             </li>
           );
@@ -113,5 +120,36 @@ export function EmptyState({ icon: Icon, title, children, action }) {
       {children && <p className="mt-2 max-w-sm text-[14px] text-uns-muted">{children}</p>}
       {action && <div className="mt-6">{action}</div>}
     </div>
+  );
+}
+
+/**
+ * Bloque desplegable en celular/tablet; en escritorio (lg) siempre abierto y
+ * el encabezado es un título común. Menos scroll en pantallas chicas.
+ */
+export function Collapsible({ title, meta, action, defaultOpen = true, className = '', bodyClassName = '', children }) {
+  const [open, setOpen] = useState(defaultOpen);
+  const id = useId();
+  return (
+    <section className={className}>
+      <div className="mb-2.5 flex items-center justify-between gap-3 lg:mb-4">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          aria-controls={id}
+          className="flex min-w-0 flex-1 items-center gap-2 py-1 text-left lg:pointer-events-none"
+        >
+          <span className="font-heading text-[18px] font-bold leading-none lg:text-[24px]">{title}</span>
+          {meta != null && meta !== false && <span className="text-[12px] font-semibold text-uns-muted">{meta}</span>}
+          <ChevronDown size={16} className={`ml-auto shrink-0 text-coast-mist transition-transform duration-300 lg:hidden ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+        </button>
+        {action && <div className="hidden shrink-0 lg:block">{action}</div>}
+      </div>
+      <div id={id} className={`${open ? '' : 'hidden'} lg:block ${bodyClassName}`}>
+        {children}
+        {action && <div className="mt-2 lg:hidden">{action}</div>}
+      </div>
+    </section>
   );
 }

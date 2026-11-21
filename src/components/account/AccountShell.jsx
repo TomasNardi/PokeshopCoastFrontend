@@ -9,11 +9,12 @@ import { LoadingRegion, Skeleton } from '@/components/ui/Skeleton';
 import { SkeletonRows } from './ui';
 
 export const ACCOUNT_NAV = [
-  { href: '/cuenta', label: 'Resumen', Icon: LayoutGrid, exact: true },
-  { href: '/cuenta/pedidos', label: 'Pedidos', Icon: Package },
-  { href: '/cuenta/notificaciones', label: 'Notificaciones', Icon: Bell, badge: 'unread' },
-  { href: '/cuenta/direcciones', label: 'Direcciones', Icon: MapPin },
-  { href: '/cuenta/perfil', label: 'Perfil', Icon: UserRound },
+  // `short`: rótulo de la barra de 5 ítems del celular (tiene que entrar en 320px).
+  { href: '/cuenta', label: 'Resumen', short: 'Inicio', Icon: LayoutGrid, exact: true },
+  { href: '/cuenta/pedidos', label: 'Pedidos', short: 'Pedidos', Icon: Package },
+  { href: '/cuenta/notificaciones', label: 'Notificaciones', short: 'Avisos', Icon: Bell, badge: 'unread' },
+  { href: '/cuenta/direcciones', label: 'Direcciones', short: 'Envíos', Icon: MapPin },
+  { href: '/cuenta/perfil', label: 'Perfil', short: 'Perfil', Icon: UserRound },
 ];
 
 const isActive = (pathname, item) => (item.exact ? pathname === item.href : pathname.startsWith(item.href));
@@ -22,14 +23,15 @@ export function displayName(user, profile) {
   return [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || user?.name || user?.email || '';
 }
 
-function Avatar({ name, url }) {
+function Avatar({ name, url, small = false }) {
   const initials = name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '·';
+  const size = small ? 'h-10 w-10 text-[15px]' : 'h-12 w-12 text-[18px]';
   if (url) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={url} alt="" className="h-12 w-12 rounded-full object-cover" />;
+    return <img src={url} alt="" className={`${size} shrink-0 rounded-full object-cover`} />;
   }
   return (
-    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-coast-ink font-heading text-[18px] font-bold text-white" aria-hidden="true">
+    <span className={`flex ${size} shrink-0 items-center justify-center rounded-full bg-coast-ink font-heading font-bold text-white`} aria-hidden="true">
       {initials}
     </span>
   );
@@ -47,8 +49,8 @@ function Shell({ children }) {
   const badge = (item) => (item.badge === 'unread' && unread > 0 ? unread : 0);
 
   return (
-    <div className="container-site pb-20 pt-8 md:pt-12">
-      <div className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
+    <div className="container-site pb-16 pt-4 md:pt-8 lg:pb-20 lg:pt-12">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
         {/* Escritorio */}
         <aside className="hidden lg:block">
           <div className="sticky top-[calc(var(--header-height)+24px)]">
@@ -86,26 +88,29 @@ function Shell({ children }) {
         </aside>
 
         {/* Celular / tablet */}
-        <div className="lg:hidden">
-          <div className="mb-5 flex items-center gap-3">
-            <Avatar name={name} url={user?.avatarUrl} />
+        <div className="min-w-0 lg:hidden">
+          <div className="mb-3 flex items-center gap-3">
+            <Avatar name={name} url={user?.avatarUrl} small />
             <div className="min-w-0 flex-1">
-              <p className="truncate font-heading text-[22px] font-bold leading-tight">{name}</p>
-              <p className="truncate text-[12px] text-uns-muted">{user?.email}</p>
+              <p className="truncate font-heading text-[18px] font-bold leading-tight">{name}</p>
+              <p className="truncate text-[11px] text-uns-muted">{user?.email}</p>
             </div>
-            <button type="button" onClick={signOut} className="header-icon text-uns-muted" aria-label="Cerrar sesión">
-              <LogOut size={20} />
+            <button type="button" onClick={signOut} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-coast-line px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.06em] text-uns-muted" aria-label="Cerrar sesión">
+              <LogOut size={14} /> Salir
             </button>
           </div>
-          <nav aria-label="Mi cuenta" className="account-tabs -mx-[var(--outer)] px-[var(--outer)]">
+          {/* 5 secciones siempre a la vista: un toque, sin scroll lateral. */}
+          <nav aria-label="Mi cuenta" className="account-bar">
             {ACCOUNT_NAV.map((item) => {
               const active = isActive(pathname, item);
               const count = badge(item);
               return (
-                <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} className={`account-tab ${active ? 'is-active' : ''}`}>
-                  <item.Icon size={15} strokeWidth={2} />
-                  {item.label}
-                  {count > 0 && <span className="rounded-full bg-coast-red px-1.5 text-[10px] font-bold leading-[16px] text-white">{count}</span>}
+                <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} aria-label={item.label} className={`account-bar__item ${active ? 'is-active' : ''}`}>
+                  <span className="relative">
+                    <item.Icon size={18} strokeWidth={active ? 2.3 : 1.9} />
+                    {count > 0 && <span className="account-bar__count">{count > 9 ? '9+' : count}</span>}
+                  </span>
+                  <span className="account-bar__label">{item.short}</span>
                 </Link>
               );
             })}
@@ -124,8 +129,8 @@ function Shell({ children }) {
 /** Mismo marco que Shell mientras se confirma la sesión: nada salta al entrar. */
 export function AccountShellSkeleton() {
   return (
-    <LoadingRegion label="Cargando tu cuenta" className="container-site pb-20 pt-8 md:pt-12">
-      <div className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
+    <LoadingRegion label="Cargando tu cuenta" className="container-site pb-16 pt-4 md:pt-8 lg:pb-20 lg:pt-12">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
         <aside className="hidden lg:block">
           <div className="flex items-center gap-3 border-b border-coast-line pb-6">
             <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
@@ -140,19 +145,15 @@ export function AccountShellSkeleton() {
             ))}
           </div>
         </aside>
-        <div className="lg:hidden">
-          <div className="mb-5 flex items-center gap-3">
-            <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
+        <div className="min-w-0 lg:hidden">
+          <div className="mb-3 flex items-center gap-3">
+            <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
             <div className="flex-1 space-y-2">
-              <Skeleton className="h-5 w-36" />
-              <Skeleton className="h-3 w-44" />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-40" />
             </div>
           </div>
-          <div className="flex gap-2 overflow-hidden">
-            {ACCOUNT_NAV.map((item) => (
-              <Skeleton key={item.href} className="h-9 w-28 shrink-0 rounded-full" />
-            ))}
-          </div>
+          <Skeleton className="h-[54px] w-full rounded-2xl" />
         </div>
         <div className="min-w-0">
           <Skeleton className="mb-5 h-8 w-48" />
