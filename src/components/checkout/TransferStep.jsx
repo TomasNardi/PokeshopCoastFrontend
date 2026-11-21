@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Check, Copy, FileText, Landmark, Lock, UploadCloud, X } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Check, Copy, FileText, Landmark, Lock, UploadCloud, X } from 'lucide-react';
 import { formatPrice } from '@/domain/money';
 import { buttonClass } from '@/components/ui/Button';
 
@@ -46,7 +46,13 @@ function CopyRow({ label, value, strong = false }) {
  * comprobante. La orden recién se crea al confirmar con el comprobante
  * adjunto (antes de esto no hay pedido).
  */
-export default function TransferStep({ open, total, transfer, receiptFile, setReceiptFile, submitting, onConfirm, onBack }) {
+/**
+ * `receipt`: { status: idle|uploading|ready|error, file, error } — el comprobante se
+ * sube apenas se elige (validación en vivo); confirmar solo se habilita con `ready`.
+ */
+export default function TransferStep({ open, total, transfer, receipt, onPickReceipt, submitting, onConfirm, onBack }) {
+  const receiptFile = receipt?.file || null;
+  const status = receipt?.status || 'idle';
   const ref = useRef(null);
   const [drag, setDrag] = useState(false);
   const [error, setError] = useState('');
@@ -83,7 +89,8 @@ export default function TransferStep({ open, total, transfer, receiptFile, setRe
     const okType = ACCEPT.split(',').includes(file.type) || /\.(jpe?g|png|webp|heic|heif|pdf)$/i.test(file.name);
     if (!okType) return setError('Subí una foto (JPG, PNG, WEBP) o un PDF.');
     if (file.size > MAX_MB * 1024 * 1024) return setError(`El archivo supera los ${MAX_MB} MB.`);
-    setReceiptFile(file);
+    if (!file.size) return setError('El archivo está vacío. Elegí otro.');
+    onPickReceipt(file);
   };
 
   return (
@@ -137,16 +144,24 @@ export default function TransferStep({ open, total, transfer, receiptFile, setRe
         <section className="mt-5" aria-label="Comprobante">
           <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.08em]">Comprobante de la transferencia</p>
           {receiptFile ? (
-            <div className="flex items-center gap-4 border border-emerald-300 bg-emerald-50 p-3">
+            <div className={`receipt-card is-${status}`}>
               {preview
                 // eslint-disable-next-line @next/next/no-img-element
                 ? <img src={preview} alt="Comprobante" className="h-20 w-16 shrink-0 bg-white object-contain" />
                 : <span className="flex h-20 w-16 shrink-0 items-center justify-center bg-white text-coast-red"><FileText size={28} /></span>}
               <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-1.5 text-[13px] font-bold text-emerald-800"><Check size={15} /> Comprobante listo</p>
+                {status === 'uploading' && (
+                  <p className="flex items-center gap-2 text-[14px] font-bold"><span className="transfer-spinner is-sm" aria-hidden="true" /> Subiendo comprobante…</p>
+                )}
+                {status === 'ready' && (
+                  <p className="flex items-center gap-1.5 text-[14px] font-bold text-emerald-800"><Check size={16} /> Comprobante recibido</p>
+                )}
+                {status === 'error' && (
+                  <p className="flex items-center gap-1.5 text-[14px] font-bold text-coast-red-dark"><AlertTriangle size={16} /> No se pudo subir</p>
+                )}
                 <p className="truncate text-[12px] text-uns-muted">{receiptFile.name}</p>
               </div>
-              <button type="button" onClick={() => setReceiptFile(null)} disabled={submitting} className="flex h-9 w-9 shrink-0 items-center justify-center text-uns-muted hover:text-coast-ink" aria-label="Quitar comprobante">
+              <button type="button" onClick={() => onPickReceipt(null)} disabled={submitting} className="flex h-9 w-9 shrink-0 items-center justify-center text-uns-muted hover:text-coast-ink" aria-label="Quitar comprobante">
                 <X size={18} />
               </button>
             </div>
@@ -163,7 +178,17 @@ export default function TransferStep({ open, total, transfer, receiptFile, setRe
               <span className="text-[12px] text-uns-muted">Tocá para elegirlo o arrastralo acá · hasta {MAX_MB} MB</span>
             </label>
           )}
-          {error && <p className="mt-2 text-[12px] font-semibold text-coast-red-dark" role="alert">{error}</p>}
+          {(error || (status === 'error' && receipt?.error)) && (
+            <div className="receipt-error" role="alert">
+              <AlertTriangle size={18} className="shrink-0" />
+              <div>
+                <p className="font-bold">{error || receipt.error}</p>
+                {status === 'error' && !error && (
+                  <button type="button" onClick={() => onPickReceipt(receiptFile)} className="mt-1 font-bold underline underline-offset-2">Reintentar</button>
+                )}
+              </div>
+            </div>
+          )}
         </section>
 
         <p className="mt-4 text-[12px] leading-relaxed text-uns-muted">
@@ -172,10 +197,14 @@ export default function TransferStep({ open, total, transfer, receiptFile, setRe
       </div>
 
       <div className={`border-t border-coast-line px-5 py-4 sm:px-7 ${ready ? 'transfer-reveal-block' : 'hidden'}`}>
-        <button type="button" onClick={onConfirm} disabled={!receiptFile || submitting} className={buttonClass({ size: 'lg', block: true })}>
+        <button type="button" onClick={onConfirm} disabled={status !== 'ready' || submitting} className={buttonClass({ size: 'lg', block: true })}>
           <Lock size={14} /> {submitting ? 'Generando tu pedido…' : 'Confirmar pedido'}
         </button>
-        {!receiptFile && <p className="mt-2 text-center text-[11px] text-uns-muted">Subí el comprobante para confirmar.</p>}
+        {status !== 'ready' && (
+          <p className="mt-2 text-center text-[11px] text-uns-muted">
+            {status === 'uploading' ? 'Esperá a que termine de subir el comprobante.' : 'Subí el comprobante para confirmar.'}
+          </p>
+        )}
       </div>
     </dialog>
   );

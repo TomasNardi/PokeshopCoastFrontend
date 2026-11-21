@@ -71,13 +71,21 @@ export function CustomerFields({ form, errors, setField, guest = false }) {
   );
 }
 
-export function ShippingSelector({ form, errors, config, setField, setShipping }) {
+export function ShippingSelector({ form, errors, config, freeShipping, setField, setShipping }) {
   const method = getShippingMethod(form.shipping_method);
   const bind = (name) => ({ value: form[name], onChange: (e) => setField(name, e.target.value), error: errors[name] });
   const priceLabel = (id) => {
     const m = getShippingMethod(id);
     if (!m.needsAddress) return 'Gratis';
     const price = quoteShipping(id, form, config);
+    if (freeShipping?.applies) {
+      return price ? (
+        <span className="flex flex-col items-end leading-tight">
+          <s className="text-[11px] font-normal text-uns-muted">{formatPrice(price)}</s>
+          <span className="text-emerald-700">Gratis</span>
+        </span>
+      ) : <span className="text-emerald-700">Gratis</span>;
+    }
     return price == null ? 'Según provincia' : formatPrice(price);
   };
 
@@ -191,7 +199,8 @@ function Totals({ totals, discount, paymentMethod }) {
       {row('Subtotal', formatPrice(totals.subtotal))}
       {totals.discount > 0 && row(`Descuento ${discount.code || ''}`, `-${formatPrice(totals.discount)}`)}
       {totals.surcharge > 0 && row(`Recargo Mercado Pago (${totals.surchargePercent}%)`, `+${formatPrice(totals.surcharge)}`)}
-      {row('Envío', totals.shipping == null ? 'A calcular' : totals.shipping === 0 ? 'Gratis' : formatPrice(totals.shipping))}
+      {row('Envío', totals.shipping == null ? (totals.freeShipping?.applies ? 'Gratis' : 'A calcular') : totals.shipping === 0 ? 'Gratis' : formatPrice(totals.shipping))}
+      <FreeShippingHint status={totals.freeShipping} />
       <div className="pt-2">
         {row('Total', formatPrice(totals.total), true)}
         {/* El total con el otro medio, para que se vea la diferencia (como Crack). */}
@@ -276,5 +285,26 @@ export function OrderSummary({ items, totals, discount, paymentMethod, onRedeem,
       <Totals totals={totals} discount={discount} paymentMethod={paymentMethod} />
       {children}
     </aside>
+  );
+}
+
+/** "Te faltan $X para el envío gratis" con barra de progreso, o la confirmación. */
+export function FreeShippingHint({ status }) {
+  if (!status?.enabled) return null;
+  if (status.applies) {
+    return (
+      <p className="free-ship is-done" role="status">
+        <span aria-hidden="true">✓</span> ¡Tenés envío gratis!
+      </p>
+    );
+  }
+  const pct = Math.max(4, Math.min(100, Math.round(((status.min - status.missing) / status.min) * 100)));
+  return (
+    <div className="free-ship" role="status">
+      <p>
+        Te faltan <strong>{formatPrice(status.missing)}</strong> para el <strong>envío gratis</strong>
+      </p>
+      <span className="free-ship__bar" aria-hidden="true"><span style={{ width: `${pct}%` }} /></span>
+    </div>
   );
 }

@@ -98,15 +98,19 @@ export function createOrderService(repository) {
     /** El link `?recuperar=<token>` del mail de recordatorio. */
     recoverCheckout: (token) => repository.recoverCheckout(token),
 
-    async placeOrder({ form, items, discountCode, receiptFile, origin, checkoutToken }) {
+    /** Sube el comprobante apenas se elige (validación en vivo). → { token, name, content_type, size } */
+    uploadReceipt: (file) => repository.uploadReceipt(file),
+
+    /** `receipt`: comprobante ya subido (uploadReceipt). Si no viene, se sube `receiptFile` acá. */
+    async placeOrder({ form, items, discountCode, receiptFile, receipt: uploaded = null, origin, checkoutToken }) {
       const payment = getPaymentMethod(form.payment_method);
-      const errors = validateCheckout(form, { receipt: payment?.requiresReceipt ? receiptFile : true });
+      const errors = validateCheckout(form, { receipt: payment?.requiresReceipt ? uploaded || receiptFile : true });
       if (Object.keys(errors).length > 0) {
         throw Object.assign(new Error('Revisá los datos marcados.'), { fieldErrors: errors });
       }
       if (!items?.length) throw new Error('Tu carrito está vacío.');
 
-      const receipt = payment.requiresReceipt ? await repository.uploadReceipt(receiptFile) : null;
+      const receipt = payment.requiresReceipt ? uploaded || (await repository.uploadReceipt(receiptFile)) : null;
       const response = await repository.createOrder(
         buildOrderPayload(form, items, { discountCode, receipt, origin, checkoutToken })
       );

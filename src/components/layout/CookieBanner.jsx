@@ -46,18 +46,19 @@ export default function CookieBanner() {
   if (!open) return null;
 
   return (
-    <div role="region" aria-label="Aviso de cookies" className="cookie-banner fade-up">
-      <p className="text-[13px] leading-relaxed text-coast-ink">
-        Usamos cookies para mejorar la experiencia de nuestros usuarios. Para más información sobre las cookies y cómo
-        gestionarlas consultá nuestra{' '}
+    <div role="region" aria-label="Aviso de cookies" className="cookie-banner">
+      <p className="cookie-banner__text text-coast-ink">
+        <span className="cookie-banner__long">
+          Usamos cookies para mejorar la experiencia de nuestros usuarios. Para más información sobre las cookies y cómo
+          gestionarlas consultá nuestra{' '}
+        </span>
+        <span className="cookie-banner__short">Usamos cookies para mejorar tu experiencia. Más info en nuestra </span>
         <Link href="/privacidad" className="font-semibold underline underline-offset-4">Política de Privacidad</Link>.
       </p>
-      <div className="mt-3 flex items-center gap-2">
-        <button type="button" onClick={() => decide('accepted')} className="bg-coast-ink px-4 py-2 text-[12px] font-bold uppercase tracking-[0.06em] text-white hover:opacity-90">
-          Aceptar
-        </button>
-      </div>
-      <button type="button" onClick={() => decide('dismissed')} className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center text-coast-gray hover:text-coast-ink" aria-label="Cerrar aviso de cookies">
+      <button type="button" onClick={() => decide('accepted')} className="cookie-banner__accept">
+        Aceptar
+      </button>
+      <button type="button" onClick={() => decide('dismissed')} className="cookie-banner__close" aria-label="Cerrar aviso de cookies">
         <X size={16} />
       </button>
     </div>

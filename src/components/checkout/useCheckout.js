@@ -7,7 +7,7 @@ import { EMPTY_CHECKOUT_FORM, validateCheckout } from '@/services/orders/orderSe
 import { getShippingMethod, quoteShipping } from '@/services/shipping/shippingMethods';
 import { enabledPaymentMethods, getPaymentMethod } from '@/services/payments/paymentMethods';
 import { cardSurchargePercent } from '@/domain/pricing';
-import { computeTotals, subtotalOf } from '@/domain/cart';
+import { computeTotals, freeShippingStatus, subtotalOf } from '@/domain/cart';
 import { useCartStore } from '@/store/cartStore';
 import { useSession } from '@/components/auth/SessionProvider';
 import { forgetGuestEmail, rememberGuestEmail } from '@/domain/guestSignup';
@@ -90,7 +90,25 @@ export function useCheckout() {
 
   const [state, dispatch] = useReducer(reducer, { form: { ...EMPTY_CHECKOUT_FORM }, errors: {} });
   const [config, setConfig] = useState(null);
-  const [receiptFile, setReceiptFile] = useState(null);
+  // Comprobante: se sube apenas se elige, así el error (o el OK) se ve en el momento.
+  // status: idle | uploading | ready | error
+  const [receipt, setReceipt] = useState({ status: 'idle', file: null, data: null, error: '' });
+  const receiptSeq = useRef(0);
+  const pickReceipt = async (file) => {
+    const seq = ++receiptSeq.current;
+    if (!file) {
+      setReceipt({ status: 'idle', file: null, data: null, error: '' });
+      return;
+    }
+    setReceipt({ status: 'uploading', file, data: null, error: '' });
+    try {
+      const data = await services.orders.uploadReceipt(file);
+      if (seq === receiptSeq.current) setReceipt({ status: 'ready', file, data, error: '' });
+    } catch (error) {
+      if (seq !== receiptSeq.current) return;
+      setReceipt({ status: 'error', file, data: null, error: error.message || 'No pudimos subir el comprobante.' });
+    }
+  };
   const [submitting, setSubmitting] = useState(false);
   // Transferencia: paso final con datos bancarios + comprobante. La orden se crea recién ahí.
   const [transferOpen, setTransferOpen] = useState(false);
@@ -186,15 +204,20 @@ export function useCheckout() {
 
   const totals = useMemo(() => {
     const payment = getPaymentMethod(state.form.payment_method);
-    return computeTotals({
-      subtotal: subtotalOf(items),
+    const subtotal = subtotalOf(items);
+    const productsTotal = subtotal - Math.min(subtotal, subtotal * ((discount.percent || 0) / 100) + (discount.fixed || 0));
+    const freeShipping = freeShippingStatus(config, productsTotal);
+    const quoted = quoteShipping(state.form.shipping_method, state.form, config);
+    const totals = computeTotals({
+      subtotal,
       discountPercent: discount.percent,
       discountFixed: discount.fixed,
-      shipping: quoteShipping(state.form.shipping_method, state.form, config),
+      shipping: freeShipping.applies && quoted != null ? 0 : quoted,
       surchargePercent: payment?.surchargePercent(config) || 0,
       // Solo para comparar: con los dos medios activos se muestra la diferencia.
       cardSurchargePercent: paymentMethods.length > 1 ? cardSurchargePercent(config) : 0,
     });
+    return { ...totals, freeShipping };
   }, [items, discount.percent, discount.fixed, state.form, config, paymentMethods]);
 
   const submit = async (event) => {
@@ -216,7 +239,7 @@ export function useCheckout() {
         form: state.form,
         items,
         discountCode: discount.code,
-        receiptFile,
+        receipt: receipt.data,
         origin: window.location.origin,
         checkoutToken: checkoutToken.current,
       });
@@ -256,8 +279,8 @@ export function useCheckout() {
     totals,
     discount,
     submitting,
-    receiptFile,
-    setReceiptFile,
+    receipt,
+    pickReceipt,
     transferOpen,
     guest: sessionStatus === 'anonymous',
     closeTransfer: () => setTransferOpen(false),

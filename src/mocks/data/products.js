@@ -280,6 +280,7 @@ export const MOCK_PAYMENT_CONFIG = {
   card_surcharge_percent: 10,
   mercadopago_enabled: true,
   transfer: { bank: 'Banco Mock', holder: 'PokeShop Coast', cbu: '0000000000000000000000', alias: 'POKESHOP.COAST' },
+  free_shipping: { enabled: true, min_total: 300000 },
   shipping_prices: {
     branch: { ba: { normal: 6500, express: 9500 }, province: { normal: 8900, express: 12900 } },
     home: { ba: { normal: 8500 }, province: { normal: 11900 } },

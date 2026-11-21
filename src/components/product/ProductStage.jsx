@@ -15,7 +15,8 @@ const PC_HOVER = '(hover: hover) and (pointer: fine) and (min-width: 750px)';
  * llevan un zoom lento en hover (effect='zoom').
  *
  * size: 'card' (5:6, grillas) | 'detail' (cuadrado, ficha de producto)
- * effect: 'tilt' (cartas) | 'zoom' (sellados, accesorios)
+ * effect: 'tilt' (carta en la ficha) | 'lift' (carta en el listado: sube y gana sombra)
+ *         | 'zoom' (sellados, accesorios)
  */
 export default function ProductStage({ src, alt, size = 'card', effect = 'tilt', priority = false, className = '', children }) {
   const tilt = effect === 'tilt';

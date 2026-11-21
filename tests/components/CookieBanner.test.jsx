@@ -13,17 +13,17 @@ describe('aviso de cookies', () => {
     window.addEventListener('psc:cookie-consent', heard);
     render(<CookieBanner />);
     act(() => vi.advanceTimersByTime(900));
-    expect(screen.getByText(/Usamos cookies/)).toBeTruthy();
+    expect(screen.getAllByText(/Usamos cookies/).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByText('Aceptar'));
     expect(window.localStorage.getItem(CONSENT_KEY)).toBe('accepted');
     expect(heard).toHaveBeenCalled();
-    expect(screen.queryByText(/Usamos cookies/)).toBeNull();
+    expect(screen.queryAllByText(/Usamos cookies/)).toHaveLength(0);
   });
 
   it('si ya decidió, no vuelve a aparecer', () => {
     window.localStorage.setItem(CONSENT_KEY, 'dismissed');
     render(<CookieBanner />);
     act(() => vi.advanceTimersByTime(900));
-    expect(screen.queryByText(/Usamos cookies/)).toBeNull();
+    expect(screen.queryAllByText(/Usamos cookies/)).toHaveLength(0);
   });
 });

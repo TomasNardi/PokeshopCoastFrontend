@@ -86,3 +86,20 @@ describe('totales', () => {
     expect(computeTotals({ subtotal: 500, discountFixed: 9999 }).total).toBe(0);
   });
 });
+
+describe('freeShippingStatus (envío gratis)', () => {
+  const config = { free_shipping: { enabled: true, min_total: 100000 } };
+
+  it('apagado o sin monto: nunca aplica', async () => {
+    const { freeShippingStatus } = await import('@/domain/cart');
+    expect(freeShippingStatus({ free_shipping: { enabled: false, min_total: 100000 } }, 500000).applies).toBe(false);
+    expect(freeShippingStatus({ free_shipping: { enabled: true, min_total: 0 } }, 500000).enabled).toBe(false);
+    expect(freeShippingStatus(null, 500000).enabled).toBe(false);
+  });
+
+  it('desde el monto mínimo aplica; antes dice cuánto falta', async () => {
+    const { freeShippingStatus } = await import('@/domain/cart');
+    expect(freeShippingStatus(config, 100000)).toMatchObject({ applies: true, missing: 0 });
+    expect(freeShippingStatus(config, 75000)).toMatchObject({ applies: false, missing: 25000 });
+  });
+});

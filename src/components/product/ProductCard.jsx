@@ -25,7 +25,7 @@ export default function ProductCard({ product, priority = false }) {
     <article className="product-item group">
       <div className="product-item__media">
         <CardLink href={view.href} className="block" aria-label={view.name}>
-          <ProductStage src={view.imageUrl} alt={view.name} effect={view.isCard ? 'tilt' : 'zoom'} priority={priority}>
+          <ProductStage src={view.imageUrl} alt={view.name} effect={view.isCard ? 'lift' : 'zoom'} priority={priority}>
             <div className="product-item__badges product-item__badges--left">
               <OutletBadge show={view.isOutlet} />
               <SaleBadge show={view.hasDiscount && view.isAvailable && !view.isOutlet} />

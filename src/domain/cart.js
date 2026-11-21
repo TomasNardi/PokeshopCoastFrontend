@@ -108,3 +108,17 @@ export function computeTotals({ subtotal, discountPercent = 0, discountFixed = 0
     cardTotal: transferTotal + cardSurcharge,
   };
 }
+
+/**
+ * Envío gratis (lo configura el dueño en Ventas → Envío gratis). Se mide sobre
+ * los productos con el cupón aplicado, antes del recargo de Mercado Pago: la
+ * misma regla que aplica el backend al crear la orden (el que manda es él).
+ * → { enabled, applies, min, missing }
+ */
+export function freeShippingStatus(config, productsTotal) {
+  const fs = config?.free_shipping;
+  const min = Number(fs?.min_total) || 0;
+  if (!fs?.enabled || min <= 0) return { enabled: false, applies: false, min: 0, missing: 0 };
+  const applies = productsTotal >= min;
+  return { enabled: true, applies, min, missing: applies ? 0 : min - productsTotal };
+}

@@ -1024,6 +1024,22 @@ body {
   object-fit: contain;
 }
 
+/* Cartas en el listado: en vez de rotar, la carta "se levanta" de la mesa. */
+.stage--lift .stage__card {
+  transform: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (hover: hover) and (pointer: fine) and (min-width: 750px) {
+  .product-item:hover .stage--lift .stage__card {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 14px 24px -12px rgba(0, 0, 0, 0.28);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage--lift .stage__card { transition: none; }
+}
+
 /* Sellados y accesorios: foto de producto sin bordes de carta, zoom lento en hover. */
 .stage--zoom .stage__card {
   border-radius: 0;
@@ -2368,7 +2384,8 @@ html.has-buy-bar .wa-float { bottom: calc(84px + env(safe-area-inset-bottom)); t
 /* "Terminá de configurar tu cuenta": la barra avanza con transición al completar un paso. */
 .setup-progress { transition: width 0.6s var(--ease-soft); }
 
-/* Aviso de cookies: abajo a la izquierda, chico; en celular a lo ancho. No tapa la barra de compra. */
+/* Aviso de cookies. PC: tarjeta chica abajo a la izquierda.
+   Celular: franja inferior a todo lo ancho, texto compacto y "Aceptar" fácil de tocar. */
 .cookie-banner {
   position: fixed;
   left: 16px;
@@ -2377,13 +2394,64 @@ html.has-buy-bar .wa-float { bottom: calc(84px + env(safe-area-inset-bottom)); t
   width: min(380px, calc(100vw - 32px));
   border: 1px solid theme('colors.coast.line');
   background: #fff;
-  padding: 16px 40px 16px 16px;
+  padding: 16px 44px 16px 16px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  animation: cookie-in 0.45s var(--ease-soft) both;
 }
+.cookie-banner__text { font-size: 13px; line-height: 1.55; }
+.cookie-banner__accept {
+  margin-top: 12px;
+  background: theme('colors.coast.ink');
+  color: #fff;
+  padding: 9px 18px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: opacity 0.2s;
+}
+.cookie-banner__accept:hover { opacity: 0.88; }
+.cookie-banner__close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  color: theme('colors.coast.gray');
+}
+.cookie-banner__close:hover { color: theme('colors.coast.ink'); }
+@keyframes cookie-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+.cookie-banner__short { display: none; }
 @media (max-width: 749px) {
-  .cookie-banner { left: 12px; right: 76px; width: auto; bottom: 12px; }
+  .cookie-banner {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    border: 0;
+    border-top: 1px solid theme('colors.coast.line');
+    padding: 14px 48px calc(14px + env(safe-area-inset-bottom)) 16px;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
+  }
+  .cookie-banner__long { display: none; }
+  .cookie-banner__short { display: inline; }
+  .cookie-banner__text { font-size: 13px; line-height: 1.5; }
+  /* "Aceptar" a todo lo ancho (la X no queda debajo del dedo por error). */
+  .cookie-banner__accept { display: block; width: calc(100% + 32px); margin-top: 12px; min-height: 44px; }
+  .cookie-banner__close { top: 8px; right: 4px; width: 44px; height: 44px; }
+  /* Mientras está el aviso, el WhatsApp flotante no se le encima. */
+  body:has(.cookie-banner) .wa-float { display: none; }
 }
 html.has-buy-bar .cookie-banner { bottom: calc(84px + env(safe-area-inset-bottom)); }
+@media (max-width: 1023px) {
+  /* Checkout en celular: el aviso queda arriba de la barra de pago. */
+  body:has(.checkout-paybar) .cookie-banner { bottom: calc(72px + env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: reduce) { .cookie-banner { animation: none; } }
 
 /* Paso final de transferencia: datos bancarios + comprobante. */
 .transfer-step {
@@ -2437,3 +2505,24 @@ html.has-buy-bar .cookie-banner { bottom: calc(84px + env(safe-area-inset-bottom
 /* El pie entra como bloque: animar el botón pisaría su opacidad de "deshabilitado". */
 .transfer-reveal-block { animation: transfer-fade .4s ease-out .2s both; }
 @media (prefers-reduced-motion: reduce) { .transfer-reveal-block { animation: none; } }
+
+/* Comprobante: estado en vivo (subiendo / recibido / error), bien visible. */
+.receipt-card { display: flex; align-items: center; gap: 16px; padding: 12px; border: 1px solid #e7e5e4; background: #fafaf9; }
+.receipt-card.is-ready { border-color: #6ee7b7; background: #ecfdf5; }
+.receipt-card.is-error { border-color: #fca5a5; background: #fef2f2; }
+.receipt-error { display: flex; gap: 10px; margin-top: 10px; padding: 12px 14px; border: 1px solid #fca5a5;
+  background: #fef2f2; color: #991b1b; font-size: 13px; line-height: 1.45; animation: transfer-rise .3s ease-out both; }
+.transfer-spinner.is-sm { width: 16px; height: 16px; border-width: 2px; margin: 0; }
+
+/* Checkout en celular: sin hueco blanco al final. La barra de pago es fija, así que
+   se reserva su alto al pie de la página (no a mitad, entre el resumen y el footer). */
+@media (max-width: 1023px) {
+  body:has(.checkout-paybar) { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+  body:has(.checkout-paybar) footer { margin-top: 40px; }
+}
+
+/* Envío gratis: cuánto falta (barra) o la confirmación. */
+.free-ship { margin: 4px 0 2px; padding: 10px 12px; background: #f5f5f4; font-size: 12px; line-height: 1.4; color: #44403c; }
+.free-ship.is-done { background: #ecfdf5; color: #047857; font-weight: 700; }
+.free-ship__bar { display: block; height: 4px; margin-top: 8px; background: #e7e5e4; overflow: hidden; }
+.free-ship__bar > span { display: block; height: 100%; background: #059669; transition: width .5s cubic-bezier(.2,.8,.2,1); }
