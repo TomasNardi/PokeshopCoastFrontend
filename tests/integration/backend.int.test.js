@@ -47,7 +47,7 @@ describe.skipIf(!apiUrl)('backend real', () => {
 
   it('config de pagos trae precios de envío', async () => {
     const config = await services.orders.getPaymentConfig();
-    expect(config).toHaveProperty('shipping_prices');
+    expect(config).toHaveProperty('shipping');
   });
 
   it('un código de descuento inventado se rechaza con mensaje', async () => {

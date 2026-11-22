@@ -1,43 +1,62 @@
 import { describe, expect, it } from 'vitest';
-import { getShippingMethod, quoteShipping, shippingZoneFor } from '@/services/shipping/shippingMethods';
+import {
+  canQuote, getShippingMethod, groupOptions, methodForKind, quoteKey, sameOption,
+} from '@/services/shipping/shippingMethods';
+import { MOCK_SHIPPING_OPTIONS } from '@/services/shipping/shippingRepository.mock';
 import { MERCADOPAGO, TRANSFER, routeForMercadoPagoStatus } from '@/services/payments/paymentMethods';
 import { MOCK_PAYMENT_CONFIG } from '@/mocks/data/products';
 
-const address = { shipping_address: 'Av. Costanera 123', shipping_city: 'Mar del Plata', shipping_province: 'Buenos Aires', shipping_zip: '7600' };
+const destination = { shipping_city: 'Mar del Plata', shipping_province: 'Buenos Aires', shipping_zip: '7600' };
+const home = { ...destination, shipping_address: 'Av. Colón', shipping_street_number: '1234', shipping_quote: 'q-ca-dom' };
 
 describe('estrategias de envío', () => {
-  it('zona tarifaria: BA y CABA son "ba", el resto "province"', () => {
-    expect(shippingZoneFor('CABA')).toBe('ba');
-    expect(shippingZoneFor('Córdoba')).toBe('province');
+  it('se cotiza recién con CP de 4 dígitos, provincia y ciudad', () => {
+    expect(canQuote(destination)).toBe(true);
+    expect(canQuote({ ...destination, shipping_zip: '76' })).toBe(false);
+    expect(canQuote({ ...destination, shipping_city: '' })).toBe(false);
   });
 
-  it('retiro no pide dirección y cuesta 0', () => {
+  it('la cotización cambia con el destino o el carrito, no con el orden de los ítems', () => {
+    const items = [{ id: 2, quantity: 1 }, { id: 1, quantity: 3 }];
+    expect(quoteKey(destination, items)).toBe(quoteKey(destination, [...items].reverse()));
+    expect(quoteKey(destination, items)).not.toBe(quoteKey({ ...destination, shipping_zip: '7601' }, items));
+    expect(quoteKey(destination, items)).not.toBe(quoteKey(destination, [{ id: 2, quantity: 2 }, { id: 1, quantity: 3 }]));
+  });
+
+  it('retiro en persona no pide nada y viaja como pickup', () => {
     const pickup = getShippingMethod('pickup_store');
     expect(pickup.validate({})).toEqual({});
-    expect(quoteShipping('pickup_store', {}, MOCK_PAYMENT_CONFIG)).toBe(0);
     expect(pickup.toPayload({})).toMatchObject({ shipping_type: 'pickup', shipping_method: 'pickup_store' });
   });
 
-  it('domicilio valida dirección completa y CP de 4 dígitos', () => {
-    const errors = getShippingMethod('home').validate({ ...address, shipping_zip: '76' });
-    expect(Object.keys(errors)).toEqual(['shipping_zip']);
-    expect(getShippingMethod('home').validate(address)).toEqual({});
-  });
-
-  it('cotiza por zona según la config del backend', () => {
-    expect(quoteShipping('branch_express', address, MOCK_PAYMENT_CONFIG)).toBe(9500);
-    expect(quoteShipping('home', { ...address, shipping_province: 'Salta' }, MOCK_PAYMENT_CONFIG)).toBe(11900);
-    expect(quoteShipping('home', { shipping_province: '' }, MOCK_PAYMENT_CONFIG)).toBeNull();
-  });
-
-  it('serializa sucursal con el contrato de Crack (shipping_type "home")', () => {
-    expect(getShippingMethod('branch_normal').toPayload(address)).toEqual({
-      shipping_type: 'home',
-      shipping_method: 'branch_normal',
-      shipping_zone: 'ba',
-      shipping_branch: 'Sucursal de correo',
-      ...address,
+  it('domicilio pide calle, número y una opción cotizada', () => {
+    const method = getShippingMethod('envia_home');
+    expect(method.validate(home)).toEqual({});
+    expect(Object.keys(method.validate({ ...home, shipping_street_number: '', shipping_quote: '' })).sort())
+      .toEqual(['shipping_quote', 'shipping_street_number']);
+    expect(method.toPayload({ ...home, shipping_apartment: ' 3° B ' })).toEqual({
+      shipping_type: 'home', shipping_method: 'envia_home', shipping_quote: 'q-ca-dom',
+      shipping_address: 'Av. Colón', shipping_street_number: '1234', shipping_apartment: '3° B',
+      shipping_city: 'Mar del Plata', shipping_province: 'Buenos Aires', shipping_zip: '7600',
+      shipping_branch: '', shipping_branch_code: '',
     });
+  });
+
+  it('sucursal pide la sucursal elegida, no la calle', () => {
+    const method = getShippingMethod('envia_branch');
+    const form = { ...destination, shipping_quote: 'q-ca-suc' };
+    expect(method.validate(form)).toEqual({ shipping_branch_code: 'Elegí la sucursal donde retirás.' });
+    expect(method.toPayload({ ...form, shipping_branch_code: 'MDQ01', shipping_branch: 'Sucursal Centro' }))
+      .toMatchObject({ shipping_method: 'envia_branch', shipping_branch_code: 'MDQ01', shipping_quote: 'q-ca-suc' });
+  });
+
+  it('agrupa por modalidad y reconoce la misma opción en una cotización nueva', () => {
+    const groups = groupOptions(MOCK_SHIPPING_OPTIONS);
+    expect(groups.home.map((o) => o.carrier)).toEqual(['correo_argentino', 'andreani']);
+    expect(groups.branch).toHaveLength(2);
+    expect(sameOption(MOCK_SHIPPING_OPTIONS[2], { ...MOCK_SHIPPING_OPTIONS[2], token: 'otro' })).toBe(true);
+    expect(sameOption(MOCK_SHIPPING_OPTIONS[2], MOCK_SHIPPING_OPTIONS[3])).toBe(false);
+    expect(methodForKind('branch')).toBe('envia_branch');
   });
 });
 

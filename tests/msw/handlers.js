@@ -9,16 +9,18 @@
 import { http, HttpResponse } from 'msw';
 import { MOCK_CATEGORIES, MOCK_CONDITIONS, MOCK_PAYMENT_CONFIG, MOCK_PRODUCTS } from '@/mocks/data/products';
 import { filterProducts } from '@/services/catalog/catalogRepository.mock';
+import { MOCK_BRANCHES, MOCK_SHIPPING_OPTIONS } from '@/services/shipping/shippingRepository.mock';
 
 export const API = 'http://api.test/api/v1';
 
 /** Lo que el front mandó, para que los tests lo inspeccionen. */
-export const received = { orders: [], contacts: [], customerTokens: [] };
+export const received = { orders: [], contacts: [], customerTokens: [], quotes: [] };
 
 export function resetReceived() {
   received.orders.length = 0;
   received.contacts.length = 0;
   received.customerTokens.length = 0;
+  received.quotes.length = 0;
 }
 
 const paginate = (list, page = 1, size = 12) => ({
@@ -47,6 +49,14 @@ export const handlers = [
   http.get(`${API}/conditions/`, () => HttpResponse.json({ count: MOCK_CONDITIONS.length, results: MOCK_CONDITIONS })),
 
   http.get(`${API}/payments/config/`, () => HttpResponse.json(MOCK_PAYMENT_CONFIG)),
+  http.post(`${API}/shipping/quote/`, async ({ request }) => {
+    const body = await request.json();
+    received.quotes.push(body);
+    return /^\d{4}$/.test(body.zip)
+      ? HttpResponse.json({ options: MOCK_SHIPPING_OPTIONS })
+      : HttpResponse.json({ zip: ['El código postal debe tener 4 dígitos.'] }, { status: 400 });
+  }),
+  http.get(`${API}/shipping/branches/`, () => HttpResponse.json({ branches: MOCK_BRANCHES })),
   http.post(`${API}/payments/validate-discount/`, async ({ request }) => {
     const { code } = await request.json();
     return code === 'COAST10'

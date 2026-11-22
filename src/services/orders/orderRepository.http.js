@@ -4,7 +4,7 @@ import { CUSTOMER_TOKEN_HEADER } from '../customer/customerRepository.http';
  * Órdenes y pagos contra Django (contrato de Crack).
  *   createOrder(payload) → { order, checkout? }
  *   uploadReceipt(file) → { token, name, content_type, size }
- *   getPaymentConfig() → { card_surcharge_*, shipping_prices, transfer }
+ *   getPaymentConfig() → { card_surcharge_*, shipping, free_shipping, transfer }
  *   verifyPayment({ payment_id, external_reference, ... }) → { status, order }
  *   validateDiscount(code) → { code, percent, fixed, expires_at }
  *   savePendingCheckout(payload) → { token }   (carrito abandonado: el recordatorio por mail)

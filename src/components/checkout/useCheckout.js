@@ -1,10 +1,10 @@
 'use client';
-import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { getServices } from '@/services/container';
 import { EMPTY_CHECKOUT_FORM, validateCheckout } from '@/services/orders/orderService';
-import { getShippingMethod, quoteShipping } from '@/services/shipping/shippingMethods';
+import { useShipping } from './useShipping';
 import { enabledPaymentMethods, getPaymentMethod } from '@/services/payments/paymentMethods';
 import { cardSurchargePercent } from '@/domain/pricing';
 import { computeTotals, freeShippingStatus, subtotalOf } from '@/domain/cart';
@@ -16,20 +16,10 @@ function reducer(state, action) {
   switch (action.type) {
     case 'field':
       return { ...state, form: { ...state.form, [action.name]: action.value }, errors: { ...state.errors, [action.name]: undefined } };
-    case 'shipping': {
-      // Cambiar entre sucursal y domicilio limpia la dirección: no son la misma.
-      const prevNeeds = getShippingMethod(state.form.shipping_method)?.needsAddress;
-      const nextNeeds = getShippingMethod(action.value)?.needsAddress;
-      const clearAddress = prevNeeds && nextNeeds && state.form.shipping_method !== action.value;
-      return {
-        ...state,
-        form: {
-          ...state.form,
-          shipping_method: action.value,
-          ...(clearAddress ? { shipping_address: '', shipping_city: '', shipping_zip: '' } : {}),
-        },
-        errors: {},
-      };
+    case 'fields': {
+      // Varios campos juntos (opción de envío, dirección guardada): limpia sus errores.
+      const cleared = Object.fromEntries(Object.keys(action.values).map((k) => [k, undefined]));
+      return { ...state, form: { ...state.form, ...action.values }, errors: { ...state.errors, ...cleared, shipping_method: undefined } };
     }
     case 'restore':
       // Link del recordatorio: lo guardado manda sobre el formulario vacío.
@@ -89,6 +79,8 @@ export function useCheckout() {
   const { profile, user, status: sessionStatus } = useSession();
 
   const [state, dispatch] = useReducer(reducer, { form: { ...EMPTY_CHECKOUT_FORM }, errors: {} });
+  const setFields = useCallback((values) => dispatch({ type: 'fields', values }), []);
+  const shipping = useShipping({ form: state.form, items, setFields, loggedIn: Boolean(user) });
   const [config, setConfig] = useState(null);
   // Comprobante: se sube apenas se elige, así el error (o el OK) se ve en el momento.
   // status: idle | uploading | ready | error
@@ -182,8 +174,8 @@ export function useCheckout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     recovering, items, discount.code, form.customer_email, form.customer_name, form.customer_phone,
-    form.shipping_method, form.shipping_address, form.shipping_city, form.shipping_province,
-    form.shipping_zip, form.payment_method,
+    form.shipping_method, form.shipping_address, form.shipping_street_number, form.shipping_apartment,
+    form.shipping_city, form.shipping_province, form.shipping_zip, form.payment_method,
   ]);
 
   // Con sesión, completa lo vacío una sola vez. Nunca pisa lo que tipeó.
@@ -207,7 +199,8 @@ export function useCheckout() {
     const subtotal = subtotalOf(items);
     const productsTotal = subtotal - Math.min(subtotal, subtotal * ((discount.percent || 0) / 100) + (discount.fixed || 0));
     const freeShipping = freeShippingStatus(config, productsTotal);
-    const quoted = quoteShipping(state.form.shipping_method, state.form, config);
+    // Envío: lo cotizado por Envia para la opción elegida (null = todavía sin cotizar).
+    const quoted = shipping.delivery === 'pickup' ? 0 : (shipping.selected?.price ?? null);
     const totals = computeTotals({
       subtotal,
       discountPercent: discount.percent,
@@ -218,7 +211,7 @@ export function useCheckout() {
       cardSurchargePercent: paymentMethods.length > 1 ? cardSurchargePercent(config) : 0,
     });
     return { ...totals, freeShipping };
-  }, [items, discount.percent, discount.fixed, state.form, config, paymentMethods]);
+  }, [items, discount.percent, discount.fixed, state.form.payment_method, config, paymentMethods, shipping.delivery, shipping.selected]);
 
   const submit = async (event) => {
     event?.preventDefault();
@@ -244,6 +237,7 @@ export function useCheckout() {
         checkoutToken: checkoutToken.current,
       });
       writeToken(null);
+      await shipping.saveNewAddress();
       // Invitado: en la confirmación le ofrecemos crear la cuenta con este email.
       if (user) forgetGuestEmail(); else rememberGuestEmail(state.form.customer_email);
       // Constancia del pedido en este navegador: al entrar con cualquier cuenta, aparece en "Mi cuenta".
@@ -252,6 +246,8 @@ export function useCheckout() {
       if (next.type === 'redirect') window.location.assign(next.url);
       else router.push(next.href);
     } catch (error) {
+      // La cotización venció o el carrito cambió: se recotiza sola y el comprador elige de nuevo.
+      if (error.data?.code === 'shipping_quote_expired') shipping.retry();
       if (error.fieldErrors) {
         dispatch({ type: 'errors', errors: error.fieldErrors });
         // Si el problema está en los datos (no en el comprobante), volvemos al formulario.
@@ -285,9 +281,11 @@ export function useCheckout() {
     pickReceipt,
     transferOpen,
     guest: sessionStatus === 'anonymous',
+    loggedIn: Boolean(user),
     closeTransfer: () => setTransferOpen(false),
     setField: (name, value) => dispatch({ type: 'field', name, value }),
-    setShipping: (value) => dispatch({ type: 'shipping', value }),
+    setFields,
+    shipping,
     redeem,
     submit,
   };

@@ -27,6 +27,8 @@ import { createMockAuthProvider } from './auth/providers/mockAuthProvider';
 import { createDisabledAuthProvider } from './auth/providers/disabledAuthProvider';
 import { createDevApiAuthProvider } from './auth/providers/devApiAuthProvider';
 import { createAuthService } from './auth/authService';
+import { createHttpShippingRepository } from './shipping/shippingRepository.http';
+import { createMockShippingRepository } from './shipping/shippingRepository.mock';
 import { createPasswordRecoveryService } from './auth/passwordRecoveryService';
 
 function pickAuthProvider({ useMocks, supabase, devLogin, apiUrl }) {
@@ -57,12 +59,14 @@ export function createServices({
         orders: createMockOrderRepository(),
         customer: createMockCustomerRepository(),
         engagement: createMockEngagementRepository(),
+        shipping: createMockShippingRepository(),
       }
     : {
         catalog: createHttpCatalogRepository(http),
         orders: createHttpOrderRepository(http, { getCustomerToken }),
         customer: createHttpCustomerRepository(http, { getCustomerToken }),
         engagement: createHttpEngagementRepository(http),
+        shipping: createHttpShippingRepository(http),
       };
 
   return Object.freeze({
@@ -73,6 +77,7 @@ export function createServices({
     orders: createOrderService(repos.orders),
     customer: repos.customer,
     engagement: createEngagementService(repos.engagement),
+    shipping: repos.shipping,
   });
 }
 

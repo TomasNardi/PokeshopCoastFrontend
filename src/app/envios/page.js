@@ -3,7 +3,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import { SHIPPING_METHOD_LIST } from '@/services/shipping/shippingMethods';
 import { PAYMENT_METHOD_LIST } from '@/services/payments/paymentMethods';
 
-export const metadata = { title: 'Envíos y pagos', description: 'Envíos a todo el país, retiro en persona y pagos con Mercado Pago.' };
+export const metadata = { title: 'Envíos y pagos', description: 'Envíos a todo el país con Correo Argentino y Andreani, retiro en persona y pagos con Mercado Pago.' };
 
 export default function EnviosPage() {
   return (
@@ -14,7 +14,7 @@ export default function EnviosPage() {
       <div className="container-site space-y-14">
         <section>
           <h2 className="mb-6 flex items-center gap-3 font-display text-2xl font-extrabold"><Truck className="text-coast-red" /> Formas de envío</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-3">
             {SHIPPING_METHOD_LIST.map((m) => (
               <article key={m.id} className="rounded-2xl border border-coast-line bg-white p-6">
                 <h3 className="font-bold">{m.label}</h3>
@@ -22,7 +22,7 @@ export default function EnviosPage() {
               </article>
             ))}
           </div>
-          <p className="mt-4 text-[13px] text-coast-gray">El costo se calcula en el checkout según la provincia de destino.</p>
+          <p className="mt-4 text-[13px] text-coast-gray">Trabajamos con Correo Argentino y Andreani. El costo exacto y la demora se calculan en el checkout con tu código postal.</p>
         </section>
         <section>
           <h2 className="mb-6 flex items-center gap-3 font-display text-2xl font-extrabold"><CreditCard className="text-coast-red" /> Medios de pago</h2>

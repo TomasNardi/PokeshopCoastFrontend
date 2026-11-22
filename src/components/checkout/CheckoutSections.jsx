@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import Field from '@/components/ui/Field';
 import { formatPrice } from '@/domain/money';
-import { PROVINCES, SHIPPING_METHOD_LIST, getShippingMethod, quoteShipping } from '@/services/shipping/shippingMethods';
+import { PaymentMark } from './Brands';
 import Thumb from '@/components/ui/Thumb';
 
 export function Step({ number, title, children, delay = 0 }) {
@@ -20,7 +20,7 @@ export function Step({ number, title, children, delay = 0 }) {
   );
 }
 
-function OptionCard({ name, value, checked, onChange, title, description, aside, badge }) {
+function OptionCard({ name, value, checked, onChange, title, description, aside, badge, logo }) {
   return (
     <label
       className={`flex min-h-[56px] cursor-pointer items-start gap-3 border p-4 transition-colors duration-300 sm:gap-4 ${
@@ -29,8 +29,10 @@ function OptionCard({ name, value, checked, onChange, title, description, aside,
     >
       <input type="radio" name={name} value={value} checked={checked} onChange={() => onChange(value)} className="mt-0.5 h-4 w-4 shrink-0 accent-black" />
       <span className="min-w-0 flex-1">
+        {logo && <span className="mb-2 block">{logo}</span>}
         <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-          <span className="text-[14px] font-bold leading-snug">{title}</span>
+          {/* Con logo, la marca ya es el título (no se repite el nombre). */}
+          {logo ? <span className="sr-only">{title}</span> : <span className="text-[14px] font-bold leading-snug">{title}</span>}
           {aside && <span className="whitespace-nowrap text-[13px] font-bold">{aside}</span>}
         </span>
         <span className="mt-1 block text-[12px] leading-snug text-uns-muted">{description}</span>
@@ -71,57 +73,6 @@ export function CustomerFields({ form, errors, setField, guest = false }) {
   );
 }
 
-export function ShippingSelector({ form, errors, config, freeShipping, setField, setShipping }) {
-  const method = getShippingMethod(form.shipping_method);
-  const bind = (name) => ({ value: form[name], onChange: (e) => setField(name, e.target.value), error: errors[name] });
-  const priceLabel = (id) => {
-    const m = getShippingMethod(id);
-    if (!m.needsAddress) return 'Gratis';
-    const price = quoteShipping(id, form, config);
-    if (freeShipping?.applies) {
-      return price ? (
-        <span className="flex flex-col items-end leading-tight">
-          <s className="text-[11px] font-normal text-uns-muted">{formatPrice(price)}</s>
-          <span className="text-emerald-700">Gratis</span>
-        </span>
-      ) : <span className="text-emerald-700">Gratis</span>;
-    }
-    return price == null ? 'Según provincia' : formatPrice(price);
-  };
-
-  return (
-    <div className="space-y-3">
-      {SHIPPING_METHOD_LIST.map((m) => (
-        <OptionCard
-          key={m.id}
-          name="shipping_method"
-          value={m.id}
-          checked={form.shipping_method === m.id}
-          onChange={setShipping}
-          title={m.label}
-          description={m.description}
-          aside={priceLabel(m.id)}
-        />
-      ))}
-      {errors.shipping_method && <p className="text-[12px] text-coast-red-dark">{errors.shipping_method}</p>}
-
-      {method?.needsAddress && (
-        <div className="fade-up grid gap-4 pt-4 sm:grid-cols-2">
-          <Field as="select" label="Provincia" {...bind('shipping_province')}>
-            <option value="">Elegí una provincia</option>
-            {PROVINCES.map((p) => (
-              <option key={p} value={p}>{p}</option>
-            ))}
-          </Field>
-          <Field label="Ciudad" autoComplete="address-level2" {...bind('shipping_city')} />
-          <Field label={method.addressLabel} autoComplete="street-address" className="sm:col-span-2" {...bind('shipping_address')} />
-          <Field label="Código postal" inputMode="numeric" maxLength={4} autoComplete="postal-code" {...bind('shipping_zip')} />
-        </div>
-      )}
-    </div>
-  );
-}
-
 export function PaymentSelector({ form, errors, methods, totals, setField }) {
   // El precio publicado es el de transferencia; MP suma el recargo del
   // backoffice solo sobre los productos. Si el recargo está apagado o hay un
@@ -156,6 +107,7 @@ export function PaymentSelector({ form, errors, methods, totals, setField }) {
           title={m.label}
           description={m.description}
           badge={badgeFor(m.id)}
+          logo={<PaymentMark method={m.id} />}
         />
       ))}
       {errors.payment_method && <p className="text-[12px] text-coast-red-dark" role="alert">{errors.payment_method}</p>}
@@ -199,7 +151,7 @@ function Totals({ totals, discount, paymentMethod }) {
       {row('Subtotal', formatPrice(totals.subtotal))}
       {totals.discount > 0 && row(`Descuento ${discount.code || ''}`, `-${formatPrice(totals.discount)}`)}
       {totals.surcharge > 0 && row(`Recargo Mercado Pago (${totals.surchargePercent}%)`, `+${formatPrice(totals.surcharge)}`)}
-      {row('Envío', totals.shipping == null ? (totals.freeShipping?.applies ? 'Gratis' : 'A calcular') : totals.shipping === 0 ? 'Gratis' : formatPrice(totals.shipping))}
+      {row('Envío', totals.shipping == null ? (totals.freeShipping?.applies ? 'Gratis' : 'Se calcula con tu dirección') : totals.shipping === 0 ? 'Gratis' : formatPrice(totals.shipping))}
       <FreeShippingHint status={totals.freeShipping} />
       <div className="pt-2">
         {row('Total', formatPrice(totals.total), true)}

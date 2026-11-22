@@ -10,11 +10,12 @@ import Button, { buttonClass } from '@/components/ui/Button';
 import { Card, EmptyState, SectionTitle, SkeletonRows } from './ui';
 
 const KINDS = { home: { label: 'Domicilio', Icon: Home }, branch: { label: 'Sucursal de correo', Icon: MapPin } };
-const EMPTY = { kind: 'home', label: '', recipient_name: '', phone: '', address: '', city: '', province: 'Buenos Aires', zip_code: '', branch_name: '', is_default: false };
+const EMPTY = { kind: 'home', label: '', recipient_name: '', phone: '', address: '', street_number: '', apartment: '', city: '', province: 'Buenos Aires', zip_code: '', branch_name: '', is_default: false };
 
 function validate(form) {
   const errors = {};
-  if (!form.address.trim()) errors.address = 'Completá la dirección.';
+  if (!form.address.trim()) errors.address = form.kind === 'branch' ? 'Completá la dirección.' : 'Completá la calle.';
+  if (form.kind === 'home' && !(form.street_number || '').trim()) errors.street_number = 'Completá el número.';
   if (!form.city.trim()) errors.city = 'Completá la ciudad.';
   if (!/^\d{4}$/.test(form.zip_code.trim())) errors.zip_code = 'El código postal tiene 4 dígitos.';
   return errors;
@@ -72,7 +73,15 @@ function AddressForm({ initial, onCancel, onSaved }) {
         <Field label="Nombre (opcional)" placeholder="Casa, Trabajo…" value={form.label} onChange={set('label')} />
         <Field label="Quién recibe" value={form.recipient_name} onChange={set('recipient_name')} />
         {form.kind === 'branch' && <Field className="sm:col-span-2" label="Sucursal" placeholder="Correo Argentino — Sucursal Centro" value={form.branch_name} onChange={set('branch_name')} />}
-        <Field className="sm:col-span-2" label={form.kind === 'branch' ? 'Dirección de la sucursal' : 'Dirección (calle, número, piso)'} value={form.address} onChange={set('address')} error={errors.address} />
+        {form.kind === 'branch' ? (
+          <Field className="sm:col-span-2" label="Dirección de la sucursal" value={form.address} onChange={set('address')} error={errors.address} />
+        ) : (
+          <div className="grid gap-4 sm:col-span-2 sm:grid-cols-6">
+            <Field className="sm:col-span-3" label="Calle" autoComplete="address-line1" value={form.address} onChange={set('address')} error={errors.address} />
+            <Field className="sm:col-span-1" label="Número" inputMode="numeric" value={form.street_number || ''} onChange={set('street_number')} error={errors.street_number} />
+            <Field className="sm:col-span-2" label="Piso / depto" autoComplete="address-line2" value={form.apartment || ''} onChange={set('apartment')} />
+          </div>
+        )}
         <Field label="Ciudad" value={form.city} onChange={set('city')} error={errors.city} />
         <Field as="select" label="Provincia" value={form.province} onChange={set('province')} error={errors.province}>
           {PROVINCES.map((p) => <option key={p}>{p}</option>)}
@@ -111,7 +120,7 @@ function AddressCard({ address, onEdit, onDelete, onDefault, style }) {
       <p className="font-heading text-[17px] font-bold leading-tight md:text-[20px]">{address.label || address.branch_name || address.address}</p>
       <p className="mt-1 text-[13px] leading-relaxed text-uns-muted">
         {address.branch_name && address.label && <>{address.branch_name}<br /></>}
-        {address.address}<br />
+        {[address.address, address.street_number].filter(Boolean).join(' ')}{address.apartment ? `, ${address.apartment}` : ''}<br />
         {address.city}, {address.province} ({address.zip_code})
         {address.recipient_name && <><br />Recibe: {address.recipient_name}</>}
       </p>

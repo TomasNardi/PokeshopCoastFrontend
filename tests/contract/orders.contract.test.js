@@ -15,8 +15,10 @@ const form = {
   customer_name: 'Misty',
   customer_email: 'misty@coast.com',
   customer_phone: '2235555555',
-  shipping_method: 'branch_normal',
-  shipping_address: 'Sucursal Centro',
+  shipping_method: 'envia_home',
+  shipping_address: 'Av. Colón',
+  shipping_street_number: '1234',
+  shipping_quote: 'q-ca-dom',
   shipping_city: 'Mar del Plata',
   shipping_province: 'Buenos Aires',
   shipping_zip: '7600',
@@ -33,8 +35,9 @@ describe('POST /orders/', () => {
     expect(received.orders[0].body).toMatchObject({
       frontend_origin: 'https://pokeshopcoast.com',
       shipping_type: 'home',
-      shipping_method: 'branch_normal',
-      shipping_zone: 'ba',
+      shipping_method: 'envia_home',
+      shipping_quote: 'q-ca-dom',
+      shipping_street_number: '1234',
       items: [{ product_id: 1, quantity: 1 }],
     });
   });
@@ -67,7 +70,7 @@ describe('POST /orders/', () => {
 describe('pagos', () => {
   it('lee la config de envíos y recargos', async () => {
     const config = await build().getPaymentConfig();
-    expect(config.shipping_prices.branch.ba.normal).toBeGreaterThan(0);
+    expect(config.shipping.carriers.map((c) => c.code)).toEqual(['correo_argentino', 'andreani']);
   });
 
   it('valida códigos de descuento', async () => {

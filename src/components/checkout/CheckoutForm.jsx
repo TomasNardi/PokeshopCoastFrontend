@@ -4,7 +4,8 @@ import { buttonClass } from '@/components/ui/Button';
 import { useHydrated } from '@/hooks/useHydrated';
 import { useCheckout } from './useCheckout';
 import { formatPrice } from '@/domain/money';
-import { CustomerFields, MobileSummary, OrderSummary, PaymentSelector, ShippingSelector, Step } from './CheckoutSections';
+import { CustomerFields, MobileSummary, OrderSummary, PaymentSelector, Step } from './CheckoutSections';
+import ShippingStep from './ShippingStep';
 import Button from '@/components/ui/Button';
 import { CheckoutSkeleton } from '@/components/cart/CartSkeletons';
 import TransferStep from './TransferStep';
@@ -35,7 +36,7 @@ export default function CheckoutForm() {
           <CustomerFields form={form} errors={errors} setField={checkout.setField} guest={checkout.guest} />
         </Step>
         <Step number={2} title="Envío" delay={0.1}>
-          <ShippingSelector form={form} errors={errors} config={config} freeShipping={totals.freeShipping} setField={checkout.setField} setShipping={checkout.setShipping} />
+          <ShippingStep form={form} errors={errors} setField={checkout.setField} shipping={checkout.shipping} freeShipping={totals.freeShipping} loggedIn={checkout.loggedIn} />
         </Step>
         <Step number={3} title="Pago" delay={0.15}>
           <PaymentSelector
