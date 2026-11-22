@@ -3,9 +3,9 @@ import { Building2, Check, Home, MapPin, RefreshCw, Store, Truck } from 'lucide-
 import Field from '@/components/ui/Field';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { formatPrice } from '@/domain/money';
-import { PICKUP_ADDRESS } from '@/config/site';
 import { BRANCH, HOME, PROVINCES, groupOptions } from '@/services/shipping/shippingMethods';
 import { CarrierMark } from './Brands';
+import PickupMap from '@/components/shipping/PickupMap';
 
 function Tabs({ value, onChange }) {
   const tab = (id, label, Icon) => (
@@ -197,9 +197,12 @@ export default function ShippingStep({ form, errors, setField, shipping, freeShi
     <div className="space-y-5">
       <Tabs value={shipping.delivery} onChange={shipping.setDelivery} />
       {shipping.delivery === 'pickup' ? (
-        <div className="fade-up flex items-start gap-3 bg-uns-stage p-4 text-[13px] leading-relaxed">
-          <Check size={18} className="mt-0.5 shrink-0 text-emerald-700" />
-          <p><strong>Sin costo.</strong> {PICKUP_ADDRESS}. Te escribimos apenas esté listo.</p>
+        <div className="fade-up space-y-3">
+          <div className="flex items-start gap-3 bg-uns-stage p-4 text-[13px] leading-relaxed">
+            <Check size={18} className="mt-0.5 shrink-0 text-emerald-700" />
+            <p><strong>Sin costo.</strong> Retirás en Santa Clara del Mar, coordinando antes día y horario por WhatsApp. Te escribimos apenas esté listo.</p>
+          </div>
+          <PickupMap />
         </div>
       ) : (
         <>

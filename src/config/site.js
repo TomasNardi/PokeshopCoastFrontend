@@ -25,8 +25,19 @@ export const CONTACT = Object.freeze({
   hours: 'Lunes a sábados de 10 a 19 h',
 });
 
-/** Dirección del punto de retiro: la usa el checkout y la página de envíos. */
-export const PICKUP_ADDRESS = 'Punto de retiro PokeShop Coast — coordinamos por WhatsApp';
+/** Punto de retiro en persona: lo usan el checkout, la página de envíos y la orden. */
+export const PICKUP_POINT = Object.freeze({
+  street: 'Calle 36 y 2',
+  city: 'Santa Clara del Mar',
+  province: 'Buenos Aires',
+  // Coordenadas del mapa: hoy el centro de Santa Clara del Mar. Con el pin exacto (link de
+  // Google Maps del punto de retiro) se reemplazan acá y el mapa marca la esquina.
+  lat: -37.8359,
+  lng: -57.5063,
+  zoom: 14,
+  mapQuery: 'Santa Clara del Mar, Buenos Aires, Argentina',
+});
+export const PICKUP_ADDRESS = `${PICKUP_POINT.street}, ${PICKUP_POINT.city} — coordinamos día y horario por WhatsApp`;
 
 export const NAV_LINKS = [
   { label: 'Tienda', href: '/tienda' },

@@ -1,5 +1,6 @@
 import { CreditCard, Package, Truck } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
+import PickupMap from '@/components/shipping/PickupMap';
 import { SHIPPING_METHOD_LIST } from '@/services/shipping/shippingMethods';
 import { PAYMENT_METHOD_LIST } from '@/services/payments/paymentMethods';
 
@@ -34,6 +35,13 @@ export default function EnviosPage() {
               </article>
             ))}
           </div>
+        </section>
+        <section>
+          <h2 className="mb-6 flex items-center gap-3 font-display text-2xl font-extrabold"><Package className="text-coast-red" /> Retiro en persona</h2>
+          <p className="mb-4 max-w-2xl text-[14px] leading-relaxed text-coast-gray">
+            Sin costo, en Santa Clara del Mar. Elegí «Retiro en persona» en el checkout y coordinamos día y horario por WhatsApp.
+          </p>
+          <PickupMap className="max-w-2xl" />
         </section>
         <section className="rounded-2xl bg-coast-cream-deep p-8">
           <h2 className="flex items-center gap-3 font-display text-2xl font-extrabold"><Package className="text-coast-red" /> Seguimiento</h2>
