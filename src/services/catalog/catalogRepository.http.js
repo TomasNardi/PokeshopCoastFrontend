@@ -30,6 +30,8 @@ export function createHttpCatalogRepository(http) {
     },
     getNewArrivals: async () => localizeImages(unwrapList(await http.get('/products/new-arrivals/', fresh))),
     getFeatured: async () => localizeImages(unwrapList(await http.get('/products/featured/', fresh))),
+    // Opciones de los filtros (solo con stock) con su cantidad.
+    getFacets: async (filters = {}) => http.get(`/products/facets/${toQuery(filters)}`, fresh),
     getCategories: async () => unwrapList(await http.get('/categories/', cached)),
     getConditions: async () => unwrapList(await http.get('/conditions/', cached)),
     getCertificationEntities: async () => unwrapList(await http.get('/certification-entities/', cached)),

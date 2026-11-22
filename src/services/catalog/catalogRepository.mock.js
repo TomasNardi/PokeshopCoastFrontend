@@ -75,6 +75,12 @@ export function createMockCatalogRepository({ products = MOCK_PRODUCTS, pageSize
     async getFeatured() {
       return products.filter((p) => p.is_featured);
     },
+    getFacets: async () => ({
+      sets: [{ slug: 'scarlet-violet-151', name: 'Scarlet & Violet 151', abbreviation: 'MEW', count: 3 }],
+      rarities: [{ value: 'Rare', count: 2 }],
+      conditions: [{ value: 'NM', name: 'Near Mint', count: 3 }],
+      languages: [{ value: 'en', count: 3 }],
+    }),
     getCategories: async () => MOCK_CATEGORIES,
     getConditions: async () => MOCK_CONDITIONS,
     getCertificationEntities: async () => MOCK_CERTIFICATION_ENTITIES,

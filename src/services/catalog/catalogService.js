@@ -67,6 +67,16 @@ export function createCatalogService(repository, { pageSize = PAGE_SIZE } = {}) 
     getProductsByIds: (ids) => repository.getProductsByIds(ids),
     getNewArrivals: () => safeList(() => repository.getNewArrivals()),
     getFeatured: () => safeList(() => repository.getFeatured()),
+    /** Opciones de los filtros. Si falla, los filtros quedan vacíos pero la tienda sigue. */
+    async getFacets(rawFilters = {}) {
+      const { page, ordering, ...filters } = normalizeFilters(rawFilters);
+      try {
+        const data = await repository.getFacets(filters);
+        return { sets: data?.sets || [], rarities: data?.rarities || [], conditions: data?.conditions || [], languages: data?.languages || [] };
+      } catch {
+        return { sets: [], rarities: [], conditions: [], languages: [] };
+      }
+    },
     getCategories: () => safeList(() => repository.getCategories()),
     getConditions: () => safeList(() => repository.getConditions()),
     getCertificationEntities: () => safeList(() => repository.getCertificationEntities()),
