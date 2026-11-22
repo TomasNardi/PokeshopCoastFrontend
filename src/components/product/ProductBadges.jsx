@@ -42,9 +42,9 @@ export function ConditionBadge({ condition, detailed = false }) {
   );
   if (!detailed) return pill;
   return (
-    <div className="flex items-start gap-3">
-      {pill}
-      {condition.description && <p className="pt-1 text-[13px] leading-snug text-uns-muted">{condition.description}</p>}
+    <div className="flex items-center gap-3">
+      <span className="shrink-0">{pill}</span>
+      {condition.description && <p className="text-[13px] leading-snug text-uns-muted">{condition.description}</p>}
     </div>
   );
 }

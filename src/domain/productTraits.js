@@ -8,7 +8,8 @@ export const LANGUAGES = Object.freeze({
   es: { label: 'Español', flag: '/flags/flag-es.svg' },
   pt: { label: 'Portugués', flag: '/flags/flag-br.svg' },
   ja: { label: 'Japonés', flag: '/flags/flag-jp.svg' },
-  zh: { label: 'Chino', flag: '/flags/flag-cn.svg' },
+  // focus: qué parte de la bandera queda en el círculo (la china tiene las estrellas arriba a la izquierda).
+  zh: { label: 'Chino', flag: '/flags/flag-cn.svg', focus: '18% 30%' },
 });
 
 export const languageOf = (product) => {

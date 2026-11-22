@@ -19,6 +19,7 @@ export const MAIN_MENU = [
       { label: 'Lightly Played', href: '/tienda?category=singles&condition=Lightly%20Played' },
       { label: 'Moderately Played', href: '/tienda?category=singles&condition=Moderately%20Played' },
       { label: 'Japonés', href: '/tienda?category=singles&language=ja' },
+      { label: 'Chino', href: '/tienda?category=singles&language=zh' },
       { label: 'En oferta', href: '/tienda?category=singles&has_discount=true' },
       { label: 'Todo', href: '/tienda?category=singles' },
     ],
@@ -52,6 +53,7 @@ export const MAIN_MENU = [
       { label: 'Booster boxes', href: '/tienda?category=sellados&search=booster' },
       { label: 'Elite trainer boxes', href: '/tienda?category=sellados&search=elite' },
       { label: 'Japonés', href: '/tienda?category=sellados&language=ja' },
+      { label: 'Chino', href: '/tienda?category=sellados&language=zh' },
       { label: 'Todo', href: '/tienda?category=sellados' },
     ],
     blocks: [

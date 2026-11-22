@@ -97,7 +97,7 @@ export default async function ProductPage({ params }) {
           {view.language && view.languageSentence && (
             <p className="mt-4 flex items-center gap-3 text-[12px] font-bold uppercase tracking-[0.06em]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={view.language.flag} alt="" width={28} height={28} className="h-7 w-7 rounded-full object-cover shadow-sm ring-1 ring-black/10" />
+              <img src={view.language.flag} alt="" width={28} height={28} className="h-7 w-7 rounded-full object-cover shadow-sm ring-1 ring-black/10" style={{ objectPosition: view.language.focus || 'center' }} />
               {view.languageSentence}
             </p>
           )}
