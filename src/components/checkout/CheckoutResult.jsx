@@ -41,7 +41,9 @@ export default function CheckoutResult({ variant }) {
   const params = useSearchParams();
   const clear = useCartStore((s) => s.clear);
   const [order, setOrder] = useState(null);
-  const [verifying, setVerifying] = useState(Boolean(params.get('payment_id')));
+  // MP vuelve con payment_id; si el comprador cerró antes, solo con ?code= (se busca el pago por el código).
+  const fromMercadoPago = Boolean(params.get('payment_id') || (params.get('code') && params.get('transfer') !== '1'));
+  const [verifying, setVerifying] = useState(fromMercadoPago);
   const cfg = VARIANTS[variant];
   const isTransfer = params.get('transfer') === '1';
   const Icon = cfg.icon;
@@ -53,13 +55,13 @@ export default function CheckoutResult({ variant }) {
   useEffect(() => {
     if (cfg.clearsCart) clear();
     const paymentId = params.get('payment_id');
-    if (paymentId) {
+    if (fromMercadoPago) {
       getServices()
         .orders.verifyPayment({
-          payment_id: paymentId,
+          payment_id: paymentId && paymentId !== 'null' ? paymentId : '',
           status: params.get('status'),
-          external_reference: params.get('external_reference'),
-          preference_id: params.get('preference_id'),
+          external_reference: params.get('external_reference') || params.get('code'),
+          code: params.get('code'),
         })
         .then((res) => setOrder(res?.order || null))
         .catch(() => {})
@@ -67,7 +69,7 @@ export default function CheckoutResult({ variant }) {
     } else if (params.get('code')) {
       setOrder({ order_code: params.get('code') });
     }
-  }, [params, clear, cfg.clearsCart]);
+  }, [params, clear, cfg.clearsCart, fromMercadoPago]);
 
   return (
     <section className="container-site flex flex-col items-center py-24 text-center">
