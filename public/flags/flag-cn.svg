@@ -1,4 +1,9 @@
-<svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M0 0H16V12H0V0Z" fill="#E31D1C"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M3.55618 4.87805L1.60953 6.40376L2.35286 4.09646L1.05469 2.89669L2.81249 2.83182L3.55618 0.974609L4.29988 2.83182H6.05469L4.7595 4.09646L5.34952 6.40376L3.55618 4.87805Z" fill="#FECA00"/>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="20" viewBox="0 0 30 20">
+<defs><path id="s" d="M0,-1 0.587785,0.809017 -0.951057,-0.309017H0.951057L-0.587785,0.809017z" fill="#FFDE00"/></defs>
+<rect width="30" height="20" fill="#DE2910"/>
+<use xlink:href="#s" href="#s" transform="translate(5,5) scale(3)"/>
+<use xlink:href="#s" href="#s" transform="translate(10,2) rotate(23.036243)"/>
+<use xlink:href="#s" href="#s" transform="translate(12,4) rotate(45.869898)"/>
+<use xlink:href="#s" href="#s" transform="translate(12,7) rotate(69.945396)"/>
+<use xlink:href="#s" href="#s" transform="translate(10,9) rotate(20.659808)"/>
 </svg>
