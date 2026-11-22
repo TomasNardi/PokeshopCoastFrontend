@@ -202,7 +202,7 @@ export function MobileSummary({ items, totals, discount, paymentMethod }) {
   );
 }
 
-export function OrderSummary({ items, totals, discount, paymentMethod, onRedeem, children }) {
+export function OrderSummary({ items, totals, discount, paymentMethod, onRedeem, onRemoveDiscount, children }) {
   const [code, setCode] = useState('');
   const redeem = () => code.trim() && onRedeem(code.trim());
 
@@ -212,6 +212,23 @@ export function OrderSummary({ items, totals, discount, paymentMethod, onRedeem,
       <div className="mb-5">
         <SummaryLines items={items} />
       </div>
+
+      {discount.code && (
+        <div className={`mb-5 border p-3 text-[12px] ${discount.blocked ? 'border-coast-red/40 bg-coast-red/5' : 'border-uns-hairline bg-uns-stage'}`}>
+          <div className="flex items-center justify-between gap-3">
+            <span>
+              Código <strong className="uppercase">{discount.code}</strong>
+              {discount.blocked ? ' sin aplicar' : ' aplicado'}
+            </span>
+            <button type="button" onClick={onRemoveDiscount} className="shrink-0 font-bold uppercase tracking-[0.1em] underline underline-offset-2 hover:text-coast-red-dark">
+              Quitar
+            </button>
+          </div>
+          {discount.blocked && (
+            <p className="mt-1.5 text-coast-red-dark">Es para compras desde {formatPrice(discount.minTotal)}. Sumá productos o quitalo.</p>
+          )}
+        </div>
+      )}
 
       {!discount.code && (
         <div className="mb-5 flex gap-2">

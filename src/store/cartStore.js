@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { addLine, itemCount, setLineQuantity, subtotalOf, syncLines } from '@/domain/cart';
 
-const NO_DISCOUNT = { discountCode: null, discountPercent: 0, discountFixed: 0 };
+const NO_DISCOUNT = { discountCode: null, discountPercent: 0, discountFixed: 0, discountMinTotal: 0 };
 
 /** Solo estado + orquestación. Las reglas viven en src/domain/cart.js. */
 export const useCartStore = create(
@@ -27,8 +27,13 @@ export const useCartStore = create(
       sync: (freshProducts) => set({ items: syncLines(get().items, freshProducts) }),
       clear: () => set({ items: [], ...NO_DISCOUNT }),
 
-      applyDiscount: ({ code, percent = 0, fixed = 0 }) =>
-        set({ discountCode: code, discountPercent: Number(percent) || 0, discountFixed: Number(fixed) || 0 }),
+      applyDiscount: ({ code, percent = 0, fixed = 0, min_order_total: minTotal = 0 }) =>
+        set({
+          discountCode: code,
+          discountPercent: Number(percent) || 0,
+          discountFixed: Number(fixed) || 0,
+          discountMinTotal: Number(minTotal) || 0,
+        }),
       clearDiscount: () => set(NO_DISCOUNT),
     }),
     {
@@ -37,11 +42,12 @@ export const useCartStore = create(
       // de prueba que no existen. Se descartan una vez al actualizar.
       version: 2,
       migrate: () => ({ items: [], ...NO_DISCOUNT }),
-      partialize: ({ items, discountCode, discountPercent, discountFixed }) => ({
+      partialize: ({ items, discountCode, discountPercent, discountFixed, discountMinTotal }) => ({
         items,
         discountCode,
         discountPercent,
         discountFixed,
+        discountMinTotal,
       }),
     }
   )

@@ -6,7 +6,7 @@ import { CUSTOMER_TOKEN_HEADER } from '../customer/customerRepository.http';
  *   uploadReceipt(file) → { token, name, content_type, size }
  *   getPaymentConfig() → { card_surcharge_*, shipping, free_shipping, transfer }
  *   verifyPayment({ payment_id, external_reference, ... }) → { status, order }
- *   validateDiscount(code) → { code, percent, fixed, expires_at }
+ *   validateDiscount(code) → { code, percent, fixed, min_order_total, expires_at }
  *   savePendingCheckout(payload) → { token }   (carrito abandonado: el recordatorio por mail)
  *   recoverCheckout(token) → { token, finished, items: [{product_id, quantity}], form, discount_code }
  *

@@ -50,7 +50,7 @@ export default function CheckoutForm() {
         </Step>
       </div>
 
-      <OrderSummary items={items} totals={totals} discount={discount} paymentMethod={form.payment_method} onRedeem={checkout.redeem}>
+      <OrderSummary items={items} totals={totals} discount={discount} paymentMethod={form.payment_method} onRedeem={checkout.redeem} onRemoveDiscount={checkout.removeDiscount}>
         {blocked && <p className="mt-4 text-[12px] text-coast-red-dark">Hay productos sin stock en tu carrito. Quitalos para continuar.</p>}
         <button type="submit" disabled={submitting || blocked} className={buttonClass({ size: 'lg', block: true, className: 'mt-6 !hidden lg:!inline-flex' })}>
           <Lock size={14} />

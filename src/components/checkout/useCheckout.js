@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { getServices } from '@/services/container';
 import { EMPTY_CHECKOUT_FORM, validateCheckout } from '@/services/orders/orderService';
 import { useShipping } from './useShipping';
+import { formatPrice } from '@/domain/money';
 import { enabledPaymentMethods, getPaymentMethod } from '@/services/payments/paymentMethods';
 import { cardSurchargePercent } from '@/domain/pricing';
 import { computeTotals, freeShippingStatus, subtotalOf } from '@/domain/cart';
@@ -66,9 +67,16 @@ export function useCheckout() {
   const discountCode = useCartStore((s) => s.discountCode);
   const discountPercent = useCartStore((s) => s.discountPercent);
   const discountFixed = useCartStore((s) => s.discountFixed);
+  const discountMinTotal = useCartStore((s) => s.discountMinTotal) || 0;
+  const clearDiscount = useCartStore((s) => s.clearDiscount);
+  // Un código con compra mínima no descuenta (ni viaja) si el carrito no llega: se avisa y se puede quitar.
+  const cartSubtotal = subtotalOf(items);
+  const discountBlocked = Boolean(discountCode) && cartSubtotal < discountMinTotal;
   const discount = useMemo(
-    () => ({ code: discountCode, percent: discountPercent, fixed: discountFixed }),
-    [discountCode, discountPercent, discountFixed]
+    () => (discountBlocked
+      ? { code: discountCode, percent: 0, fixed: 0, minTotal: discountMinTotal, blocked: true }
+      : { code: discountCode, percent: discountPercent, fixed: discountFixed, minTotal: discountMinTotal, blocked: false }),
+    [discountCode, discountPercent, discountFixed, discountMinTotal, discountBlocked]
   );
   const applyDiscount = useCartStore((s) => s.applyDiscount);
   const sync = useCartStore((s) => s.sync);
@@ -231,7 +239,7 @@ export function useCheckout() {
       const { next, claimToken } = await services.orders.placeOrder({
         form: state.form,
         items,
-        discountCode: discount.code,
+        discountCode: discount.blocked ? '' : discount.code,
         receipt: receipt.data,
         origin: window.location.origin,
         checkoutToken: checkoutToken.current,
@@ -248,6 +256,8 @@ export function useCheckout() {
     } catch (error) {
       // La cotización venció o el carrito cambió: se recotiza sola y el comprador elige de nuevo.
       if (error.data?.code === 'shipping_quote_expired') shipping.retry();
+      // El código dejó de servir (vencido, sin usos, compra mínima): se saca para que pueda seguir.
+      if (error.fieldErrors?.discount_code) clearDiscount();
       if (error.fieldErrors) {
         dispatch({ type: 'errors', errors: error.fieldErrors });
         // Si el problema está en los datos (no en el comprobante), volvemos al formulario.
@@ -261,6 +271,11 @@ export function useCheckout() {
   const redeem = async (code) => {
     try {
       const result = await services.orders.validateDiscount(code);
+      const minTotal = Number(result.min_order_total) || 0;
+      if (cartSubtotal < minTotal) {
+        toast.error(`El código ${result.code} es para compras desde ${formatPrice(minTotal)}.`);
+        return;
+      }
       applyDiscount(result);
       toast.success(`Código ${result.code} aplicado`);
     } catch (error) {
@@ -287,6 +302,10 @@ export function useCheckout() {
     setFields,
     shipping,
     redeem,
+    removeDiscount: () => {
+      clearDiscount();
+      toast('Código quitado');
+    },
     submit,
   };
 }
