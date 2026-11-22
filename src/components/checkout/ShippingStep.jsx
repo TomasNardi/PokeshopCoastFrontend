@@ -14,11 +14,12 @@ function Tabs({ value, onChange }) {
       role="radio"
       aria-checked={value === id}
       onClick={() => onChange(id)}
-      className={`flex items-center justify-center gap-2 py-3 text-[12px] font-bold uppercase tracking-[0.1em] transition-colors duration-300 ${
+      className={`flex min-w-0 flex-col items-center justify-center gap-1 px-2 py-2.5 text-center text-[11px] font-bold uppercase leading-tight tracking-[0.06em] transition-colors duration-300 min-[420px]:flex-row min-[420px]:gap-2 min-[420px]:py-3 sm:text-[12px] sm:tracking-[0.1em] ${
         value === id ? 'bg-black text-white' : 'text-uns-muted hover:text-black'
       }`}
     >
-      <Icon size={16} strokeWidth={2} /> {label}
+      <Icon size={16} strokeWidth={2} className="shrink-0" />
+      <span className="min-w-0">{label}</span>
     </button>
   );
   return (
