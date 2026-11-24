@@ -3,7 +3,7 @@ import { productView } from '@/domain/product';
 import { formatPrice } from '@/domain/money';
 import ProductStage from './ProductStage';
 import AddToCartButton from './AddToCartButton';
-import { CertBadge, ConditionBadge, LanguageFlag, OutletBadge, SaleBadge, SoldOutBadge } from './ProductBadges';
+import { CertBadge, ConditionBadge, LanguageFlag, OutletBadge, SaleBadge, SoldOutBadge, TraitBadges } from './ProductBadges';
 import { PRESENTATION_MODE } from '@/config/presentation';
 
 /** En modo presentación la card se ve y anima igual, pero no es un link. */
@@ -19,7 +19,8 @@ function CardLink({ href, children, ...rest }) {
  */
 export default function ProductCard({ product, priority = false }) {
   const view = productView(product);
-  const subtitle = [view.subtitle, ...view.traits].filter(Boolean).join(' · ');
+  // Reverse, 1st Edition, firmada… van como insignias sobre la foto; el subtítulo queda para set y número.
+  const subtitle = view.subtitle || '';
 
   return (
     <article className="product-item group">
@@ -34,9 +35,10 @@ export default function ProductCard({ product, priority = false }) {
             <div className="product-item__badges product-item__badges--right">
               {view.certLabel ? <CertBadge label={view.certLabel} /> : <ConditionBadge condition={view.condition} />}
             </div>
-            {view.language && (
+            {(view.language || view.traitBadges.length > 0) && (
               <span className="product-item__lang">
                 <LanguageFlag language={view.language} />
+                <TraitBadges badges={view.traitBadges} />
               </span>
             )}
           </ProductStage>

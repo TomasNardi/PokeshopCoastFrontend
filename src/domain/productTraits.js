@@ -45,3 +45,25 @@ export const ATTRIBUTES = [
 
 export const attributesOf = (product) =>
   ATTRIBUTES.filter(([field]) => product?.[field]).map(([, label]) => label);
+
+/**
+ * Insignias con ícono (como TCG Fans): solo las que aplican a la carta.
+ * Mismos íconos que la carga de stock del admin (public/insignias).
+ */
+const ATTRIBUTE_ICONS = {
+  altered: '/insignias/alterada.svg',
+  signed: '/insignias/firmada.svg',
+  stamped: '/insignias/estampada.svg',
+  freshly_opened: '/insignias/recien_abierta.svg',
+};
+
+export function traitBadgesOf(product) {
+  const finish = product?.finish || '';
+  const badges = [];
+  if (finish === 'Reverse Holofoil') badges.push({ key: 'reverse', label: 'Reverse Holo', icon: '/insignias/reverse.svg' });
+  if (finish.startsWith('1st Edition')) badges.push({ key: '1st', label: '1st Edition', icon: '/insignias/primera.svg' });
+  ATTRIBUTES.forEach(([field, label]) => {
+    if (product?.[field]) badges.push({ key: field, label, icon: ATTRIBUTE_ICONS[field] });
+  });
+  return badges;
+}

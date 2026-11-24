@@ -61,6 +61,25 @@ export function DiscountBadge({ percent }) {
   return <span className={`${box} badge-box--sale`}>-{percent}%</span>;
 }
 
+/**
+ * Reverse Holo, 1st Edition, firmada, estampada… como ícono (TCG Fans). Solo
+ * las que aplican. `withLabel`: con el nombre al lado (ficha del producto).
+ */
+export function TraitBadges({ badges, withLabel = false }) {
+  if (!badges?.length) return null;
+  return (
+    <span className={`trait-badges ${withLabel ? 'trait-badges--labeled' : ''}`}>
+      {badges.map((b) => (
+        <span key={b.key} className="trait-badge" title={b.label}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={b.icon} alt={withLabel ? '' : b.label} width={18} height={18} />
+          {withLabel && <span>{b.label}</span>}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export function LanguageFlag({ language }) {
   if (!language) return null;
   return (

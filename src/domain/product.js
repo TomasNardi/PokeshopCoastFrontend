@@ -5,7 +5,7 @@
  */
 import { toNumber } from './money';
 import { getCondition } from './conditions';
-import { attributesOf, finishLabel, isSpecialFinish, languageOf } from './productTraits';
+import { attributesOf, finishLabel, isSpecialFinish, languageOf, traitBadgesOf } from './productTraits';
 
 export const LOW_STOCK_THRESHOLD = 2;
 
@@ -131,6 +131,7 @@ export function productView(product) {
     language,
     finish: finishLabel(product.finish),
     traits: [isSpecialFinish(product.finish) ? finishLabel(product.finish) : null, ...attributesOf(product)].filter(Boolean),
+    traitBadges: traitBadgesOf(product),
     maxQuantity: getMaxQuantity(product),
     stockStatus: stockStatusOf(product),
     isAvailable: getMaxQuantity(product) > 0,

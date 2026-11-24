@@ -1250,6 +1250,44 @@ body {
   z-index: 3;
   display: flex;
 }
+/* Insignias de la carta (Reverse, 1st Edition, firmada…): íconos chicos junto a la bandera. */
+.product-item__lang {
+  align-items: center;
+  gap: 5px;
+}
+.trait-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.trait-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.trait-badge img {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.18);
+}
+.trait-badges--labeled {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.trait-badges--labeled .trait-badge {
+  padding: 5px 10px 5px 6px;
+  border: 1px solid theme('colors.uns.hairline');
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: theme('colors.coast.ink');
+}
+.trait-badges--labeled .trait-badge img {
+  box-shadow: none;
+}
 .product-item__quick {
   position: absolute;
   left: 0;

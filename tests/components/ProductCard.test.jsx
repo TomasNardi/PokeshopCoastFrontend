@@ -49,9 +49,17 @@ describe('<ProductCard />', () => {
     expect(container.querySelector('.stage__glare')).not.toBeInTheDocument();
   });
 
-  it('subtítulo: set + particularidades', () => {
+  it('1st Edition, firmada, etc. van como insignias con ícono; el subtítulo queda para el set', () => {
     render(<ProductCard product={bySlug('lugia-009-neo-genesis-1st-edition')} />);
-    expect(screen.getByText('Neo Genesis · 1st Edition Holo · Firmada')).toBeInTheDocument();
+    expect(screen.getByText('Neo Genesis')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: '1st Edition' })).toHaveAttribute('src', '/insignias/primera.svg');
+    expect(screen.getByRole('img', { name: 'Firmada' })).toHaveAttribute('src', '/insignias/firmada.svg');
+    expect(screen.queryByRole('img', { name: 'Reverse Holo' })).not.toBeInTheDocument();
+  });
+
+  it('una reverse muestra su insignia', () => {
+    render(<ProductCard product={bySlug('pikachu-025-151-reverse')} />);
+    expect(screen.getByRole('img', { name: 'Reverse Holo' })).toBeInTheDocument();
   });
 
   it('agregar al carrito: anillo de carga → check → suma la unidad y abre el drawer', async () => {

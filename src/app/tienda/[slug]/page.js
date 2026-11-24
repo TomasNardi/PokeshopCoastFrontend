@@ -14,7 +14,7 @@ import CompleteYourOrder from '@/components/product/CompleteYourOrder';
 import StickyBuyBar from '@/components/product/StickyBuyBar';
 import { Description, DetailRows, ShippingInfo } from '@/components/product/ProductInfo';
 import InfoSection from '@/components/product/InfoSection';
-import { CertBadge, ConditionBadge, DiscountBadge, StockStatus } from '@/components/product/ProductBadges';
+import { CertBadge, ConditionBadge, DiscountBadge, StockStatus, TraitBadges } from '@/components/product/ProductBadges';
 
 export const dynamic = 'force-dynamic';
 
@@ -92,7 +92,11 @@ export default async function ProductPage({ params }) {
         <div className="fade-up min-w-0 lg:pt-2" style={{ '--delay': '0.1s' }}>
           {view.subtitle && <p className="eyebrow mb-2">{view.subtitle}</p>}
           <h1 className="font-display text-[30px] font-extrabold leading-[1.05] tracking-[-0.02em] sm:text-5xl">{view.title}</h1>
-          {view.traits.length > 0 && <p className="mt-3 text-[13px] font-semibold text-coast-gray">{view.traits.join(' · ')}</p>}
+          {view.traitBadges.length > 0 && (
+            <div className="mt-3">
+              <TraitBadges badges={view.traitBadges} withLabel />
+            </div>
+          )}
 
           {view.language && view.languageSentence && (
             <p className="mt-4 flex items-center gap-3 text-[12px] font-bold uppercase tracking-[0.06em]">
