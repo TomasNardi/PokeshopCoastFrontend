@@ -30,6 +30,7 @@ import { createAuthService } from './auth/authService';
 import { createHttpShippingRepository } from './shipping/shippingRepository.http';
 import { createMockShippingRepository } from './shipping/shippingRepository.mock';
 import { createPasswordRecoveryService } from './auth/passwordRecoveryService';
+import { createHttpSeoRepository, createMockSeoRepository } from './seo/seoRepository.http';
 
 function pickAuthProvider({ useMocks, supabase, devLogin, apiUrl }) {
   if (supabase) return createSupabaseAuthProvider(supabase);
@@ -60,6 +61,7 @@ export function createServices({
         customer: createMockCustomerRepository(),
         engagement: createMockEngagementRepository(),
         shipping: createMockShippingRepository(),
+        seo: createMockSeoRepository(),
       }
     : {
         catalog: createHttpCatalogRepository(http),
@@ -67,6 +69,7 @@ export function createServices({
         customer: createHttpCustomerRepository(http, { getCustomerToken }),
         engagement: createHttpEngagementRepository(http),
         shipping: createHttpShippingRepository(http),
+        seo: createHttpSeoRepository(http),
       };
 
   return Object.freeze({
@@ -78,6 +81,7 @@ export function createServices({
     customer: repos.customer,
     engagement: createEngagementService(repos.engagement),
     shipping: repos.shipping,
+    seo: repos.seo,
   });
 }
 

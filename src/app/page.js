@@ -9,6 +9,10 @@ import { ProductGridSkeleton, ProductRailSkeleton } from '@/components/product/P
 import Newsletter from '@/components/home/Newsletter';
 import KeepLoading from '@/components/ui/KeepLoading';
 import { PRESENTATION_MODE } from '@/config/presentation';
+import JsonLd from '@/components/seo/JsonLd';
+import { organizationJsonLd, websiteJsonLd } from '@/seo/structuredData';
+
+export const metadata = { alternates: { canonical: '/' } };
 
 // Modo presentación: "Comprar" baja a los productos en vez de ir a la tienda.
 const mainHero = PRESENTATION_MODE
@@ -100,6 +104,8 @@ async function SealedProducts() {
 export default function HomePage() {
   return (
     <>
+      <JsonLd data={organizationJsonLd()} />
+      <JsonLd data={websiteJsonLd()} />
       <ParallaxHero {...mainHero} priority titleAs="h1" />
       <Suspense fallback={railSkeleton}>
         <NewArrivals />

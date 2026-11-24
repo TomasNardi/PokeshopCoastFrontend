@@ -1,5 +1,5 @@
 import { Suspense, cache } from 'react';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { Truck, ShieldCheck, CreditCard } from 'lucide-react';
 import { getServices } from '@/services/container';
 import { defaultDescription, productView } from '@/domain/product';
@@ -14,6 +14,8 @@ import CompleteYourOrder from '@/components/product/CompleteYourOrder';
 import StickyBuyBar from '@/components/product/StickyBuyBar';
 import { Description, DetailRows, ShippingInfo } from '@/components/product/ProductInfo';
 import InfoSection from '@/components/product/InfoSection';
+import JsonLd from '@/components/seo/JsonLd';
+import { openGraph } from '@/config/seo';
 import { CertBadge, ConditionBadge, DiscountBadge, StockStatus, TraitBadges } from '@/components/product/ProductBadges';
 
 export const dynamic = 'force-dynamic';
@@ -43,19 +45,32 @@ export async function generateMetadata({ params }) {
   const product = await loadProduct(slug);
   if (!product) return { title: 'Producto no encontrado' };
   const seo = product.seo || {};
+  const description = seo.description || `${product.name} en PokeShop Coast. Envíos a todo el país.`;
+  // Canonical con el slug real del producto, no el de la URL pedida.
+  const canonical = `/tienda/${product.slug || slug}`;
   return {
     // El título del backend ya trae la marca: va sin la plantilla "| PokeShop Coast".
     title: seo.title ? { absolute: seo.title } : product.name,
-    description: seo.description || `${product.name} en PokeShop Coast. Envíos a todo el país.`,
-    alternates: { canonical: `/tienda/${slug}` },
-    openGraph: { images: product.image_url ? [product.image_url] : [] },
+    description,
+    alternates: { canonical },
+    openGraph: openGraph({
+      url: canonical,
+      title: seo.title || product.name,
+      description,
+      images: product.image_url ? [{ url: product.image_url, alt: product.name }] : [],
+    }),
   };
 }
 
 export default async function ProductPage({ params }) {
   const { slug } = await params;
   const [product, paymentConfig] = await Promise.all([loadProduct(slug), loadPaymentConfig()]);
-  if (!product) notFound();
+  if (!product) {
+    // Producto renombrado: el slug viejo (ya indexado o compartido) va con 308 al nuevo.
+    const target = await getServices().seo.resolveRedirect(`/tienda/${slug}`);
+    if (target) permanentRedirect(target);
+    notFound();
+  }
 
   const view = productView(product);
   const isCard = view.kind === 'single' || view.kind === 'slab';
@@ -72,9 +87,7 @@ export default async function ProductPage({ params }) {
 
   return (
     <>
-      {product.seo?.json_ld && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(product.seo.json_ld).replace(/</g, '\\u003c') }} />
-      )}
+      <JsonLd data={product.seo?.json_ld} />
 
       <div className="container-site pt-5 md:pt-8">
         <ProductBreadcrumb category={view.category} categorySlug={view.categorySlug} name={view.name} />

@@ -7,6 +7,9 @@ import ProductGrid from '@/components/product/ProductGrid';
 import { ProductGridSkeleton, ShopFiltersSkeleton } from '@/components/product/ProductSkeletons';
 import ShopFilters from '@/components/shop/ShopFilters';
 import Pagination from '@/components/shop/Pagination';
+import { NOINDEX_FOLLOW, shopIndexing } from '@/seo/indexing';
+import { openGraph } from '@/config/seo';
+import { SITE } from '@/config/site';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,9 +20,21 @@ const keyOf = (params) => new URLSearchParams(Object.entries(params).filter(([, 
 const loadPage = cache((key) => getServices().catalog.getProductPage(Object.fromEntries(new URLSearchParams(key))));
 
 export async function generateMetadata({ searchParams }) {
-  const { category } = await searchParams;
-  const name = CATEGORIES.find((c) => c.slug === category)?.name;
-  return { title: name ? `${name} Pokémon TCG` : 'Tienda', alternates: { canonical: '/tienda' } };
+  const filters = normalizeFilters(await searchParams);
+  const category = CATEGORIES.find((c) => c.slug === filters.category);
+  const { canonical, indexable } = shopIndexing(filters);
+  const pageSuffix = filters.page > 1 ? ` — Página ${filters.page}` : '';
+  const title = `${category ? `${category.name} Pokémon TCG` : 'Tienda de cartas Pokémon TCG'}${pageSuffix}`;
+  const description = category
+    ? `${category.name} de Pokémon TCG en Argentina: ${category.blurb.toLowerCase()}. Envíos a todo el país y pago con Mercado Pago.`
+    : SITE.description;
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: openGraph({ url: canonical, title: `${title} | ${SITE.name}`, description }),
+    ...(indexable ? {} : { robots: NOINDEX_FOLLOW }),
+  };
 }
 
 async function ResultCount({ queryKey }) {

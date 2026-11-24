@@ -1,6 +1,7 @@
 import { Barlow_Condensed, Roboto, Roboto_Condensed } from 'next/font/google';
 import './globals.css';
 import { SITE, TOP_BANNER_MESSAGE } from '@/config/site';
+import { GOOGLE_SITE_VERIFICATION, openGraph } from '@/config/seo';
 import { MAIN_MENU } from '@/config/navigation';
 import { getServices } from '@/services/container';
 import { loadMenuImages } from '@/components/header/menuData';
@@ -54,8 +55,12 @@ const BASE_METADATA = {
   },
   manifest: '/site.webmanifest',
   appleWebApp: { title: SITE.name },
-  openGraph: { type: 'website', locale: SITE.locale, siteName: SITE.name, url: SITE.url },
-  robots: { index: true, follow: true },
+  openGraph: openGraph({ url: '/', title: `${SITE.name} — Cartas Pokémon TCG en Argentina`, description: SITE.description }),
+  twitter: { card: 'summary_large_image' },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
+  // Search Console (también está el archivo public/googlec4d88a0b592d5be2.html).
+  verification: { google: GOOGLE_SITE_VERIFICATION },
+  formatDetection: { telephone: false },
 };
 
 // En mantenimiento o antes de la apertura (y en la vista previa del dueño) Google

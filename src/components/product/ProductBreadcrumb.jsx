@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
-import { SITE } from '@/config/site';
+import { absoluteUrl } from '@/config/seo';
+import JsonLd from '@/components/seo/JsonLd';
 
 /**
  * Inicio › Tienda › Categoría › Producto, con su BreadcrumbList para Google
@@ -21,7 +22,7 @@ export default function ProductBreadcrumb({ category, categorySlug, name }) {
       '@type': 'ListItem',
       position: index + 1,
       name: item.label,
-      ...(item.href ? { item: new URL(item.href, SITE.url).toString() } : {}),
+      ...(item.href ? { item: absoluteUrl(item.href) } : {}),
     })),
   };
 
@@ -42,7 +43,7 @@ export default function ProductBreadcrumb({ category, categorySlug, name }) {
           );
         })}
       </ol>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
+      <JsonLd data={jsonLd} />
     </nav>
   );
 }
