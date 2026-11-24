@@ -62,7 +62,7 @@ function AddressForm({ initial, onCancel, onSaved }) {
             role="radio"
             aria-checked={form.kind === kind}
             onClick={() => setForm((f) => ({ ...f, kind }))}
-            className={`rounded-full py-2 text-[12px] font-bold uppercase tracking-[0.1em] transition-all duration-300 ${form.kind === kind ? 'bg-white shadow-sm' : 'text-coast-gray'}`}
+            className={`rounded-full py-2 text-[12px] font-bold uppercase tracking-[0.1em] transition-[background-color,box-shadow,color] duration-300 ${form.kind === kind ? 'bg-white shadow-sm' : 'text-coast-gray'}`}
           >
             {label}
           </button>
@@ -106,7 +106,7 @@ function AddressForm({ initial, onCancel, onSaved }) {
 function AddressCard({ address, onEdit, onDelete, onDefault, style }) {
   const { Icon, label } = KINDS[address.kind] || KINDS.home;
   return (
-    <Card style={style} className={`group relative flex flex-col p-4 transition-all duration-300 hover:shadow-card md:p-5 ${address.is_default ? 'border-coast-ink/40' : ''}`}>
+    <Card style={style} className={`group relative flex flex-col p-4 transition-shadow duration-300 hover:shadow-card md:p-5 ${address.is_default ? 'border-coast-ink/40' : ''}`}>
       <div className="mb-3 flex items-center justify-between">
         <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.1em] text-uns-muted">
           <Icon size={14} /> {label}

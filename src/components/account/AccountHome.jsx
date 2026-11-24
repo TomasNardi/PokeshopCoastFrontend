@@ -23,7 +23,7 @@ function greeting() {
 
 function Stat({ label, value, href, Icon }) {
   return (
-    <Link href={href} className="group block min-w-0 rounded-2xl border border-coast-line bg-white p-3 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover md:p-5">
+    <Link href={href} className="group block min-w-0 rounded-2xl border border-coast-line bg-white p-3 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-card-hover md:p-5">
       <div className="flex items-center justify-between gap-1 text-uns-muted">
         <span className="truncate text-[10px] font-bold uppercase tracking-[0.06em] md:text-[11px] md:tracking-[0.1em]">{label}</span>
         <Icon size={14} className="hidden shrink-0 transition-colors group-hover:text-coast-red sm:block md:h-4 md:w-4" />

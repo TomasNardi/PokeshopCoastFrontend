@@ -80,7 +80,7 @@ export default function NotificationsSection() {
                         </span>
                         <span className="mt-0.5 line-clamp-2 block text-[12px] leading-snug text-uns-muted md:mt-1 md:line-clamp-none md:text-[13px] md:leading-relaxed">{n.body}</span>
                       </span>
-                      <span className={`mt-2 h-2 w-2 shrink-0 rounded-full transition-all duration-500 ${n.read_at ? 'scale-0 bg-transparent' : 'bg-coast-red'}`} aria-hidden="true" />
+                      <span className={`mt-2 h-2 w-2 shrink-0 rounded-full transition-[transform,background-color] duration-500 ${n.read_at ? 'scale-0 bg-transparent' : 'bg-coast-red'}`} aria-hidden="true" />
                     </Link>
                   </li>
                 ))}

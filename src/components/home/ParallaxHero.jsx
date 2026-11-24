@@ -59,7 +59,7 @@ export default function ParallaxHero({
       raf = 0;
       const rect = frame.getBoundingClientRect();
       if (rect.bottom < 0 || rect.top > window.innerHeight) return;
-      pane.style.transform = `translate3d(0, ${(-(rect.top - rest) * SPEED).toFixed(1)}px, 0)`;
+      pane.style.transform = `translate3d(0, ${Math.round(-(rect.top - rest) * SPEED)}px, 0)`;
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);

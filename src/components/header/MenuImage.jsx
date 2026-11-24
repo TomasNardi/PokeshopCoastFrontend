@@ -16,7 +16,7 @@ export default function MenuImage({ block, delay, tabbable, onNavigate }) {
       onClick={onNavigate}
     >
       <span className="mega__image-wrapper" style={{ transitionDelay: `${delay}ms` }}>
-        {block.image && <img src={block.image} alt="" loading="lazy" className="mega__image-img" />}
+        {block.image && <img src={block.image} alt="" width={600} height={838} loading="lazy" decoding="async" className="mega__image-img" />}
       </span>
       <span className="mega__image-overlay" aria-hidden="true" />
       <span className="mega__image-title">{block.title}</span>

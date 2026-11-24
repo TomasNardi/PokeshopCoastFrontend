@@ -438,12 +438,17 @@ body {
   align-items: center;
   justify-content: center;
   background: #f2f2f2;
-  transform: scale(1.06);
+  /* Capa de GPU fija (no solo durante la transición): si el navegador la suelta
+     al terminar, re-rasteriza alineando al píxel y la foto "salta" 1-2 px.
+     Mismas funciones (translateZ + scale) en los dos estados. */
+  transform: translateZ(0) scale(1.06);
   transform-origin: bottom center;
+  will-change: transform;
+  backface-visibility: hidden;
   transition: transform 0.75s var(--ease-out);
 }
 .mega.is-visible .mega__image-wrapper {
-  transform: scale(1);
+  transform: translateZ(0) scale(1);
   transition: transform 1.5s var(--ease-out);
 }
 .mega:not(.is-visible) .mega__image,
@@ -454,10 +459,13 @@ body {
 .mega__image-img {
   position: relative;
   z-index: 1;
+  display: block;
   max-width: 50%;
   max-height: 58%;
   object-fit: contain;
-  transform: translateY(-8%);
+  /* Posición fija (no se anima): `translate` aparte para no mezclarlo con transform. */
+  translate: 0 -8%;
+  backface-visibility: hidden;
 }
 .mega__image-overlay {
   position: absolute;
@@ -585,18 +593,26 @@ body {
   aspect-ratio: 985 / 888;
   background: #f2f2f2;
 }
+.search-card__media {
+  overflow: hidden;
+}
 .search-card__media img {
   position: relative;
   z-index: 1;
+  display: block;
   max-width: 46%;
   max-height: 60%;
   object-fit: contain;
-  transform: translateY(-8%);
+  translate: 0 -8%;
+  /* Antes animaba -8% → -12% y terminaba en px con decimales (-7.749px): saltaba al final. */
+  transform: translateZ(0) translateY(0);
+  will-change: transform;
+  backface-visibility: hidden;
   transition: transform 0.6s var(--ease-soft);
 }
 @media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .search-card:hover .search-card__media img {
-    transform: translateY(-12%);
+    transform: translateZ(0) translateY(-6px);
   }
 }
 .search-card__title,
@@ -984,12 +1000,13 @@ body {
   container-type: size;
   perspective: 900px;
   opacity: 0;
-  transform: scale(1.04);
+  transform: translateZ(0) scale(1.04);
+  backface-visibility: hidden;
   transition: opacity 0.8s var(--ease-quart), transform 0.8s var(--ease-quart);
 }
 .stage__float.is-loaded {
   opacity: 1;
-  transform: scale(1);
+  transform: translateZ(0) scale(1);
 }
 
 /* La carta: caja con la proporción real de la imagen (--ar, por defecto la de
@@ -1026,30 +1043,43 @@ body {
 
 /* Cartas en el listado: en vez de rotar, la carta "se levanta" de la mesa. */
 .stage--lift .stage__card {
-  transform: none;
+  transform: translateZ(0) translateY(0) scale(1);
+  backface-visibility: hidden;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .product-item:hover .stage--lift .stage__card {
-    transform: translateY(-6px) scale(1.03);
+    transform: translateZ(0) translateY(-6px) scale(1.03);
     box-shadow: 0 14px 24px -12px rgba(0, 0, 0, 0.28);
   }
 }
 @media (prefers-reduced-motion: reduce) {
   .stage--lift .stage__card { transition: none; }
+  /* Sin zoom: las fotos quedan quietas. */
+  .mega__image-wrapper,
+  .mega.is-visible .mega__image-wrapper,
+  .stage__float,
+  .stage__float.is-loaded { transform: translateZ(0) scale(1); transition: opacity 0.3s ease; }
+  .search-card__media img,
+  .search-card:hover .search-card__media img { transform: translateZ(0) translateY(0); transition: none; }
+  .stage--lift .stage__card,
+  .product-item:hover .stage--lift .stage__card { transform: translateZ(0) translateY(0) scale(1); }
+  .stage--zoom .stage__card,
+  .group:hover .stage--zoom .stage__card { transform: translateZ(0) scale(1); transition: none; }
 }
 
 /* Sellados y accesorios: foto de producto sin bordes de carta, zoom lento en hover. */
 .stage--zoom .stage__card {
   border-radius: 0;
   overflow: visible;
-  transform: scale(1);
+  transform: translateZ(0) scale(1);
+  backface-visibility: hidden;
   transition: transform 0.9s var(--ease-soft);
 }
 @media (hover: hover) and (pointer: fine) and (min-width: 750px) {
   .group:hover .stage--zoom .stage__card {
-    transform: scale(1.08);
+    transform: translateZ(0) scale(1.08);
   }
 }
 

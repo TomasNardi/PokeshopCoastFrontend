@@ -11,7 +11,7 @@ export default function OrderCard({ order, style }) {
     <Link
       href={`/cuenta/pedidos/${order.order_code}`}
       style={style}
-      className="order-card group flex items-center gap-3 rounded-2xl border border-coast-line bg-white p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-coast-ink/30 hover:shadow-card-hover md:gap-4 md:p-5"
+      className="order-card group flex items-center gap-3 rounded-2xl border border-coast-line bg-white p-3 transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-coast-ink/30 hover:shadow-card-hover md:gap-4 md:p-5"
     >
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 md:gap-x-3 md:gap-y-2">
