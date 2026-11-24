@@ -38,3 +38,18 @@ describe('resolveGate', () => {
     expect(resolveGate({ isActive: false, beforeLaunch: true, preview: true })).toEqual({ maintenance: false, launch: false });
   });
 });
+
+describe('«Inaugurar ya» (plan B desde el admin)', () => {
+  it('el backend puede abrir la tienda antes de la fecha; sin backend manda la fecha', async () => {
+    const { getSiteStatus } = await import('@/services/site/siteStatus');
+    const original = globalThis.fetch;
+    try {
+      globalThis.fetch = async () => ({ ok: true, json: async () => ({ is_active: true, launch_open: true }) });
+      expect((await getSiteStatus()).launchOpen).toBe(true);
+      globalThis.fetch = async () => { throw new Error('caído'); };
+      expect((await getSiteStatus()).launchOpen).toBe(false);
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+});

@@ -19,7 +19,8 @@ import { internalHeaders } from '@/services/http/internalHeaders';
  */
 
 const TIMEOUT_MS = 3000;
-const OPEN = Object.freeze({ isActive: true, maintenanceTitle: '', maintenanceMessage: '', showTopBanner: true, topBannerMessage: '' });
+// launchOpen false: sin backend, la apertura la decide la fecha (config/launch.js), que abre sola igual.
+const OPEN = Object.freeze({ isActive: true, launchOpen: false, maintenanceTitle: '', maintenanceMessage: '', showTopBanner: true, topBannerMessage: '' });
 
 export const PREVIEW_COOKIE = 'psc_preview';
 
@@ -32,6 +33,8 @@ export const getSiteStatus = cache(async () => {
     const data = await response.json();
     return {
       isActive: data.is_active !== false,
+      // Plan B del lanzamiento: «Inaugurar ya» en el admin abre la tienda aunque no sea la fecha.
+      launchOpen: data.launch_open === true,
       maintenanceTitle: data.maintenance_title || '',
       maintenanceMessage: data.maintenance_message || '',
       showTopBanner: data.show_top_banner !== false,
@@ -105,7 +108,7 @@ export function resolveGate({ isActive, beforeLaunch, preview }) {
  */
 export const getMaintenanceState = cache(async () => {
   const status = await getSiteStatus();
-  const beforeLaunch = isBeforeLaunch();
+  const beforeLaunch = !status.launchOpen && isBeforeLaunch();
   const gated = !status.isActive || beforeLaunch;
   // Las cookies solo se leen cuando hace falta: abierta la tienda, las páginas no dependen de ellas.
   const preview = gated ? await hasPreviewAccess() : false;
