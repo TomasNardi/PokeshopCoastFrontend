@@ -57,6 +57,15 @@ describe('<ProductCard />', () => {
     expect(screen.queryByRole('img', { name: 'Reverse Holo' })).not.toBeInTheDocument();
   });
 
+  it('con más de dos insignias suma un "+N" para celular (las demás siguen en el HTML)', async () => {
+    const { TraitBadges } = await import('@/components/product/ProductBadges');
+    const badges = ['reverse', 'signed', 'stamped', 'altered'].map((key) => ({ key, label: key, icon: `/${key}.svg` }));
+    const { container } = render(<TraitBadges badges={badges} />);
+    expect(container.querySelectorAll('.trait-badge')).toHaveLength(4);
+    expect(container.querySelectorAll('.trait-badge.is-extra')).toHaveLength(2);
+    expect(container.querySelector('.trait-more')).toHaveTextContent('+2');
+  });
+
   it('una reverse muestra su insignia', () => {
     render(<ProductCard product={bySlug('pikachu-025-151-reverse')} />);
     expect(screen.getByRole('img', { name: 'Reverse Holo' })).toBeInTheDocument();

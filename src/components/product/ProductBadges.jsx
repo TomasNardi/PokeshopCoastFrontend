@@ -61,21 +61,31 @@ export function DiscountBadge({ percent }) {
   return <span className={`${box} badge-box--sale`}>-{percent}%</span>;
 }
 
+/** En las cards de celular entran estas; el resto se resume en "+N". */
+const MOBILE_VISIBLE = 2;
+
 /**
  * Reverse Holo, 1st Edition, firmada, estampada… como ícono (TCG Fans). Solo
- * las que aplican. `withLabel`: con el nombre al lado (ficha del producto).
+ * las que aplican, siempre en el mismo orden y tamaño. `withLabel`: con el
+ * nombre al lado (ficha del producto).
  */
 export function TraitBadges({ badges, withLabel = false }) {
   if (!badges?.length) return null;
+  const hidden = badges.slice(MOBILE_VISIBLE);
   return (
     <span className={`trait-badges ${withLabel ? 'trait-badges--labeled' : ''}`}>
-      {badges.map((b) => (
-        <span key={b.key} className="trait-badge" title={b.label}>
+      {badges.map((b, i) => (
+        <span key={b.key} className={`trait-badge ${i >= MOBILE_VISIBLE ? 'is-extra' : ''}`} title={b.label}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={b.icon} alt={withLabel ? '' : b.label} width={18} height={18} />
           {withLabel && <span>{b.label}</span>}
         </span>
       ))}
+      {!withLabel && hidden.length > 0 && (
+        <span className="trait-more" title={hidden.map((b) => b.label).join(', ')} aria-hidden="true">
+          +{hidden.length}
+        </span>
+      )}
     </span>
   );
 }

@@ -1272,6 +1272,36 @@ body {
   border-radius: 4px;
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.18);
 }
+.trait-more {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: theme('colors.coast.ink');
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+/* Celular: dos insignias y "+N" con el resto, un poco más chicas. */
+@media (max-width: 749px) {
+  .trait-badges:not(.trait-badges--labeled) .trait-badge.is-extra {
+    display: none;
+  }
+  .trait-badges:not(.trait-badges--labeled) .trait-more {
+    display: inline-flex;
+    min-width: 16px;
+    height: 16px;
+    font-size: 9px;
+  }
+  .trait-badges:not(.trait-badges--labeled) .trait-badge img {
+    width: 16px;
+    height: 16px;
+  }
+}
 .trait-badges--labeled {
   flex-wrap: wrap;
   gap: 8px;
