@@ -33,22 +33,23 @@ export function filterProducts(products, filters = {}) {
 
   const order = filters.ordering;
   if (order === 'price_ars') list.sort((a, b) => Number(a.final_price) - Number(b.final_price));
-  if (order === '-price_ars') list.sort((a, b) => Number(b.final_price) - Number(a.final_price));
+  if (order === '-price_ars' || order === '-final_price') list.sort((a, b) => Number(b.final_price) - Number(a.final_price));
   if (order === '-created_at') list.sort((a, b) => b.created_at.localeCompare(a.created_at));
   return list;
 }
 
 export function createMockCatalogRepository({ products = MOCK_PRODUCTS, pageSize = PAGE_SIZE } = {}) {
-  return {
+  const repository = {
     async listProducts(filters = {}) {
       const all = filterProducts(products, filters);
       const page = Number(filters.page) || 1;
-      const start = (page - 1) * pageSize;
+      const size = Number(filters.page_size) || pageSize;
+      const start = (page - 1) * size;
       return {
         count: all.length,
-        next: start + pageSize < all.length ? `?page=${page + 1}` : null,
+        next: start + size < all.length ? `?page=${page + 1}` : null,
         previous: page > 1 ? `?page=${page - 1}` : null,
-        results: all.slice(start, start + pageSize),
+        results: all.slice(start, start + size),
       };
     },
     async getProduct(slug) {
@@ -85,4 +86,6 @@ export function createMockCatalogRepository({ products = MOCK_PRODUCTS, pageSize
     getConditions: async () => MOCK_CONDITIONS,
     getCertificationEntities: async () => MOCK_CERTIFICATION_ENTITIES,
   };
+  repository.listMenuProducts = repository.listProducts;
+  return repository;
 }

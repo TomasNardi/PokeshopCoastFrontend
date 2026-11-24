@@ -3,13 +3,16 @@ import { act, createEvent, fireEvent, render, screen } from '@testing-library/re
 import MegaMenu from '@/components/header/MegaMenu';
 import SiteHeader from '@/components/header/SiteHeader';
 import { SessionProvider } from '@/components/auth/SessionProvider';
-import { imageStaggerDelay, linkStaggerDelays, resolveMenuImages } from '@/components/header/menuData';
+import { imageStaggerDelay, linkStaggerDelays, loadMenuImages } from '@/components/header/menuData';
 import { MAIN_MENU } from '@/config/navigation';
 import { MOCK_PRODUCTS } from '@/mocks/data/products';
 import { createServices } from '@/services/container';
+import { createMockCatalogRepository } from '@/services/catalog/catalogRepository.mock';
 
-const menu = resolveMenuImages(MAIN_MENU, MOCK_PRODUCTS);
+const mockRepository = createMockCatalogRepository();
+const menu = await loadMenuImages(MAIN_MENU, mockRepository.listMenuProducts);
 const singles = menu.find((m) => m.id === 'singles');
+const priceOf = (image) => Number(MOCK_PRODUCTS.find((p) => p.image_url === image)?.final_price);
 
 describe('menuData', () => {
   it('cascada de links con la fórmula del tema Broadcast (i·e+10, e·0.95)', () => {
@@ -20,15 +23,39 @@ describe('menuData', () => {
     expect([0, 1, 2].map(imageStaggerDelay)).toEqual([0, 100, 200]);
   });
 
-  it('cada bloque del megamenú resuelve una imagen del catálogo de su categoría', () => {
-    const slabs = menu.find((m) => m.id === 'slabs');
-    const slabImages = MOCK_PRODUCTS.filter((p) => p.category.slug === 'slabs').map((p) => p.image_url);
-    slabs.blocks.forEach((block) => expect(slabImages).toContain(block.image));
+  it('cada bloque busca su producto: New = el single más caro, Ofertas = la oferta más cara que no esté ya en el menú', () => {
+    const inStock = MOCK_PRODUCTS.filter((p) => p.category.slug === 'singles' && p.in_stock && p.image_url);
+    const block = (title) => singles.blocks.find((b) => b.title === title);
+    expect(priceOf(block('New').image)).toBe(Math.max(...inStock.map((p) => Number(p.final_price))));
+    const shown = new Set([block('Todo').image, block('New').image]);
+    const offers = inStock.filter((p) => p.discount_percent > 0 && !shown.has(p.image_url));
+    expect(priceOf(block('Ofertas').image)).toBe(Math.max(...offers.map((p) => Number(p.final_price))));
   });
 
-  it('sin productos de la categoría usa cualquier imagen (nunca queda un bloque vacío si hay catálogo)', () => {
-    const [item] = resolveMenuImages([{ id: 'x', blocks: [{ title: 'X', href: '/', from: { category: 'nada' } }] }], MOCK_PRODUCTS);
-    expect(item.blocks[0].image).toBeTruthy();
+  it('accesorios: Todo, Toploaders y Carpetas', () => {
+    expect(menu.find((m) => m.id === 'accesorios').blocks.map((b) => b.title)).toEqual(['Todo', 'Toploaders', 'Carpetas']);
+  });
+
+  it('dentro de un megamenú no repite la foto si hay otra opción', () => {
+    const images = singles.blocks.map((b) => b.image).filter(Boolean);
+    expect(new Set(images).size).toBe(images.length);
+  });
+
+  it('sin resultados prueba el fallback y, si la búsqueda falla, el bloque queda sin foto (no rompe)', async () => {
+    const list = async (filters) => {
+      if (filters.search === 'nada') return { results: [] };
+      if (filters.search === 'roto') throw new Error('backend caído');
+      return { results: [{ id: 1, image_url: '/x.webp', name: 'X' }] };
+    };
+    const [item] = await loadMenuImages(
+      [{ id: 'x', blocks: [
+        { title: 'A', href: '/', query: { search: 'nada' }, fallback: { category: 'y' } },
+        { title: 'B', href: '/', query: { search: 'roto' } },
+      ] }],
+      list
+    );
+    expect(item.blocks[0].image).toBe('/x.webp');
+    expect(item.blocks[1].image).toBeNull();
   });
 });
 

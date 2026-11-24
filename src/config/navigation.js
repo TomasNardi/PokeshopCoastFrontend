@@ -3,9 +3,10 @@
  *
  * Cada item con `links` + `blocks` abre un megamenú a todo el ancho:
  *   - links:  columna izquierda (aparecen en cascada)
- *   - blocks: hasta 3 imágenes cuadradas con título. La imagen sale del
- *             catálogo (`from` filtra productos, `pick` elige cuál) para que
- *             el menú se actualice solo cuando cambia el stock.
+ *   - blocks: hasta 3 imágenes cuadradas con título. La imagen es el primer
+ *             producto con stock (y foto) que devuelve `query` en la tienda;
+ *             si no hay ninguno, prueba `fallback`. Así el menú se actualiza
+ *             solo cuando cambia el stock. Las elegidas las pidió el dueño.
  * Un item sin `links` es un link simple.
  */
 export const MAIN_MENU = [
@@ -24,9 +25,19 @@ export const MAIN_MENU = [
       { label: 'Todo', href: '/tienda?category=singles' },
     ],
     blocks: [
-      { title: 'Todo', href: '/tienda?category=singles', from: { category: 'singles' }, pick: 0 },
-      { title: 'New', href: '/tienda?category=singles&ordering=-created_at', from: { category: 'singles' }, pick: 1 },
-      { title: 'Ofertas', href: '/tienda?category=singles&has_discount=true', from: { category: 'singles', discount: true }, pick: 0 },
+      // El Charizard de Base Set que haya (el más caro); si no hay, el último single cargado.
+      {
+        title: 'Todo',
+        href: '/tienda?category=singles',
+        query: { category: 'singles', set: 'base-set-en', search: 'charizard', ordering: '-final_price' },
+        fallback: { category: 'singles', ordering: '-created_at' },
+      },
+      { title: 'New', href: '/tienda?category=singles&ordering=-created_at', query: { category: 'singles', ordering: '-final_price' } },
+      {
+        title: 'Ofertas',
+        href: '/tienda?category=singles&has_discount=true',
+        query: { category: 'singles', has_discount: 'true', ordering: '-final_price' },
+      },
     ],
   },
   {
@@ -40,9 +51,17 @@ export const MAIN_MENU = [
       { label: 'Todo', href: '/tienda?category=slabs' },
     ],
     blocks: [
-      { title: 'PSA', href: '/tienda?category=slabs&certification_entity=PSA', from: { category: 'slabs' }, pick: 0 },
-      { title: 'CGC', href: '/tienda?category=slabs&certification_entity=CGC', from: { category: 'slabs' }, pick: 1 },
-      { title: 'Todo', href: '/tienda?category=slabs', from: { category: 'slabs' }, pick: 2 },
+      {
+        title: 'PSA',
+        href: '/tienda?category=slabs&certification_entity=PSA',
+        query: { category: 'slabs', certification_entity: 'PSA', ordering: '-final_price' },
+      },
+      {
+        title: 'CGC',
+        href: '/tienda?category=slabs&certification_entity=CGC',
+        query: { category: 'slabs', certification_entity: 'CGC', ordering: '-final_price' },
+      },
+      { title: 'Todo', href: '/tienda?category=slabs', query: { category: 'slabs', ordering: '-created_at' } },
     ],
   },
   {
@@ -57,9 +76,10 @@ export const MAIN_MENU = [
       { label: 'Todo', href: '/tienda?category=sellados' },
     ],
     blocks: [
-      { title: 'Todo', href: '/tienda?category=sellados', from: { category: 'sellados' }, pick: 0 },
-      { title: 'New', href: '/tienda?category=sellados&ordering=-created_at', from: { category: 'sellados' }, pick: 1 },
-      { title: 'Best sellers', href: '/tienda?category=sellados', from: { featured: true }, pick: 0 },
+      { title: 'Todo', href: '/tienda?category=sellados', query: { category: 'sellados', ordering: '-final_price' } },
+      { title: 'New', href: '/tienda?category=sellados&ordering=-created_at', query: { category: 'sellados', ordering: '-created_at' } },
+      // Lo más vendido; sin ventas, uno al azar (lo resuelve el backend).
+      { title: 'Best sellers', href: '/tienda?category=sellados', query: { category: 'sellados', ordering: 'best_selling' } },
     ],
   },
   {
@@ -73,9 +93,19 @@ export const MAIN_MENU = [
       { label: 'Todo', href: '/tienda?category=accesorios' },
     ],
     blocks: [
-      { title: 'Todo', href: '/tienda?category=accesorios', from: { category: 'accesorios' }, pick: 0 },
-      { title: 'New', href: '/tienda?ordering=-created_at', from: {}, pick: 0 },
-      { title: 'Envíos', href: '/envios', from: { featured: true }, pick: 1 },
+      { title: 'Todo', href: '/tienda?category=accesorios', query: { category: 'accesorios' } },
+      {
+        title: 'Toploaders',
+        href: '/tienda?category=accesorios&search=toploader',
+        query: { category: 'accesorios', search: 'toploader' },
+        fallback: { category: 'accesorios' },
+      },
+      {
+        title: 'Carpetas',
+        href: '/tienda?category=accesorios&search=carpeta',
+        query: { category: 'accesorios', search: 'carpeta' },
+        fallback: { category: 'accesorios' },
+      },
     ],
   },
   // Destacado en rojo (como el --highlight del tema).

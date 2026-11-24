@@ -5,6 +5,7 @@ import { localizeImages } from './imageUrls';
  * Repositorio de catálogo contra Django. Endpoints idénticos a Crack.
  * Interfaz (la implementa también catalogRepository.mock.js):
  *   listProducts(filters) → { count, results, next, previous }
+ *   listMenuProducts(filters) → lo mismo, cacheado 10 min (fotos del megamenú)
  *   getProduct(slug) → product   (ApiError 404 si no existe)
  *   getProductsByIds(ids) → product[]
  *   getNewArrivals() / getFeatured() → product[]
@@ -14,9 +15,12 @@ export function createHttpCatalogRepository(http) {
   // Stock fresco siempre: después de un checkout la vuelta atrás no puede mostrar stock viejo.
   const fresh = { cache: 'no-store' };
   const cached = { next: { revalidate: 1800 } };
+  // El megamenú se arma en cada página: sus fotos pueden tener unos minutos de atraso.
+  const menu = { next: { revalidate: 600 } };
 
   return {
     listProducts: async (filters = {}) => localizeImages(await http.get(`/products/${toQuery(filters)}`, fresh)),
+    listMenuProducts: async (filters = {}) => localizeImages(await http.get(`/products/${toQuery(filters)}`, menu)),
     getProduct: async (slug) => localizeImages(await http.get(`/products/${encodeURIComponent(slug)}/`, fresh)),
     // Las dos vidrieras de la ficha: { related: [], complete: [] }.
     getSuggestions: async (slug) => {

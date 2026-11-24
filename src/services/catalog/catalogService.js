@@ -66,6 +66,8 @@ export function createCatalogService(repository, { pageSize = PAGE_SIZE } = {}) 
 
     getProductsByIds: (ids) => repository.getProductsByIds(ids),
     getNewArrivals: () => safeList(() => repository.getNewArrivals()),
+    /** Búsqueda para las fotos del megamenú (cacheada unos minutos). */
+    listMenuProducts: (filters) => repository.listMenuProducts(filters),
     getFeatured: () => safeList(() => repository.getFeatured()),
     /** Opciones de los filtros. Si falla, los filtros quedan vacíos pero la tienda sigue. */
     async getFacets(rawFilters = {}) {

@@ -1,39 +1,44 @@
 /**
- * Resuelve las imágenes de los bloques del megamenú a partir del catálogo.
- * Puro (sin React): lo llama el layout en el servidor y se testea aparte.
+ * Resuelve las imágenes de los bloques del megamenú a partir de la tienda.
+ * Sin React: lo llama el layout en el servidor y se testea aparte.
  */
 
-const categorySlug = (product) =>
-  product?.category && typeof product.category === 'object' ? product.category.slug : product?.category;
+// Se piden unos pocos por bloque para poder saltear los que no tienen foto
+// o ya se usaron en otro bloque del mismo megamenú.
+const PICK_POOL = 6;
 
-function matches(product, from = {}) {
-  if (!product?.image_url) return false;
-  if (from.category && categorySlug(product) !== from.category) return false;
-  if (from.discount && !(Number(product.discount_percent) > 0)) return false;
-  if (from.featured && !product.is_featured) return false;
-  return true;
+async function pick(listProducts, query, used) {
+  if (!query) return null;
+  let results = [];
+  try {
+    results = (await listProducts({ ...query, in_stock: 'true', page_size: PICK_POOL }))?.results || [];
+  } catch {
+    return null; // decorativo: si falla, el bloque queda sin foto pero el sitio anda
+  }
+  const withImage = results.filter((p) => p?.image_url);
+  return withImage.find((p) => !used.has(p.id)) || withImage[0] || null;
 }
 
 /**
- * @param {Array} menu   MAIN_MENU
- * @param {Array} products productos disponibles (featured + nuevos, sin repetir)
+ * @param {Array} menu MAIN_MENU (cada bloque con `query` y, opcional, `fallback`)
+ * @param {(filters: object) => Promise<{results: Array}>} listProducts la búsqueda de la tienda
  * @returns menú con `blocks[i].image` resuelto (o null si no hay producto)
  */
-export function resolveMenuImages(menu, products) {
-  const unique = [...new Map(products.filter(Boolean).map((p) => [p.id, p])).values()];
-  return menu.map((item) => {
-    if (!item.blocks) return item;
-    return {
-      ...item,
-      blocks: item.blocks.map((block) => {
-        const pool = unique.filter((p) => matches(p, block.from));
-        const fallback = unique.filter((p) => p.image_url);
-        const source = pool.length ? pool : fallback;
-        const product = source.length ? source[(block.pick || 0) % source.length] : null;
-        return { title: block.title, href: block.href, image: product?.image_url || null, alt: product?.name || block.title };
-      }),
-    };
-  });
+export async function loadMenuImages(menu, listProducts) {
+  return Promise.all(
+    menu.map(async (item) => {
+      if (!item.blocks) return item;
+      const used = new Set();
+      const blocks = [];
+      // En orden: el primer bloque elige primero y los siguientes no repiten su foto.
+      for (const block of item.blocks) {
+        const product = (await pick(listProducts, block.query, used)) || (await pick(listProducts, block.fallback, used));
+        if (product) used.add(product.id);
+        blocks.push({ title: block.title, href: block.href, image: product?.image_url || null, alt: product?.name || block.title });
+      }
+      return { ...item, blocks };
+    })
+  );
 }
 
 /**

@@ -3,7 +3,7 @@ import './globals.css';
 import { SITE, TOP_BANNER_MESSAGE } from '@/config/site';
 import { MAIN_MENU } from '@/config/navigation';
 import { getServices } from '@/services/container';
-import { resolveMenuImages } from '@/components/header/menuData';
+import { loadMenuImages } from '@/components/header/menuData';
 import Providers from '@/components/layout/Providers';
 import SiteHeader from '@/components/header/SiteHeader';
 import Footer from '@/components/layout/Footer';
@@ -80,10 +80,10 @@ export default async function RootLayout({ children }) {
     );
   }
 
-  // Las imágenes del megamenú salen del catálogo (nunca rompe: devuelve [] si falla).
+  // Las imágenes del megamenú salen de la tienda (ver config/navigation.js). Nunca rompe:
+  // si una búsqueda falla, ese bloque queda sin foto.
   const { catalog } = getServices();
-  const [featured, newArrivals] = await Promise.all([catalog.getFeatured(), catalog.getNewArrivals()]);
-  const menu = resolveMenuImages(MAIN_MENU, [...featured, ...newArrivals]);
+  const [featured, menu] = await Promise.all([catalog.getFeatured(), loadMenuImages(MAIN_MENU, catalog.listMenuProducts)]);
 
   return (
     <html lang="es" className={fonts}>
