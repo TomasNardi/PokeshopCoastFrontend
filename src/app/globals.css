@@ -2278,6 +2278,451 @@ body {
     animation: none;
   }
 }
+/* ==========================================================================
+   Lanzamiento (cuenta regresiva hasta la apertura) — ver components/launch.
+   Base: la página de mantenimiento (.maintenance*); acá solo lo propio.
+   ========================================================================== */
+.launch__layout {
+  gap: 24px;
+}
+.launch__stage {
+  max-width: 340px;
+}
+.launch__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: theme('colors.coast.red');
+}
+.launch__accent {
+  margin-bottom: 0;
+}
+.launch__title {
+  margin-top: 14px;
+  font-size: 44px;
+}
+.launch__date {
+  display: block;
+  color: theme('colors.coast.red');
+}
+.launch__message {
+  max-width: 470px;
+}
+
+/* --- Cuenta regresiva --------------------------------------------------- */
+.launch-countdown {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: 470px;
+  margin: 28px auto 0;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  background: rgb(255 255 255 / 0.03);
+}
+.launch-countdown__cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 4px 12px;
+}
+.launch-countdown__cell + .launch-countdown__cell {
+  border-left: 1px solid rgb(255 255 255 / 0.1);
+}
+.launch-countdown__sep {
+  display: none;
+}
+.launch-countdown__value {
+  display: block;
+  overflow: hidden;
+  font-family: theme('fontFamily.barlow');
+  font-size: 46px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+.launch-countdown__digits {
+  display: block;
+  animation: launch-tick 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.launch-countdown__label {
+  margin-top: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.5);
+}
+.launch-countdown.is-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 22px 16px;
+  border-color: theme('colors.coast.red');
+}
+.launch-countdown__done {
+  font-family: theme('fontFamily.barlow');
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  color: theme('colors.coast.red');
+}
+.launch-countdown__done-sub {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.6);
+}
+
+/* --- Avisame cuando abra ------------------------------------------------ */
+.launch-notify {
+  max-width: 470px;
+  margin: 24px auto 0;
+  text-align: left;
+}
+.launch-notify__label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.6);
+}
+.launch-notify__row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.launch-notify__input {
+  height: 50px;
+  min-width: 0;
+  width: 100%;
+  flex: none; /* en columna (mobile) el flex:1 le comía el alto */
+  padding: 0 16px;
+  border: 1px solid rgb(255 255 255 / 0.22);
+  background: rgb(255 255 255 / 0.04);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 0;
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+.launch-notify__input::placeholder {
+  color: rgb(255 255 255 / 0.4);
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+.launch-notify__input:focus {
+  outline: none;
+  border-color: #fff;
+  background: rgb(255 255 255 / 0.07);
+}
+.launch-notify__input[aria-invalid='true'] {
+  border-color: theme('colors.coast.red');
+}
+.launch-notify__button {
+  height: 50px;
+  padding: 0 28px;
+  border: 1px solid theme('colors.coast.red');
+  background: theme('colors.coast.red');
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+.launch-notify__button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.launch-notify__error {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #ff8a80;
+}
+.launch-notify__done {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  max-width: 470px;
+  margin: 24px auto 0;
+  padding: 14px 16px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+.launch-notify__check {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: theme('colors.coast.red');
+  font-size: 12px;
+}
+
+/* --- Redes -------------------------------------------------------------- */
+.launch__socials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+.launch__socials-label {
+  margin-right: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.5);
+}
+.launch__social {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  color: #fff;
+  transition: border-color 0.25s ease, background-color 0.25s ease, color 0.25s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .launch-notify__button:hover:not(:disabled) {
+    border-color: #fff;
+    background: #fff;
+    color: #000;
+  }
+  .launch__social:hover {
+    border-color: #fff;
+    background: #fff;
+    color: #000;
+  }
+}
+
+@media (min-width: 480px) {
+  .launch-notify__row {
+    flex-direction: row;
+    gap: 0;
+  }
+  .launch-notify__input {
+    flex: 1 1 auto;
+    width: auto;
+    border-right: 0;
+  }
+}
+@media (min-width: 640px) {
+  .launch__stage {
+    max-width: 420px;
+  }
+  .launch__title {
+    font-size: 60px;
+  }
+  .launch-countdown__value {
+    font-size: 58px;
+  }
+  .launch-countdown__label {
+    font-size: 11px;
+  }
+}
+@media (min-width: 1024px) {
+  .launch__layout {
+    gap: 56px;
+  }
+  .launch__stage {
+    max-width: 620px;
+  }
+  .launch__title {
+    font-size: 76px;
+  }
+  .launch-countdown,
+  .launch-notify,
+  .launch-notify__done {
+    margin-left: 0;
+  }
+  .launch-notify__done {
+    justify-content: flex-start;
+  }
+  .launch__socials {
+    justify-content: flex-start;
+  }
+  .launch-countdown {
+    margin-top: 36px;
+  }
+  .launch-countdown__value {
+    font-size: 68px;
+  }
+}
+@media (min-width: 1280px) {
+  .launch__title {
+    font-size: 88px;
+  }
+}
+/* Todo en una pantalla (mobile): el abanico y los textos se achican con el alto. */
+@media (max-width: 1023px) {
+  .launch {
+    padding-top: 18px;
+    padding-bottom: 16px;
+  }
+  .launch__layout {
+    gap: 14px;
+    padding: 10px 0 14px;
+  }
+  .launch__stage {
+    width: min(100%, 300px, 44svh);
+  }
+  .launch__title {
+    margin-top: 8px;
+    font-size: clamp(34px, 5.4svh, 60px);
+  }
+  .launch__message {
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  .launch__message-extra {
+    display: none;
+  }
+  .launch-countdown {
+    margin-top: 16px;
+  }
+  .launch-countdown__cell {
+    padding: 10px 2px 8px;
+  }
+  .launch-countdown__value {
+    font-size: clamp(36px, 5.6svh, 58px);
+  }
+  .launch-countdown__label {
+    margin-top: 5px;
+  }
+  .launch-notify,
+  .launch-notify__done {
+    margin-top: 14px;
+  }
+  .launch-notify__label {
+    margin-bottom: 8px;
+  }
+  .launch-notify__row {
+    flex-direction: row;
+    gap: 0;
+  }
+  .launch-notify__input {
+    flex: 1 1 auto;
+    width: auto;
+    height: 46px;
+    border-right: 0;
+  }
+  .launch-notify__button {
+    height: 46px;
+    padding: 0 18px;
+  }
+  .launch__socials {
+    margin-top: 14px;
+  }
+  .launch__social {
+    width: 36px;
+    height: 36px;
+  }
+  .launch .maintenance__footer {
+    gap: 6px;
+  }
+  .launch .maintenance__footer p {
+    display: none; /* WhatsApp e Instagram ya están en "Seguinos" */
+  }
+}
+/* Celulares bajos (iPhone SE y similares). */
+@media (max-width: 1023px) and (max-height: 700px) {
+  .launch__layout {
+    gap: 10px;
+    padding: 4px 0 8px;
+  }
+  .launch__stage {
+    width: min(100%, 230px, 34svh);
+  }
+  .launch__eyebrow {
+    font-size: 11px;
+  }
+  .launch__title {
+    margin-top: 6px;
+    font-size: 32px;
+  }
+  .launch-countdown {
+    margin-top: 12px;
+  }
+  .launch-countdown__value {
+    font-size: 34px;
+  }
+  .launch-notify,
+  .launch-notify__done,
+  .launch__socials {
+    margin-top: 10px;
+  }
+}
+/* Notebooks (pantalla ancha pero baja): todo entra sin scrollear. */
+@media (min-width: 1024px) and (max-height: 900px) {
+  .launch {
+    padding-top: 24px;
+    padding-bottom: 20px;
+  }
+  .launch__layout {
+    padding: 8px 0;
+  }
+  .launch__title {
+    margin-top: 10px;
+    font-size: clamp(48px, 9vh, 76px);
+  }
+  .launch__message {
+    margin-top: 12px;
+    font-size: 16px;
+  }
+  .launch-countdown {
+    margin-top: 22px;
+  }
+  .launch-countdown__cell {
+    padding: 10px 4px 9px;
+  }
+  .launch-countdown__value {
+    font-size: clamp(42px, 7.4vh, 62px);
+  }
+  .launch-notify,
+  .launch-notify__done,
+  .launch__socials {
+    margin-top: 16px;
+  }
+  .launch__stage {
+    max-width: min(560px, 78vh);
+  }
+}
+
+@keyframes launch-tick {
+  from {
+    opacity: 0;
+    transform: translateY(-40%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .launch-countdown__digits {
+    animation: none;
+  }
+}
+
 .dev-access {
   position: fixed;
   inset: 0;

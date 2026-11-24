@@ -7,7 +7,7 @@ export function createHttpEngagementRepository(http) {
     sendContact: (data) => http.post('/contact/', data),
     // Botón de arrepentimiento: devuelve { code, message }.
     sendWithdrawal: (data) => http.post('/withdrawals/', data),
-    subscribe: (email) => http.post('/subscribe/', { email }),
+    subscribe: (email, source = '') => http.post('/subscribe/', { email, source }),
     unsubscribe: (token) => http.post('/unsubscribe/', { token }),
     getSiteConfig: () => http.get('/site-config/', { cache: 'no-store' }),
   };

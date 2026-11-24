@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { env } from '@/config/env';
+import { isBeforeLaunch } from '@/config/launch';
 import { internalHeaders } from '@/services/http/internalHeaders';
 
 /**
@@ -85,10 +86,28 @@ export async function hasPreviewAccess() {
   return Boolean(token) && value === (await previewFingerprint(token));
 }
 
-/** Lo que el layout necesita saber: mostrar mantenimiento o la tienda. */
+/**
+ * Qué pantalla corresponde, sin tocar cookies ni red (se testea aparte).
+ * Hasta la apertura, la de lanzamiento reemplaza a todo (también al
+ * mantenimiento del admin). Después, todo como siempre: el admin apaga el
+ * sitio y se ve la página de mantenimiento. La vista previa (acceso
+ * desarrollo) pasa por las dos.
+ */
+export function resolveGate({ isActive, beforeLaunch, preview }) {
+  if (preview) return { maintenance: false, launch: false };
+  if (beforeLaunch) return { maintenance: false, launch: true };
+  return { maintenance: !isActive, launch: false };
+}
+
+/**
+ * Lo que el layout necesita saber: mantenimiento, lanzamiento o la tienda.
+ * `gated`: el público no ve la tienda todavía (para la barra de vista previa y el noindex).
+ */
 export const getMaintenanceState = cache(async () => {
   const status = await getSiteStatus();
-  if (status.isActive) return { status, maintenance: false, preview: false };
-  const preview = await hasPreviewAccess();
-  return { status, maintenance: !preview, preview };
+  const beforeLaunch = isBeforeLaunch();
+  const gated = !status.isActive || beforeLaunch;
+  // Las cookies solo se leen cuando hace falta: abierta la tienda, las páginas no dependen de ellas.
+  const preview = gated ? await hasPreviewAccess() : false;
+  return { status, gated, preview, beforeLaunch, ...resolveGate({ isActive: status.isActive, beforeLaunch, preview }) };
 });

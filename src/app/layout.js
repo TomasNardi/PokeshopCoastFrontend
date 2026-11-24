@@ -15,6 +15,8 @@ import { PRESENTATION_MODE } from '@/config/presentation';
 import PresentationGuard from '@/components/layout/PresentationGuard';
 import NavigationProgress from '@/components/layout/NavigationProgress';
 import MaintenancePage from '@/components/layout/MaintenancePage';
+import LaunchPage from '@/components/launch/LaunchPage';
+import { launchLabels } from '@/config/launch';
 import { getMaintenanceState } from '@/services/site/siteStatus';
 
 // Mismas familias que unsobremas.com (Wappalyzer → Google Font API).
@@ -56,12 +58,21 @@ const BASE_METADATA = {
   robots: { index: true, follow: true },
 };
 
-// En mantenimiento (y en la vista previa del dueño) Google no indexa: si lo
-// hiciera, guardaría la página de "volvemos en un rato" en vez de la tienda.
+// En mantenimiento o antes de la apertura (y en la vista previa del dueño) Google
+// no indexa: si lo hiciera, guardaría "volvemos en un rato" en vez de la tienda.
 export async function generateMetadata() {
-  const { status } = await getMaintenanceState();
-  if (status.isActive) return BASE_METADATA;
-  return { ...BASE_METADATA, title: `${SITE.name} — Volvemos pronto`, robots: { index: false, follow: false } };
+  const { status, gated, beforeLaunch } = await getMaintenanceState();
+  if (!gated) return BASE_METADATA;
+  const noindex = { robots: { index: false, follow: false } };
+  if (beforeLaunch) {
+    return {
+      ...BASE_METADATA,
+      ...noindex,
+      title: `${SITE.name} — Abrimos el ${launchLabels().day}`,
+      description: 'Singles, slabs certificados y producto sellado de Pokémon TCG. Gran apertura de la tienda online.',
+    };
+  }
+  return { ...BASE_METADATA, ...noindex, title: `${SITE.name} — Volvemos pronto` };
 }
 
 export default async function RootLayout({ children }) {
@@ -69,12 +80,22 @@ export default async function RootLayout({ children }) {
 
   // Sitio apagado desde el admin → solo la página de mantenimiento, en
   // cualquier URL. Si el backend no responde, el sitio queda abierto.
-  const { status, maintenance } = await getMaintenanceState();
+  const { status, maintenance, launch, preview, beforeLaunch } = await getMaintenanceState();
   if (maintenance) {
     return (
       <html lang="es" className={fonts}>
         <body>
           <MaintenancePage title={status.maintenanceTitle} message={status.maintenanceMessage} />
+        </body>
+      </html>
+    );
+  }
+  // Antes de la apertura (config/launch.js): cuenta regresiva en cualquier URL.
+  if (launch) {
+    return (
+      <html lang="es" className={fonts}>
+        <body>
+          <LaunchPage serverNow={Date.now()} />
         </body>
       </html>
     );
@@ -90,10 +111,13 @@ export default async function RootLayout({ children }) {
       <body>
         <Providers>
           <NavigationProgress />
-          {!status.isActive && (
+          {preview && (
             <div className="bg-coast-red py-2 text-center text-[11px] font-bold uppercase tracking-[0.1em] text-white">
-              Vista previa · el sitio está en mantenimiento para el público ·{' '}
-              <a href="/vista-previa?salir=1" className="underline underline-offset-2">Salir</a>
+              Vista previa ·{' '}
+              {beforeLaunch
+                ? `el público ve la cuenta regresiva hasta el ${launchLabels().day}`
+                : 'el sitio está en mantenimiento para el público'}{' '}
+              · <a href="/vista-previa?salir=1" className="underline underline-offset-2">Salir</a>
             </div>
           )}
           {status.showTopBanner && (

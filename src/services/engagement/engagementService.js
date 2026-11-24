@@ -49,9 +49,10 @@ export function createEngagementService(repository) {
         reason: form.reason?.trim() || '',
       });
     },
-    async subscribe(email) {
+    /** `source`: de dónde vino (ej. "lanzamiento"), queda en el admin de suscriptores. */
+    async subscribe(email, { source = '' } = {}) {
       if (!isValidEmail(email)) throw new Error('Ingresá un email válido.');
-      return repository.subscribe(email.trim().toLowerCase());
+      return repository.subscribe(email.trim().toLowerCase(), source);
     },
     unsubscribe: (token) => repository.unsubscribe(token),
     getSiteConfig: () => repository.getSiteConfig().catch(() => ({ is_active: true, show_top_banner: true })),
