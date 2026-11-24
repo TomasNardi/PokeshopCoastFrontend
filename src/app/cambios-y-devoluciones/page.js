@@ -24,7 +24,7 @@ const SECTIONS = [
       { list: ['Número de pedido o comprobante de compra.', 'Fotografías o videos del producto recibido.', 'Descripción detallada del inconveniente.'] },
       'El producto deberá conservarse en las condiciones en que fue recibido, sin modificaciones, alteraciones ni manipulaciones que puedan dificultar la evaluación del reclamo.',
       'Pokeshopcoast analizará cada caso y ofrecerá una solución conforme a la normativa vigente.',
-      { strong: 'Pasadas 24 horas no se aceptará ningún tipo de reclamo.' },
+      { strong: 'Pasadas 24 horas NO SE ACEPTARA NINGUN TIPO DE RECLAMO.' },
     ],
   },
   {
