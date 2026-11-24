@@ -12,6 +12,7 @@ const ALL_COLUMNS = [
       { label: 'Envíos', href: '/envios' },
       { label: 'Contacto', href: '/contacto' },
       { label: 'Mi cuenta', href: '/cuenta' },
+      { label: 'Cambios y devoluciones', href: '/cambios-y-devoluciones' },
       { label: 'Términos', href: '/terminos' },
       { label: 'Privacidad', href: '/privacidad' },
     ],
