@@ -9,7 +9,6 @@ import PageHeader from './PageHeader';
  *                                   { list: [...] } = viñetas,
  *                                   { strong: '...' } = párrafo destacado
  *   updated:  "Última actualización: …"
- *   final:    true cuando el texto ya es el definitivo del cliente
  */
 function Block({ block }) {
   if (typeof block === 'string') return <p>{block}</p>;
@@ -24,7 +23,7 @@ function Block({ block }) {
   return null;
 }
 
-export default function LegalPage({ title, intro = [], sections, updated, final = false }) {
+export default function LegalPage({ title, intro = [], sections, updated }) {
   return (
     <>
       <PageHeader eyebrow="Legales" title={title} />
@@ -43,7 +42,6 @@ export default function LegalPage({ title, intro = [], sections, updated, final 
             </div>
           </section>
         ))}
-        {!final && <p className="text-[12px] text-coast-mist">Texto provisorio — pendiente de revisión legal del cliente.</p>}
       </div>
     </>
   );

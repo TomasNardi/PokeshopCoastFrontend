@@ -115,7 +115,7 @@ function OptionsSkeleton() {
       {[0, 1, 2].map((i) => (
         <div key={i} className="flex items-center gap-4 border border-uns-hairline p-4">
           <Skeleton className="h-4 w-4 rounded-full" />
-          <Skeleton className="h-9 w-9" />
+          <Skeleton className="h-10 w-10 rounded-[6px]" />
           <span className="flex-1 space-y-2"><Skeleton className="block h-3.5 w-40" /><Skeleton className="block h-3 w-56 max-w-full" /></span>
           <Skeleton className="h-4 w-16" />
         </div>

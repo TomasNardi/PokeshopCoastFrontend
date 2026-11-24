@@ -2,17 +2,20 @@
 import { Landmark, Truck } from 'lucide-react';
 
 /**
- * Marcas del checkout. Los archivos viven en /public/brands: para usar el logo
- * oficial alcanza con reemplazar el SVG (mismo nombre), sin tocar código.
+ * Marcas del checkout. Logos oficiales de cada correo en /public/brands (ícono
+ * cuadrado de 192px: se ve nítido también en pantallas retina).
  */
-const CARRIER_LOGOS = { correo_argentino: '/brands/correo-argentino.svg', andreani: '/brands/andreani.svg' };
+const CARRIER_LOGOS = { correo_argentino: '/brands/correo-argentino.png', andreani: '/brands/andreani.png' };
 
 export function CarrierMark({ carrier, name }) {
   const src = CARRIER_LOGOS[carrier];
   if (!src) {
     return <span className="flex h-9 w-9 shrink-0 items-center justify-center bg-uns-stage"><Truck size={16} /></span>;
   }
-  return <img src={src} alt={name} width={36} height={36} className="h-9 w-9 shrink-0" loading="lazy" />;
+  return (
+    <img src={src} alt={name} title={name} width={40} height={40}
+      className="h-10 w-10 shrink-0 rounded-[6px] object-cover" loading="lazy" />
+  );
 }
 
 /** Tarjetas que acepta Mercado Pago (mismos SVG que Crack, en /public/payments). */
