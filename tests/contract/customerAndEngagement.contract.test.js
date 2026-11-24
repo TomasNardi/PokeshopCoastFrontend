@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { useMswServer } from '../msw/server';
+import { setupMswServer } from '../msw/server';
 import { API, received } from '../msw/handlers';
 import { createHttpClient } from '@/services/http/httpClient';
 import { createHttpCustomerRepository } from '@/services/customer/customerRepository.http';
 import { createHttpEngagementRepository } from '@/services/engagement/engagementRepository.http';
 import { createEngagementService } from '@/services/engagement/engagementService';
 
-useMswServer();
+setupMswServer();
 
 const httpClient = createHttpClient({ baseUrl: API });
 

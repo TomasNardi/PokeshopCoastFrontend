@@ -115,7 +115,7 @@ export function useShipping({ form, items, setFields, loggedIn }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loggedIn]);
 
-  const useNewAddress = () => {
+  const startNewAddress = () => {
     setAddressId('new');
     setFields(Object.fromEntries(ADDRESS_FIELDS.map((f) => [f, f === 'shipping_province' ? formRef.current.shipping_province : ''])));
   };
@@ -155,7 +155,7 @@ export function useShipping({ form, items, setFields, loggedIn }) {
     selectBranch: (branch) => setFields({ shipping_branch_code: branch.code, shipping_branch: `${branch.name} — ${branch.address}` }),
     addresses,
     addressId,
-    selectAddress: (address) => (address === 'new' ? useNewAddress() : applyAddress(address)),
+    selectAddress: (address) => (address === 'new' ? startNewAddress() : applyAddress(address)),
     saveAddress,
     setSaveAddress,
     saveNewAddress,

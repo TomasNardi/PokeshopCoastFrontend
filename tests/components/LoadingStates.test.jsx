@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { ProductCardSkeleton, ProductGridSkeleton, ProductRailSkeleton } from '@/components/product/ProductSkeletons';
 import { CartPageSkeleton, CheckoutSkeleton } from '@/components/cart/CartSkeletons';
@@ -35,6 +35,11 @@ describe('esqueletos de carga', () => {
 
 describe('<NavigationProgress />', () => {
   const bar = (container) => container.querySelector('.nav-progress');
+  // jsdom no navega: se cancela el clic al final del burbujeo (después de que
+  // NavigationProgress lo vio) para que no ensucie la salida con "Not implemented".
+  const stopNavigation = (event) => event.preventDefault();
+  beforeEach(() => window.addEventListener('click', stopNavigation));
+  afterEach(() => window.removeEventListener('click', stopNavigation));
 
   it('un clic en un link interno a otra página muestra la barra (pasado el umbral)', () => {
     vi.useFakeTimers();

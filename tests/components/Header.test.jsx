@@ -53,20 +53,25 @@ describe('<MegaMenu />', () => {
 });
 
 describe('<SiteHeader />', () => {
-  const renderHeader = () =>
-    render(
+  // La sesión mock llega en un microtask: se espera dentro de act() para que
+  // el SessionProvider termine de actualizar antes de cada aserción.
+  const renderHeader = async () => {
+    const view = render(
       <SessionProvider services={createServices({ useMocks: true, supabase: null })}>
         <SiteHeader menu={menu} popularProducts={MOCK_PRODUCTS.slice(0, 4)} />
       </SessionProvider>
     );
+    await act(async () => {});
+    return view;
+  };
 
-  it('en la home (pathname "/") arranca transparente sobre el hero', () => {
-    const { container } = renderHeader();
+  it('en la home (pathname "/") arranca transparente sobre el hero', async () => {
+    const { container } = await renderHeader();
     expect(container.querySelector('.site-header')).toHaveClass('site-header--overlay', 'is-transparent');
   });
 
-  it('pasar el mouse sobre el header lo pone sólido; un toque (touch/pen) no lo deja pegado', () => {
-    const { container } = renderHeader();
+  it('pasar el mouse sobre el header lo pone sólido; un toque (touch/pen) no lo deja pegado', async () => {
+    const { container } = await renderHeader();
     const header = container.querySelector('.site-header');
     // jsdom no implementa PointerEvent.pointerType: se arma el evento a mano.
     // React deriva onPointerEnter/Leave de pointerover/pointerout.
@@ -86,8 +91,8 @@ describe('<SiteHeader />', () => {
     expect(header).toHaveClass('is-transparent');
   });
 
-  it('hover en un item abre su megamenú, oscurece la página y pasa a fondo sólido', () => {
-    const { container } = renderHeader();
+  it('hover en un item abre su megamenú, oscurece la página y pasa a fondo sólido', async () => {
+    const { container } = await renderHeader();
     const item = screen.getByRole('link', { name: /Singles/ }).closest('li');
     fireEvent.mouseEnter(item);
     expect(container.querySelector('#mega-singles')).toHaveClass('is-visible');
@@ -97,8 +102,8 @@ describe('<SiteHeader />', () => {
     expect(container.querySelector('#mega-singles')).not.toHaveClass('is-visible');
   });
 
-  it('un solo megamenú abierto a la vez y Escape cierra', () => {
-    const { container } = renderHeader();
+  it('un solo megamenú abierto a la vez y Escape cierra', async () => {
+    const { container } = await renderHeader();
     fireEvent.mouseEnter(screen.getByRole('link', { name: /Singles/ }).closest('li'));
     fireEvent.mouseEnter(screen.getByRole('link', { name: /Slabs/ }).closest('li'));
     expect(container.querySelectorAll('.mega.is-visible:not(.search-pop)')).toHaveLength(1);
@@ -106,21 +111,21 @@ describe('<SiteHeader />', () => {
     expect(container.querySelectorAll('.mega.is-visible')).toHaveLength(0);
   });
 
-  it('la lupa abre la búsqueda con productos populares', () => {
-    const { container } = renderHeader();
+  it('la lupa abre la búsqueda con productos populares', async () => {
+    const { container } = await renderHeader();
     fireEvent.click(screen.getAllByRole('button', { name: 'Buscar' })[0]);
     expect(container.querySelector('.search-pop')).toHaveClass('is-visible');
     expect(screen.getByText('Productos populares')).toBeInTheDocument();
   });
 
-  it('el menú mobile se abre desde la hamburguesa', () => {
-    const { container } = renderHeader();
+  it('el menú mobile se abre desde la hamburguesa', async () => {
+    const { container } = await renderHeader();
     fireEvent.click(screen.getByRole('button', { name: 'Abrir menú' }));
     expect(container.querySelector('.drawer')).toHaveClass('is-open');
   });
 
-  it('menú mobile tipo sliderule: tocar una categoría desliza su submenú y "atrás" vuelve', () => {
-    const { container } = renderHeader();
+  it('menú mobile tipo sliderule: tocar una categoría desliza su submenú y "atrás" vuelve', async () => {
+    const { container } = await renderHeader();
     fireEvent.click(screen.getByRole('button', { name: 'Abrir menú' }));
     const nav = container.querySelector('.sliderule');
     const panel = () => container.querySelector('.sliderule__panel.is-visible');

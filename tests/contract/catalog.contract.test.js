@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { http, HttpResponse } from 'msw';
-import { server, useMswServer } from '../msw/server';
+import { server, setupMswServer } from '../msw/server';
 import { API } from '../msw/handlers';
 import { createHttpClient } from '@/services/http/httpClient';
 import { createHttpCatalogRepository } from '@/services/catalog/catalogRepository.http';
@@ -12,7 +12,7 @@ import { createCatalogService } from '@/services/catalog/catalogService';
 import { ApiError } from '@/services/http/ApiError';
 import { productView } from '@/domain/product';
 
-useMswServer();
+setupMswServer();
 
 const repo = createHttpCatalogRepository(createHttpClient({ baseUrl: API }));
 const catalog = createCatalogService(repo);

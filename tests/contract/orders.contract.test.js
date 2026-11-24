@@ -2,13 +2,13 @@
  * Contrato de órdenes y pagos (Mercado Pago / transferencia).
  */
 import { describe, expect, it } from 'vitest';
-import { useMswServer } from '../msw/server';
+import { setupMswServer } from '../msw/server';
 import { API, received } from '../msw/handlers';
 import { createHttpClient } from '@/services/http/httpClient';
 import { createHttpOrderRepository } from '@/services/orders/orderRepository.http';
 import { createOrderService, EMPTY_CHECKOUT_FORM } from '@/services/orders/orderService';
 
-useMswServer();
+setupMswServer();
 
 const form = {
   ...EMPTY_CHECKOUT_FORM,
