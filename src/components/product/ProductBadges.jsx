@@ -92,16 +92,13 @@ export function TraitBadges({ badges, withLabel = false }) {
 }
 
 /**
- * "Holofoil" con brillo: un reflejo que cruza la etiqueta cada tanto, como la
- * carta al moverla. Va junto al nombre (card y ficha), no sobre la foto.
+ * "Holofoil" con brillo: misma caja que el estado (va debajo de él en la card),
+ * con fondo iridiscente y un reflejo que la cruza cada tanto.
  */
-export function HolofoilTag({ show, large = false }) {
+export function HolofoilTag({ show }) {
   if (!show) return null;
   return (
-    <span className={`holo-tag ${large ? 'holo-tag--large' : ''}`} title="Carta holo: la ilustración brilla">
-      <svg className="holo-tag__spark" viewBox="0 0 16 16" aria-hidden="true">
-        <path d="M8 0c.4 3.9 2.1 6.6 8 8-5.9 1.4-7.6 4.1-8 8-.4-3.9-2.1-6.6-8-8 5.9-1.4 7.6-4.1 8-8z" />
-      </svg>
+    <span className={`${box} badge-box--holo`} title="Carta holo: la ilustración brilla">
       Holofoil
     </span>
   );

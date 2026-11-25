@@ -1203,10 +1203,6 @@ body {
 @container (min-width: 178px) and (max-width: 198.98px) {
   .product-item__badges .badge-box {
     padding: 4px 7px;
-  /* El precio va siempre al pie: en una fila con cartas holo y no holo
-     (la holo tiene una línea más) los precios quedan alineados. */
-  display: flex;
-  flex-direction: column;
     font-size: 10px;
   }
 }
@@ -1231,6 +1227,56 @@ body {
 .badge-box--sale {
   background: theme('colors.coast.red');
   color: #fff;
+}
+/* Holofoil: debajo del estado (columna derecha de la card), con la misma caja
+   y tamaño que el estado. Fondo iridiscente como el foil de la carta y un
+   reflejo blanco que la cruza cada pocos segundos (más seguido con el mouse). */
+.badge-box--holo {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(115deg, #ff8fc4 0%, #ffd66e 18%, #7ff0b8 36%, #74ccff 54%, #b896ff 72%, #ff8fc4 90%);
+  background-size: 250% 100%;
+  color: #1d1530;
+  animation: holo-shift 8s linear infinite;
+}
+.badge-box--holo::after {
+  content: '';
+  position: absolute;
+  inset: -2px auto -2px 0;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.9), transparent);
+  transform: translateX(-140%) skewX(-18deg);
+  animation: holo-glint 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+/* Holofoil va al lado del estado, en la misma fila, para no bajar sobre la
+   foto. Si no entra, pasa a una segunda línea (wrap), siempre a la derecha.
+   Con un badge a la izquierda (outlet, rebajado, sin stock) la fila se limita a
+   la mitad de la card para no chocarlo. */
+.product-item__badges--right:has(.badge-box--holo) {
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  max-width: calc(100% - 10px);
+}
+.product-item__media:has(.product-item__badges--left > *) .product-item__badges--right:has(.badge-box--holo) {
+  max-width: calc(50% - 8px);
+}
+.product-item:hover .badge-box--holo::after {
+  animation-duration: 1.4s;
+}
+@keyframes holo-shift {
+  to { background-position: -250% 0; }
+}
+@keyframes holo-glint {
+  0%, 62% { transform: translateX(-140%) skewX(-18deg); }
+  100% { transform: translateX(320%) skewX(-18deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .badge-box--holo,
+  .badge-box--holo::after {
+    animation: none;
+  }
 }
 
 /* Quick add = unsobremas (.quick-add__holder / .quick-add__button).
@@ -1276,30 +1322,6 @@ body {
   border-radius: 4px;
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.18);
 }
-.trait-more {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 4px;
-  background: theme('colors.coast.ink');
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1;
-}
-/* Celular: dos insignias y "+N" con el resto, un poco más chicas. */
-@media (max-width: 749px) {
-  .trait-badges:not(.trait-badges--labeled) .trait-badge.is-extra {
-    display: none;
-  }
-  .trait-badges:not(.trait-badges--labeled) .trait-more {
-    display: inline-flex;
-    min-width: 16px;
-    height: 16px;
-    font-size: 9px;
 /* Nombre de la insignia: oculto; en PC se despliega al pasar el mouse por la
    card (el ícono se vuelve una pastilla blanca "⟲ REVERSE HOLO"). Con varias
    insignias se apilan hacia arriba para no salirse de la card. En táctil no
@@ -1348,6 +1370,30 @@ body {
     align-items: flex-start;
   }
 }
+.trait-more {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: theme('colors.coast.ink');
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+/* Celular: dos insignias y "+N" con el resto, un poco más chicas. */
+@media (max-width: 749px) {
+  .trait-badges:not(.trait-badges--labeled) .trait-badge.is-extra {
+    display: none;
+  }
+  .trait-badges:not(.trait-badges--labeled) .trait-more {
+    display: inline-flex;
+    min-width: 16px;
+    height: 16px;
+    font-size: 9px;
   }
   .trait-badges:not(.trait-badges--labeled) .trait-badge img {
     width: 16px;
@@ -1567,10 +1613,7 @@ body {
 }
 
 .product-item__info {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  min-width: 0;
+  display: block;
   padding: 20px 0 30px;
 }
 .product-item__title,
@@ -1591,8 +1634,7 @@ body {
   color: #747474;
 }
 .product-item__price {
-  margin-top: auto;
-  padding-top: 10px;
+  margin-top: 10px;
   font-size: 14px;
   font-weight: 700;
   color: #000;
@@ -1628,89 +1670,7 @@ body {
   left: 0;
   top: 58%;
   z-index: 30;
-/* Holofoil: en su propia línea, debajo del nombre. */
-.product-item__holo {
   display: flex;
-  margin: 2px 0 6px;
-}
-
-/* Holofoil: pastilla iridiscente (como el foil de la carta) con un reflejo
-   blanco que la cruza cada pocos segundos, y más seguido con el mouse encima. */
-.holo-tag {
-  position: relative;
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  overflow: hidden;
-  padding: 3px 7px 3px 6px;
-  border-radius: 999px;
-  background: linear-gradient(115deg, #ff8fc4 0%, #ffd66e 18%, #7ff0b8 36%, #74ccff 54%, #b896ff 72%, #ff8fc4 90%);
-  background-size: 250% 100%;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7), 0 1px 2px rgb(0 0 0 / 0.12);
-  color: #1d1530;
-  font-family: theme('fontFamily.heading');
-  font-size: 10px;
-  font-style: italic;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  animation: holo-shift 8s linear infinite;
-}
-.holo-tag::after {
-  content: '';
-  position: absolute;
-  inset: -2px auto -2px 0;
-  width: 45%;
-  background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.95), transparent);
-  transform: translateX(-140%) skewX(-18deg);
-  animation: holo-glint 4.5s ease-in-out infinite;
-  pointer-events: none;
-}
-.holo-tag__spark {
-  width: 9px;
-  height: 9px;
-  fill: #fff;
-  filter: drop-shadow(0 0 1.5px rgb(90 40 200 / 0.9));
-}
-.holo-tag--large {
-  padding: 6px 12px 6px 10px;
-  font-size: 12px;
-  gap: 6px;
-}
-.holo-tag--large .holo-tag__spark {
-  width: 12px;
-  height: 12px;
-}
-.product-item:hover .holo-tag::after {
-  animation-duration: 1.4s;
-}
-@keyframes holo-shift {
-  to { background-position: -250% 0; }
-}
-@keyframes holo-glint {
-  0%, 62% { transform: translateX(-140%) skewX(-18deg); }
-  100% { transform: translateX(320%) skewX(-18deg); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .holo-tag,
-  .holo-tag::after {
-    animation: none;
-  }
-}
-
-  display: flex;
-  .holo-tag:not(.holo-tag--large) {
-    padding: 4px 10px 4px 8px;
-    font-size: 12px;
-    gap: 5px;
-  }
-  .holo-tag:not(.holo-tag--large) .holo-tag__spark {
-    width: 11px;
-    height: 11px;
-  }
   flex-direction: column;
   align-items: center;
   gap: 6px;

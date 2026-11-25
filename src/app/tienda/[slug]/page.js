@@ -107,7 +107,7 @@ export default async function ProductPage({ params }) {
           <h1 className="font-display text-[30px] font-extrabold leading-[1.05] tracking-[-0.02em] sm:text-5xl">{view.title}</h1>
           {(view.isHolofoil || view.traitBadges.length > 0) && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <HolofoilTag show={view.isHolofoil} large />
+              <HolofoilTag show={view.isHolofoil} />
               {view.traitBadges.length > 0 && <TraitBadges badges={view.traitBadges} withLabel />}
             </div>
           )}

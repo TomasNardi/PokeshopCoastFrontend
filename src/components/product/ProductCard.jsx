@@ -34,6 +34,7 @@ export default function ProductCard({ product, priority = false }) {
             </div>
             <div className="product-item__badges product-item__badges--right">
               {view.certLabel ? <CertBadge label={view.certLabel} /> : <ConditionBadge condition={view.condition} />}
+              <HolofoilTag show={view.isHolofoil} />
             </div>
             {(view.language || view.traitBadges.length > 0) && (
               <span className="product-item__lang">
@@ -56,11 +57,6 @@ export default function ProductCard({ product, priority = false }) {
 
       <CardLink href={view.href} className="product-item__info">
         <h3 className="product-item__title" title={view.name}>{view.title}</h3>
-        {view.isHolofoil && (
-          <span className="product-item__holo">
-            <HolofoilTag show />
-          </span>
-        )}
         <p className="product-item__category" title={subtitle}>{subtitle || ' '}</p>
         <p className={`product-item__price ${view.hasDiscount ? 'is-sale' : ''}`}>
           <span className="new-price">{formatPrice(view.price)}</span>

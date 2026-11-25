@@ -50,6 +50,8 @@ tests/
 | Null Object | `auth/providers/disabledAuthProvider.js` | Sin auth configurado el sitio vende igual |
 | View-model | `domain/product.js → productView()` | Card, detalle y carrito usan las mismas reglas |
 
+Etiqueta **Holofoil**: sale del acabado de TCGplayer que trae cada producto (`finish`: Holofoil, Unlimited Holofoil o 1st Edition Holofoil; la reverse no cuenta). Ver `domain/productTraits.js → isHolofoil()` y `HolofoilTag` en `components/product/ProductBadges.jsx`. En el admin se marca o se saca con la insignia **H**.
+
 ## Integraciones
 
 - **Login (Google SSO + email)**: Supabase Auth, igual que Crack/Delta. Supabase → Providers → Google.
