@@ -78,7 +78,8 @@ export function TraitBadges({ badges, withLabel = false }) {
         <span key={b.key} className={`trait-badge ${i >= MOBILE_VISIBLE ? 'is-extra' : ''}`} title={b.label}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={b.icon} alt={withLabel ? '' : b.label} width={18} height={18} />
-          {withLabel && <span>{b.label}</span>}
+          {/* En la card: el nombre aparece al pasar el mouse (solo PC, ver globals.css). */}
+          {withLabel ? <span>{b.label}</span> : <span className="trait-badge__label" aria-hidden="true">{b.label}</span>}
         </span>
       ))}
       {!withLabel && hidden.length > 0 && (
@@ -86,6 +87,22 @@ export function TraitBadges({ badges, withLabel = false }) {
           +{hidden.length}
         </span>
       )}
+    </span>
+  );
+}
+
+/**
+ * "Holofoil" con brillo: un reflejo que cruza la etiqueta cada tanto, como la
+ * carta al moverla. Va junto al nombre (card y ficha), no sobre la foto.
+ */
+export function HolofoilTag({ show, large = false }) {
+  if (!show) return null;
+  return (
+    <span className={`holo-tag ${large ? 'holo-tag--large' : ''}`} title="Carta holo: la ilustración brilla">
+      <svg className="holo-tag__spark" viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M8 0c.4 3.9 2.1 6.6 8 8-5.9 1.4-7.6 4.1-8 8-.4-3.9-2.1-6.6-8-8 5.9-1.4 7.6-4.1 8-8z" />
+      </svg>
+      Holofoil
     </span>
   );
 }

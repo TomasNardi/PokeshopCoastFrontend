@@ -3,7 +3,7 @@ import { productView } from '@/domain/product';
 import { formatPrice } from '@/domain/money';
 import ProductStage from './ProductStage';
 import AddToCartButton from './AddToCartButton';
-import { CertBadge, ConditionBadge, LanguageFlag, OutletBadge, SaleBadge, SoldOutBadge, TraitBadges } from './ProductBadges';
+import { CertBadge, ConditionBadge, HolofoilTag, LanguageFlag, OutletBadge, SaleBadge, SoldOutBadge, TraitBadges } from './ProductBadges';
 import { PRESENTATION_MODE } from '@/config/presentation';
 
 /** En modo presentación la card se ve y anima igual, pero no es un link. */
@@ -56,6 +56,11 @@ export default function ProductCard({ product, priority = false }) {
 
       <CardLink href={view.href} className="product-item__info">
         <h3 className="product-item__title" title={view.name}>{view.title}</h3>
+        {view.isHolofoil && (
+          <span className="product-item__holo">
+            <HolofoilTag show />
+          </span>
+        )}
         <p className="product-item__category" title={subtitle}>{subtitle || ' '}</p>
         <p className={`product-item__price ${view.hasDiscount ? 'is-sale' : ''}`}>
           <span className="new-price">{formatPrice(view.price)}</span>

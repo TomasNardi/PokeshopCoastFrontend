@@ -36,6 +36,12 @@ const BASE_FINISHES = new Set(['', 'Normal', 'Holofoil', 'Unlimited', 'Unlimited
 
 export const isSpecialFinish = (finish) => !BASE_FINISHES.has(finish || '');
 
+/**
+ * Carta holo (la variante "Holofoil" de TCGplayer, también Unlimited y 1st
+ * Edition Holofoil). La reverse no cuenta: brilla el fondo, no la ilustración.
+ */
+export const isHolofoil = (finish) => /Holofoil$/.test(finish || '') && finish !== 'Reverse Holofoil';
+
 export const ATTRIBUTES = [
   ['altered', 'Alterada'],
   ['signed', 'Firmada'],

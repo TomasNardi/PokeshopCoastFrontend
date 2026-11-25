@@ -16,7 +16,7 @@ import { Description, DetailRows, ShippingInfo } from '@/components/product/Prod
 import InfoSection from '@/components/product/InfoSection';
 import JsonLd from '@/components/seo/JsonLd';
 import { openGraph } from '@/config/seo';
-import { CertBadge, ConditionBadge, DiscountBadge, StockStatus, TraitBadges } from '@/components/product/ProductBadges';
+import { CertBadge, ConditionBadge, DiscountBadge, HolofoilTag, StockStatus, TraitBadges } from '@/components/product/ProductBadges';
 
 export const dynamic = 'force-dynamic';
 
@@ -105,9 +105,10 @@ export default async function ProductPage({ params }) {
         <div className="fade-up min-w-0 lg:pt-2" style={{ '--delay': '0.1s' }}>
           {view.subtitle && <p className="eyebrow mb-2">{view.subtitle}</p>}
           <h1 className="font-display text-[30px] font-extrabold leading-[1.05] tracking-[-0.02em] sm:text-5xl">{view.title}</h1>
-          {view.traitBadges.length > 0 && (
-            <div className="mt-3">
-              <TraitBadges badges={view.traitBadges} withLabel />
+          {(view.isHolofoil || view.traitBadges.length > 0) && (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <HolofoilTag show={view.isHolofoil} large />
+              {view.traitBadges.length > 0 && <TraitBadges badges={view.traitBadges} withLabel />}
             </div>
           )}
 
