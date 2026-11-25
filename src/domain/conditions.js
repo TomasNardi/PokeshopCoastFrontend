@@ -42,12 +42,18 @@ export const CONDITIONS = Object.freeze({
   },
   'moderately played': PLAYED_MODERATE,
   'moderate played': PLAYED_MODERATE,
+  'heavily played': {
+    abbr: 'HP',
+    label: 'Heavily Played',
+    tone: 'bg-red-400 text-white',
+    description: 'Desgaste fuerte: bordes muy gastados, rayones y marcas evidentes, sin roturas.',
+  },
   damage: DAMAGED,
   damaged: DAMAGED,
 });
 
 /** Orden de los filtros de la tienda. */
-export const CONDITION_FILTERS = ['Mint', 'Near Mint', 'Lightly Played', 'Moderately Played', 'Damaged'];
+export const CONDITION_FILTERS = ['Mint', 'Near Mint', 'Lightly Played', 'Moderately Played', 'Heavily Played', 'Damaged'];
 
 export function getCondition(name) {
   if (!name) return null;
