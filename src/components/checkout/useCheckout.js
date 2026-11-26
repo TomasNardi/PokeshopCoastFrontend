@@ -83,6 +83,9 @@ export function useCheckout() {
   const addToCart = useCartStore((s) => s.add);
   const clearCart = useCartStore((s) => s.clear);
   const checkoutToken = useRef(null);
+  // Mientras se crea el pedido (y después) no se guarda más el checkout pendiente:
+  // un guardado tardío reabriría el carrito y llegaría el recordatorio a alguien que ya compró.
+  const placing = useRef(false);
   const [recovering, setRecovering] = useState(false);
   const { profile, user, status: sessionStatus } = useSession();
 
@@ -166,6 +169,7 @@ export function useCheckout() {
   useEffect(() => {
     if (recovering || !items.length) return undefined;
     const timer = setTimeout(async () => {
+      if (placing.current) return;
       try {
         const token = await services.orders.savePendingCheckout({
           form, items, discountCode: discount.code, token: checkoutToken.current,
@@ -235,6 +239,7 @@ export function useCheckout() {
       return;
     }
     setSubmitting(true);
+    placing.current = true;
     try {
       const { next, claimToken } = await services.orders.placeOrder({
         form: state.form,
@@ -264,6 +269,7 @@ export function useCheckout() {
         if (Object.keys(error.fieldErrors).some((k) => k !== 'receipt')) setTransferOpen(false);
       }
       toast.error(error.message || 'No pudimos crear el pedido.');
+      placing.current = false;
       setSubmitting(false);
     }
   };
