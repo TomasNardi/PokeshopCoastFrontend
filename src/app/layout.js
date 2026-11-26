@@ -1,7 +1,9 @@
 import { Barlow_Condensed, Roboto, Roboto_Condensed } from 'next/font/google';
 import './globals.css';
 import { SITE, TOP_BANNER_MESSAGE } from '@/config/site';
-import { GOOGLE_SITE_VERIFICATION, openGraph } from '@/config/seo';
+import { GOOGLE_SITE_VERIFICATION, SHARE_IMAGE, openGraph } from '@/config/seo';
+import JsonLd from '@/components/seo/JsonLd';
+import { organizationJsonLd, websiteJsonLd } from '@/seo/structuredData';
 import { MAIN_MENU } from '@/config/navigation';
 import { getServices } from '@/services/container';
 import { loadMenuImages } from '@/components/header/menuData';
@@ -57,8 +59,9 @@ const BASE_METADATA = {
   },
   manifest: '/site.webmanifest',
   appleWebApp: { title: SITE.name },
-  openGraph: openGraph({ url: '/', title: `${SITE.name} — Cartas Pokémon TCG en Argentina`, description: SITE.description }),
-  twitter: { card: 'summary_large_image' },
+  // Imagen al compartir y la miniatura que Google puede tomar: el logo actual (no el de Tiendanube).
+  openGraph: openGraph({ url: '/', title: `${SITE.name} — Cartas Pokémon TCG en Argentina`, description: SITE.description, images: [SHARE_IMAGE] }),
+  twitter: { card: 'summary', images: [SHARE_IMAGE.url] },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
   // Search Console (también está el archivo public/googlec4d88a0b592d5be2.html).
   verification: { google: GOOGLE_SITE_VERIFICATION },
@@ -72,6 +75,11 @@ export async function generateMetadata() {
   if (!gated) return BASE_METADATA;
   const noindex = { robots: { index: false, follow: false } };
   if (beforeLaunch) {
+    // La home SÍ se indexa antes de la apertura: con noindex Google borraba la
+    // marca del buscador y seguía mostrando la ficha vieja de Tiendanube (logo
+    // viejo, sin favicon). Título y descripción son los de la tienda, no los
+    // de la cuenta regresiva, para que el resultado quede bien el día 1.
+    if ((await headers()).get('x-pk-path') === '/') return BASE_METADATA;
     return {
       ...BASE_METADATA,
       ...noindex,
@@ -115,6 +123,8 @@ export default async function RootLayout({ children }) {
     return (
       <html lang="es" className={fonts}>
         <body>
+          <JsonLd data={organizationJsonLd()} />
+          <JsonLd data={websiteJsonLd()} />
           <LaunchPage serverNow={Date.now()} />
         </body>
       </html>

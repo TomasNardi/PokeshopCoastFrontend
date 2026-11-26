@@ -31,6 +31,9 @@ export const PRIVATE_PATHS = Object.freeze(['/checkout', '/cuenta', '/carrito', 
 /** Logo para Google (Organization.logo): cuadrado o casi, PNG, mínimo 112 px. */
 export const LOGO_PATH = '/brand/pokeshop-logo.png';
 
+/** Imagen por defecto al compartir (og:image): el logo nuevo en 512 px, fondo transparente. */
+export const SHARE_IMAGE = Object.freeze({ url: '/web-app-manifest-512x512.png', width: 512, height: 512, alt: 'PokeShop Coast' });
+
 /**
  * Open Graph por defecto. Next NO mezcla openGraph entre layout y página: si
  * una página define el suyo, reemplaza al del layout. Por eso las páginas
