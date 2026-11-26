@@ -19,6 +19,8 @@ import MaintenancePage from '@/components/layout/MaintenancePage';
 import LaunchPage from '@/components/launch/LaunchPage';
 import { launchLabels } from '@/config/launch';
 import { getMaintenanceState } from '@/services/site/siteStatus';
+import { headers } from 'next/headers';
+import { isAlwaysOpen } from '@/config/alwaysOpen';
 
 // Mismas familias que unsobremas.com (Wappalyzer → Google Font API).
 const roboto = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-roboto', display: 'swap' });
@@ -86,6 +88,19 @@ export default async function RootLayout({ children }) {
   // Sitio apagado desde el admin → solo la página de mantenimiento, en
   // cualquier URL. Si el backend no responde, el sitio queda abierto.
   const { status, maintenance, launch, preview, beforeLaunch } = await getMaintenanceState();
+  // Links de los mails (baja de newsletter): se ven igual, en una página simple sin la tienda.
+  if ((maintenance || launch) && isAlwaysOpen((await headers()).get('x-pk-path'))) {
+    return (
+      <html lang="es" className={fonts}>
+        <body>
+          <header className="container-site flex justify-center border-b border-coast-line py-6">
+            <span className="font-display text-2xl font-extrabold uppercase tracking-[-0.02em]">PokeShop Coast</span>
+          </header>
+          <main>{children}</main>
+        </body>
+      </html>
+    );
+  }
   if (maintenance) {
     return (
       <html lang="es" className={fonts}>
