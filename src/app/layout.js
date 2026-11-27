@@ -12,6 +12,7 @@ import SiteHeader from '@/components/header/SiteHeader';
 import Footer from '@/components/layout/Footer';
 import FloatingContact from '@/components/layout/FloatingContact';
 import CookieBanner from '@/components/layout/CookieBanner';
+import PromoBanner from '@/components/layout/PromoBanner';
 import SocialRail from '@/components/layout/SocialRail';
 import CartDrawer from '@/components/cart/CartDrawer';
 import { PRESENTATION_MODE } from '@/config/presentation';
@@ -163,6 +164,7 @@ export default async function RootLayout({ children }) {
           <SocialRail />
           <FloatingContact />
           <CookieBanner />
+          {!PRESENTATION_MODE && <PromoBanner banner={status.promoBanner} />}
         </Providers>
       </body>
     </html>

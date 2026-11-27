@@ -20,7 +20,7 @@ import { internalHeaders } from '@/services/http/internalHeaders';
 
 const TIMEOUT_MS = 3000;
 // launchOpen false: sin backend, la apertura la decide la fecha (config/launch.js), que abre sola igual.
-const OPEN = Object.freeze({ isActive: true, launchOpen: false, maintenanceTitle: '', maintenanceMessage: '', showTopBanner: true, topBannerMessage: '' });
+const OPEN = Object.freeze({ isActive: true, launchOpen: false, maintenanceTitle: '', maintenanceMessage: '', showTopBanner: true, topBannerMessage: '', promoBanner: null });
 
 export const PREVIEW_COOKIE = 'psc_preview';
 
@@ -39,6 +39,8 @@ export const getSiteStatus = cache(async () => {
       maintenanceMessage: data.maintenance_message || '',
       showTopBanner: data.show_top_banner !== false,
       topBannerMessage: data.top_banner_message || '',
+      // Banner de promo (admin → Configuración → Banner); null = no se muestra.
+      promoBanner: data.promo_banner?.image ? data.promo_banner : null,
     };
   } catch {
     return OPEN;

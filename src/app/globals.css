@@ -3167,3 +3167,83 @@ html.has-buy-bar .cookie-banner { bottom: calc(84px + env(safe-area-inset-bottom
 .free-ship.is-done { background: #ecfdf5; color: #047857; font-weight: 700; }
 .free-ship__bar { display: block; height: 4px; margin-top: 8px; background: #e7e5e4; overflow: hidden; }
 .free-ship__bar > span { display: block; height: 100%; background: #059669; transition: width .5s cubic-bezier(.2,.8,.2,1); }
+
+/* ==========================================================================
+   Banner de promo (admin → Configuración → Banner)
+   ========================================================================== */
+.promo-banner {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.promo-banner__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  animation: promo-fade 0.35s ease both;
+  cursor: default;
+}
+.promo-banner__card {
+  position: relative;
+  width: min(480px, 100%);
+  max-height: calc(100dvh - 40px);
+  overflow: auto;
+  background: #fff;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+  animation: promo-in 0.5s var(--ease-soft) both;
+}
+.promo-banner__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+.promo-banner__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  display: flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+.promo-banner__close:hover { transform: scale(1.08); }
+.promo-banner__body {
+  padding: 20px 22px 24px;
+  text-align: center;
+}
+.promo-banner__title {
+  font-family: theme('fontFamily.display');
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+.promo-banner__text {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: theme('colors.uns.muted');
+}
+.promo-banner__button {
+  margin-top: 16px;
+  width: 100%;
+}
+@keyframes promo-fade { from { opacity: 0; } }
+@keyframes promo-in { from { opacity: 0; transform: translateY(18px) scale(0.97); } }
+@media (prefers-reduced-motion: reduce) {
+  .promo-banner__backdrop, .promo-banner__card { animation: none; }
+}
