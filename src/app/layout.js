@@ -156,7 +156,8 @@ export default async function RootLayout({ children }) {
               {status.topBannerMessage || TOP_BANNER_MESSAGE}
             </div>
           )}
-          <SiteHeader menu={menu} popularProducts={featured} />
+          {/* El buscador muestra 4: el resto no viaja en el HTML de cada página. */}
+          <SiteHeader menu={menu} popularProducts={featured.slice(0, 4)} />
           <main className="min-h-[60vh]">{children}</main>
           <Footer />
           <CartDrawer />

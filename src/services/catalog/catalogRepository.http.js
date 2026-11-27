@@ -8,7 +8,8 @@ import { localizeImages } from './imageUrls';
  *   listMenuProducts(filters) → lo mismo, cacheado 10 min (fotos del megamenú)
  *   getProduct(slug) → product   (ApiError 404 si no existe)
  *   getProductsByIds(ids) → product[]
- *   getNewArrivals() / getFeatured() → product[]
+ *   getNewArrivals() → product[]
+ *   getFeatured() → product[] (cacheado 5 min: "más buscados" del header)
  *   getCategories() / getConditions() / getCertificationEntities() → []
  */
 export function createHttpCatalogRepository(http) {
@@ -17,6 +18,10 @@ export function createHttpCatalogRepository(http) {
   const cached = { next: { revalidate: 1800 } };
   // El megamenú se arma en cada página: sus fotos pueden tener unos minutos de atraso.
   const menu = { next: { revalidate: 600 } };
+  // "Más buscados" del buscador: lo pide el layout en CADA página. Sin cache, cada
+  // visita esperaba al backend antes de mandar el primer byte; es decorativo y el
+  // stock real se valida igual en el carrito y el checkout.
+  const popular = { next: { revalidate: 300 } };
 
   return {
     listProducts: async (filters = {}) => localizeImages(await http.get(`/products/${toQuery(filters)}`, fresh)),
@@ -33,7 +38,7 @@ export function createHttpCatalogRepository(http) {
       return localizeImages(unwrapList(await http.get(`/products/by-ids/${toQuery({ ids: clean.join(',') })}`, fresh)));
     },
     getNewArrivals: async () => localizeImages(unwrapList(await http.get('/products/new-arrivals/', fresh))),
-    getFeatured: async () => localizeImages(unwrapList(await http.get('/products/featured/', fresh))),
+    getFeatured: async () => localizeImages(unwrapList(await http.get('/products/featured/', popular))),
     // Opciones de los filtros (solo con stock) con su cantidad.
     getFacets: async (filters = {}) => http.get(`/products/facets/${toQuery(filters)}`, fresh),
     getCategories: async () => unwrapList(await http.get('/categories/', cached)),
