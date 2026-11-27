@@ -1,5 +1,5 @@
 'use client';
-import { Building2, Check, Home, MapPin, RefreshCw, Store, Truck } from 'lucide-react';
+import { Building2, Check, Home, MapPin, RefreshCw, Star, Store, Truck } from 'lucide-react';
 import Field from '@/components/ui/Field';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { formatPrice } from '@/domain/money';
@@ -30,13 +30,35 @@ function Tabs({ value, onChange }) {
   );
 }
 
+/** Etiqueta de la dirección predeterminada (la misma que en Mi cuenta → Direcciones). */
+function DefaultBadge() {
+  return (
+    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-coast-red px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-white">
+      <Star size={9} fill="currentColor" aria-hidden="true" /> Predeterminada
+    </span>
+  );
+}
+
+/**
+ * Direcciones guardadas. La predeterminada va primera y con fondo crema, para
+ * reconocerla de un vistazo; la elegida se marca con borde negro.
+ */
 function SavedAddresses({ shipping }) {
   if (!shipping.addresses.length) return null;
-  const card = (key, checked, onPick, title, text) => (
-    <label key={key} className={`flex cursor-pointer items-start gap-3 border p-3.5 transition-colors duration-300 ${checked ? 'border-black bg-uns-stage' : 'border-uns-hairline hover:border-black/40'}`}>
+  const sorted = [...shipping.addresses].sort((a, b) => Number(b.is_default) - Number(a.is_default));
+  const card = ({ key, checked, onPick, title, text, isDefault = false }) => (
+    <label
+      key={key}
+      className={`flex cursor-pointer items-start gap-3 border p-3.5 transition-colors duration-300 ${
+        checked ? 'border-black' : isDefault ? 'border-coast-cream-deep hover:border-black/40' : 'border-uns-hairline hover:border-black/40'
+      } ${isDefault ? 'bg-coast-cream' : checked ? 'bg-uns-stage' : 'bg-white'}`}
+    >
       <input type="radio" name="saved_address" checked={checked} onChange={onPick} className="mt-0.5 h-4 w-4 shrink-0 accent-black" />
-      <span className="min-w-0">
-        <span className="block text-[13px] font-bold">{title}</span>
+      <span className="min-w-0 flex-1">
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="text-[13px] font-bold">{title}</span>
+          {isDefault && <DefaultBadge />}
+        </span>
         {text && <span className="mt-0.5 block text-[12px] leading-snug text-uns-muted">{text}</span>}
       </span>
     </label>
@@ -44,12 +66,15 @@ function SavedAddresses({ shipping }) {
   return (
     <div className="space-y-2">
       <p className="label">Tus direcciones</p>
-      {shipping.addresses.map((a) => card(
-        a.id, shipping.addressId === a.id, () => shipping.selectAddress(a),
-        a.label || [a.address, a.street_number].filter(Boolean).join(' '),
-        [[a.address, a.street_number].filter(Boolean).join(' '), a.apartment, `${a.city}, ${a.province} (${a.zip_code})`].filter(Boolean).join(' · '),
-      ))}
-      {card('new', shipping.addressId === 'new', () => shipping.selectAddress('new'), 'Usar otra dirección')}
+      {sorted.map((a) => card({
+        key: a.id,
+        checked: shipping.addressId === a.id,
+        onPick: () => shipping.selectAddress(a),
+        title: a.label || [a.address, a.street_number].filter(Boolean).join(' '),
+        text: [[a.address, a.street_number].filter(Boolean).join(' '), a.apartment, `${a.city}, ${a.province} (${a.zip_code})`].filter(Boolean).join(' · '),
+        isDefault: a.is_default,
+      }))}
+      {card({ key: 'new', checked: shipping.addressId === 'new', onPick: () => shipping.selectAddress('new'), title: 'Usar otra dirección' })}
     </div>
   );
 }

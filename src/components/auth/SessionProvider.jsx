@@ -1,7 +1,8 @@
 'use client';
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 import { getServices } from '@/services/container';
-import { forgetOrderClaims, readOrderClaims } from '@/domain/guestSignup';
+import { forgetOrderClaims, linkedOrdersMessage, readOrderClaims } from '@/domain/guestSignup';
 
 /**
  * Sesión del comprador: un único lugar que sabe si hay alguien logueado.
@@ -10,6 +11,8 @@ import { forgetOrderClaims, readOrderClaims } from '@/domain/guestSignup';
  * Identidad = proveedor (Supabase: Google / email). Perfil = Django.
  * Al aparecer una sesión se sincroniza UNA vez por usuario con
  * /customers/session/ (crea el cliente y vincula compras de invitado).
+ * Si se sumaron pedidos de invitado, se avisa: el comprador tiene que saber
+ * que su compra quedó en la cuenta, no adivinarlo.
  */
 const SessionContext = createContext(null);
 
@@ -49,6 +52,8 @@ export function SessionProvider({ children, services = getServices() }) {
         // Ya usadas: los pedidos quedaron en esta cuenta (o eran de otra y no se tocan).
         forgetOrderClaims();
         setProfile(result?.profile ?? result ?? null);
+        const message = linkedOrdersMessage(result?.linked_order_codes);
+        if (message) toast.success(message, { id: 'linked-orders', duration: 6000 });
       } catch {
         // La sesión es válida aunque el backend no responda: puede comprar igual.
         syncedFor.current = null;

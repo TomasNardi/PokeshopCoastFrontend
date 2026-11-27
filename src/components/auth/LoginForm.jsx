@@ -1,6 +1,7 @@
 'use client';
-import { readGuestEmail } from '@/domain/guestSignup';
+import { hasPendingOrderClaims, readGuestEmail } from '@/domain/guestSignup';
 import { useEffect, useState } from 'react';
+import { PackageCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -15,6 +16,19 @@ import { LoginFormSkeleton } from './AuthSkeletons';
 
 const MODES = { login: 'Ingresar', signup: 'Crear cuenta' };
 
+/**
+ * Compró como invitado en este navegador: le confirmamos ANTES de registrarse que
+ * el pedido va a quedar en su cuenta (y cómo), para que no tenga que adivinarlo.
+ */
+function GuestOrderNote({ children }) {
+  return (
+    <p role="note" className="flex gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50/70 px-3.5 py-3 text-left text-[13px] leading-snug text-emerald-900">
+      <PackageCheck size={17} className="mt-px shrink-0" aria-hidden="true" />
+      <span>{children}</span>
+    </p>
+  );
+}
+
 export default function LoginForm() {
   const { auth } = getServices();
   const router = useRouter();
@@ -28,6 +42,9 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [sentTo, setSentTo] = useState('');
+  // Se lee después de montar: el storage no existe en el servidor (sin desfasaje de hidratación).
+  const [guestOrder, setGuestOrder] = useState(null);
+  useEffect(() => setGuestOrder(hasPendingOrderClaims() ? { email: readGuestEmail() } : null), []);
 
   useEffect(() => {
     if (isAuthenticated) router.replace(returnTo);
@@ -64,6 +81,13 @@ export default function LoginForm() {
         <p className="text-[14px] text-coast-gray">
           Te mandamos un link a <strong className="text-coast-ink">{sentTo}</strong> para confirmar tu cuenta.
         </p>
+        {guestOrder && (
+          <GuestOrderNote>
+            {guestOrder.email && guestOrder.email === sentTo.trim().toLowerCase()
+              ? 'Apenas confirmes, tu pedido aparece en Mi cuenta (desde cualquier dispositivo).'
+              : 'Abrí el link desde este mismo dispositivo y tu pedido aparece solo en Mi cuenta.'}
+          </GuestOrderNote>
+        )}
         <button type="button" className="text-[13px] font-semibold text-coast-red hover:underline" onClick={() => auth.resendConfirmation(sentTo).then(() => toast.success('Email reenviado')).catch((e) => toast.error(e.message))}>
           Reenviar email
         </button>
@@ -75,6 +99,7 @@ export default function LoginForm() {
   if (auth.acceptsUsername) {
     return (
       <form onSubmit={submit} className="space-y-4">
+        {guestOrder && <GuestOrderNote>Tu compra queda guardada: al ingresar, el pedido se suma solo a Mi cuenta.</GuestOrderNote>}
         <p className="rounded-xl bg-coast-cream px-4 py-3 text-[13px] text-coast-ink">
           Modo desarrollo · usuario <strong>tomi</strong> / contraseña <strong>tomi</strong>
         </p>
@@ -89,6 +114,12 @@ export default function LoginForm() {
 
   return (
     <div className="space-y-6">
+      {guestOrder && (
+        <GuestOrderNote>
+          <strong>Tu compra queda guardada.</strong> Entrá o creá tu cuenta, con Google o con cualquier mail, y el pedido
+          que hiciste desde este dispositivo se suma solo a Mi cuenta.
+        </GuestOrderNote>
+      )}
       <GoogleButton auth={auth} returnTo={returnTo} />
 
       <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-coast-mist">

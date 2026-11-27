@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { CheckCircle2, Clock, PackageSearch, XCircle } from 'lucide-react';
+import { CheckCircle2, Clock, XCircle } from 'lucide-react';
 import { useSession } from '@/components/auth/SessionProvider';
-import { SIGNUP_HREF, readGuestEmail } from '@/domain/guestSignup';
+import { readGuestEmail } from '@/domain/guestSignup';
+import QuickSignup from './QuickSignup';
 import { getServices } from '@/services/container';
 import { useCartStore } from '@/store/cartStore';
 import Button from '@/components/ui/Button';
@@ -93,16 +94,7 @@ export default function CheckoutResult({ variant }) {
         {variant === 'pending' && 'Mercado Pago está procesando el pago. Te avisamos por email apenas se acredite.'}
         {variant === 'error' && 'No se realizó ningún cobro. Tu carrito sigue guardado para que vuelvas a intentar.'}
       </p>
-      {offerAccount && (
-        <div className="result-rise mt-8 w-full max-w-md border border-coast-line bg-uns-stage p-5 text-left [animation-delay:.25s]">
-          <p className="flex items-center gap-2 text-[14px] font-bold"><PackageSearch size={18} /> Seguí tu pedido desde tu cuenta</p>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-uns-muted">
-            Entrá o creá tu cuenta desde este dispositivo, con Google o con tu mail, y este pedido aparece solo en
-            Mi cuenta, con su estado y el seguimiento del envío. Es opcional.
-          </p>
-          <Button href={SIGNUP_HREF} size="sm" className="mt-4">Crear cuenta o ingresar</Button>
-        </div>
-      )}
+      {offerAccount && <QuickSignup email={guestEmail} orderCode={order?.order_code} />}
       <div className="mt-10 flex flex-wrap justify-center gap-3">
         {variant === 'error' ? <Button href="/checkout" size="lg">Reintentar pago</Button> : <Button href="/tienda" size="lg">Seguir comprando</Button>}
         <Button href={whatsappLink(`¡Hola, PokeShop Coast! 👋 Tengo una consulta por mi pedido ${order?.order_code || ''}`.trim())} variant="outline" size="lg" target="_blank" rel="noopener noreferrer">

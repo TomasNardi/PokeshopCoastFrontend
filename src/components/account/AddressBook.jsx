@@ -106,13 +106,13 @@ function AddressForm({ initial, onCancel, onSaved }) {
 function AddressCard({ address, onEdit, onDelete, onDefault, style }) {
   const { Icon, label } = KINDS[address.kind] || KINDS.home;
   return (
-    <Card style={style} className={`group relative flex flex-col p-4 transition-shadow duration-300 hover:shadow-card md:p-5 ${address.is_default ? 'border-coast-ink/40' : ''}`}>
+    <Card style={style} className={`group relative flex flex-col p-4 transition-shadow duration-300 hover:shadow-card md:p-5 ${address.is_default ? '!border-coast-cream-deep !bg-coast-cream' : ''}`}>
       <div className="mb-3 flex items-center justify-between">
         <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.1em] text-uns-muted">
           <Icon size={14} /> {label}
         </span>
         {address.is_default && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-coast-ink px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-white">
+          <span className="inline-flex items-center gap-1 rounded-full bg-coast-red px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-white">
             <Star size={10} fill="currentColor" /> Predeterminada
           </span>
         )}

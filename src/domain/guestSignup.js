@@ -68,3 +68,14 @@ export function forgetOrderClaims() {
     /* nada */
   }
 }
+
+/** ¿Hay compras de invitado de este navegador esperando una cuenta? */
+export const hasPendingOrderClaims = () => readOrderClaims().length > 0;
+
+/** Aviso al entrar cuando el backend sumó pedidos de invitado a la cuenta. */
+export function linkedOrdersMessage(codes) {
+  const list = Array.isArray(codes) ? codes.filter(Boolean) : [];
+  if (list.length === 0) return '';
+  if (list.length === 1) return `Sumamos tu pedido ${list[0]} a tu cuenta.`;
+  return `Sumamos ${list.length} pedidos a tu cuenta.`;
+}

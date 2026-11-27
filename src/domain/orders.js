@@ -31,6 +31,9 @@ export const isActiveOrder = (order) => {
   return step >= 0 && step < 3;
 };
 
+/** Se cobró (aunque después se haya devuelto): define "Pagado con" vs "Medio de pago". */
+export const isPaidOrder = (order) => orderStatus(order.status).step >= 1 || order.status === 'refunded';
+
 export const PAYMENT_LABELS = Object.freeze({ mercadopago: 'Mercado Pago', transfer: 'Transferencia' });
 
 /** "hace 5 min", "hace 3 h", "ayer", "12 nov". */

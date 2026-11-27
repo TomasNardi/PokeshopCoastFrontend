@@ -1,11 +1,11 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { AlertCircle, ArrowLeft, Check, Copy, ExternalLink, MapPin, MessageCircle, Store, Truck } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Check, Clock, Copy, ExternalLink, MapPin, MessageCircle, RotateCcw, Store, Truck } from 'lucide-react';
 import { getServices } from '@/services/container';
 import { useAsync } from '@/hooks/useAsync';
 import { formatPrice } from '@/domain/money';
-import { formatDate, PAYMENT_LABELS, timeAgo } from '@/domain/orders';
+import { formatDate, isPaidOrder, orderStatus, PAYMENT_LABELS, timeAgo } from '@/domain/orders';
 import { whatsappLink } from '@/config/site';
 import Button from '@/components/ui/Button';
 import { Card, Collapsible, EmptyState, OrderProgress, Skeleton, StatusPill } from './ui';
@@ -36,6 +36,47 @@ function Row({ label, value, strong = false }) {
       <span className={strong ? '' : 'text-uns-muted'}>{label}</span>
       <span className={strong ? '' : 'font-semibold'}>{value}</span>
     </div>
+  );
+}
+
+/**
+ * Pedido cerrado sin entregar: en vez de la barra de progreso, qué pasó y qué
+ * puede hacer. Los vencidos son neutros (no hubo cobro); los demás, alerta.
+ */
+const CLOSED = {
+  expired: {
+    Icon: Clock,
+    tone: 'neutral',
+    title: 'Este pedido venció sin pagarse',
+    text: 'No se hizo ningún cobro y los productos volvieron a la tienda. Si todavía los querés, podés comprarlos de nuevo.',
+    action: { href: '/tienda', label: 'Ir a la tienda' },
+  },
+  refunded: { Icon: RotateCcw, tone: 'neutral', title: 'Te devolvimos el dinero', text: 'El reintegro puede tardar unos días en verse según tu medio de pago.' },
+  rejected: { Icon: AlertCircle, tone: 'alert', title: 'No pudimos validar tu pago' },
+  cancelled: { Icon: AlertCircle, tone: 'alert', title: 'Pedido cancelado' },
+};
+
+function ClosedOrderNotice({ order }) {
+  const { Icon, tone, title, text, action } = CLOSED[order.status] || CLOSED.cancelled;
+  const alert = tone === 'alert';
+  return (
+    <Card className={`flex gap-3 p-4 md:gap-4 md:p-5 ${alert ? 'border-coast-red/30 bg-coast-red-soft/40' : 'bg-uns-bg'}`}>
+      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${alert ? 'bg-white text-coast-red-dark' : 'bg-white text-uns-muted'}`}>
+        <Icon size={18} aria-hidden="true" />
+      </span>
+      <div className="min-w-0">
+        <p className="font-bold">{title}</p>
+        {(order.rejection_reason || text) && <p className="mt-1 text-[14px] text-coast-ink/80">{order.rejection_reason || text}</p>}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {action && <Button href={action.href} size="sm">{action.label}</Button>}
+          {alert && (
+            <Button href={whatsappLink(`Hola! Te escribo por mi pedido ${order.order_code}`)} variant="outline" size="sm" target="_blank" rel="noopener noreferrer">
+              <MessageCircle size={14} /> Escribinos por WhatsApp
+            </Button>
+          )}
+        </div>
+      </div>
+    </Card>
   );
 }
 
@@ -78,18 +119,9 @@ export default function OrderDetail({ code }) {
         <StatusPill status={order.status} />
       </header>
 
-      {/* Progreso o problema */}
-      {order.status === 'rejected' || order.status === 'cancelled' ? (
-        <Card className="flex gap-4 border-coast-red/30 bg-coast-red-soft/40 p-5">
-          <AlertCircle className="mt-0.5 shrink-0 text-coast-red-dark" size={20} />
-          <div>
-            <p className="font-bold">{order.status === 'rejected' ? 'No pudimos validar tu pago' : 'Pedido cancelado'}</p>
-            {order.rejection_reason && <p className="mt-1 text-[14px] text-coast-ink/80">{order.rejection_reason}</p>}
-            <Button href={whatsappLink(`Hola! Te escribo por mi pedido ${order.order_code}`)} variant="outline" size="sm" className="mt-4" target="_blank" rel="noopener noreferrer">
-              <MessageCircle size={14} /> Escribinos por WhatsApp
-            </Button>
-          </div>
-        </Card>
+      {/* Progreso, o por qué se cerró: nunca un recuadro vacío */}
+      {orderStatus(order.status).step < 0 ? (
+        <ClosedOrderNotice order={order} />
       ) : (
         <Card className="px-3 py-4 sm:p-6 md:px-8">
           <OrderProgress status={order.status} shippingType={order.shipping?.type} />
@@ -114,7 +146,7 @@ export default function OrderDetail({ code }) {
         <div className="min-w-0 space-y-6">
           {/* Productos y totales */}
           <Collapsible title="Productos" meta={`(${order.items.length}) · ${formatPrice(order.total)}`}>
-          <Card>
+          <Card className="overflow-hidden">
             <ul className="stagger divide-y divide-uns-hairline">
               {order.items.map((item) => (
                 <li key={`${item.product_slug}-${item.product_name}`} className="flex items-center gap-3 p-3 md:gap-4 md:p-5">
@@ -137,7 +169,9 @@ export default function OrderDetail({ code }) {
               <div className="mt-2 border-t border-coast-line pt-2">
                 <Row label="Total" value={formatPrice(order.total)} strong />
               </div>
-              <p className="mt-1 text-[12px] text-uns-muted">Pagado con {PAYMENT_LABELS[order.payment_method] || order.payment_method}</p>
+              <p className="mt-1 text-[12px] text-uns-muted">
+                {isPaidOrder(order) ? 'Pagado con' : 'Medio de pago:'} {PAYMENT_LABELS[order.payment_method] || order.payment_method}
+              </p>
             </div>
           </Card>
           </Collapsible>
@@ -180,7 +214,8 @@ export default function OrderDetail({ code }) {
           </Card>
 
           {/* Historial: plegado en celular, siempre visible en escritorio */}
-          <Collapsible title="Historial" meta={timeline.length > 0 && `(${timeline.length})`} defaultOpen={false}>
+          {timeline.length > 0 && (
+          <Collapsible title="Historial" meta={`(${timeline.length})`} defaultOpen={false}>
           <Card className="p-4 md:p-6">
             <ol className="relative space-y-5 before:absolute before:bottom-2 before:left-[5px] before:top-2 before:w-px before:bg-coast-line">
               {timeline.map((event, index) => (
@@ -193,6 +228,7 @@ export default function OrderDetail({ code }) {
             </ol>
           </Card>
           </Collapsible>
+          )}
 
           <Button
             href={whatsappLink(`Hola! Tengo una consulta por mi pedido ${order.order_code}`)}

@@ -38,3 +38,24 @@ describe('constancias de pedidos de invitado', () => {
     expect(readOrderClaims()).toEqual([]);
   });
 });
+
+describe('vínculo de compras de invitado', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('sabe si hay compras de este navegador esperando una cuenta', async () => {
+    const { hasPendingOrderClaims, rememberOrderClaim, forgetOrderClaims } = await import('@/domain/guestSignup');
+    expect(hasPendingOrderClaims()).toBe(false);
+    rememberOrderClaim('token-1');
+    expect(hasPendingOrderClaims()).toBe(true);
+    forgetOrderClaims();
+    expect(hasPendingOrderClaims()).toBe(false);
+  });
+
+  it('arma el aviso con el código, o la cantidad si son varios', async () => {
+    const { linkedOrdersMessage } = await import('@/domain/guestSignup');
+    expect(linkedOrdersMessage(undefined)).toBe('');
+    expect(linkedOrdersMessage([])).toBe('');
+    expect(linkedOrdersMessage(['PSC-AB12CD'])).toBe('Sumamos tu pedido PSC-AB12CD a tu cuenta.');
+    expect(linkedOrdersMessage(['PSC-1', 'PSC-2'])).toBe('Sumamos 2 pedidos a tu cuenta.');
+  });
+});
