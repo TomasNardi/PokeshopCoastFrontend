@@ -25,6 +25,21 @@ export function wasClosedRecently(id, now = Date.now()) {
   }
 }
 
+/** Encuadre del admin → variables CSS (--pb-m* celular, --pb-d* compu). Valores fuera de rango vuelven al centro. */
+export function framingStyle(framing) {
+  const num = (value, fallback, low, high) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? Math.min(Math.max(n, low), high) : fallback;
+  };
+  const style = {};
+  [['m', framing?.mobile], ['d', framing?.desktop]].forEach(([key, view]) => {
+    style[`--pb-${key}x`] = `${num(view?.x, 50, 0, 100)}%`;
+    style[`--pb-${key}y`] = `${num(view?.y, 50, 0, 100)}%`;
+    style[`--pb-${key}z`] = num(view?.zoom, 1, 1, 3);
+  });
+  return style;
+}
+
 function rememberClosed(id) {
   try {
     window.localStorage.setItem(PROMO_KEY, JSON.stringify({ id, at: Date.now() }));
@@ -40,7 +55,11 @@ function rememberClosed(id) {
  * mobile 320px con la imagen arriba (5:2). Aparece a los 3 s, una vez por día.
  * Se cierra con la X, tocando afuera o con Escape.
  *
- * @param {{ banner: { id: string, image: string, eyebrow?: string, title?: string, text?: string, button_label?: string, button_url?: string } | null }} props
+ * La imagen respeta el encuadre del admin (posición y zoom por separado para
+ * celular y compu): object-position + scale con el mismo origen, igual que
+ * la vista previa del admin (static/admin/js/promo_banner_framing.js).
+ *
+ * @param {{ banner: { id: string, image: string, framing?: { mobile?: { x: number, y: number, zoom: number }, desktop?: { x: number, y: number, zoom: number } }, eyebrow?: string, title?: string, text?: string, button_label?: string, button_url?: string } | null }} props
  */
 export default function PromoBanner({ banner }) {
   const pathname = usePathname();
@@ -100,7 +119,7 @@ export default function PromoBanner({ banner }) {
             <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
           </svg>
         </button>
-        <div className="promo-banner__media">
+        <div className="promo-banner__media" style={framingStyle(banner.framing)}>
           {href ? (
             <LinkTag {...linkProps} onClick={close} tabIndex={-1}>
               {image}

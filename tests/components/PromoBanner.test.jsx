@@ -4,7 +4,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 let pathname = '/';
 vi.mock('next/navigation', () => ({ usePathname: () => pathname }));
 
-const { default: PromoBanner, PROMO_KEY } = await import('@/components/layout/PromoBanner');
+const { default: PromoBanner, PROMO_KEY, framingStyle } = await import('@/components/layout/PromoBanner');
 
 const BANNER = { id: 'abc', image: 'https://cdn.x/venusaur.webp', eyebrow: 'Hasta el domingo', title: 'Llegó Venusaur', text: '10% off', button_label: 'Ver ofertas', button_url: '/tienda' };
 
@@ -55,5 +55,19 @@ describe('banner de promo', () => {
     show({ id: 'x', image: 'https://cdn.x/a.webp' });
     expect(screen.getByRole('dialog')).toBeTruthy();
     expect(screen.queryByRole('link')).toBeNull();
+  });
+
+  it('aplica el encuadre del admin: celular y compu por separado', () => {
+    show({ ...BANNER, framing: { mobile: { x: 50, y: 12.5, zoom: 1.6 }, desktop: { x: 30, y: 70, zoom: 1.2 } } });
+    const media = document.querySelector('.promo-banner__media');
+    expect(media.style.getPropertyValue('--pb-my')).toBe('12.5%');
+    expect(media.style.getPropertyValue('--pb-mz')).toBe('1.6');
+    expect(media.style.getPropertyValue('--pb-dx')).toBe('30%');
+    expect(media.style.getPropertyValue('--pb-dz')).toBe('1.2');
+  });
+
+  it('sin encuadre o con valores rotos, centrada y sin zoom', () => {
+    expect(framingStyle(undefined)).toMatchObject({ '--pb-mx': '50%', '--pb-my': '50%', '--pb-mz': 1, '--pb-dz': 1 });
+    expect(framingStyle({ mobile: { x: 'x', y: 400, zoom: 99 } })).toMatchObject({ '--pb-mx': '50%', '--pb-my': '100%', '--pb-mz': 3 });
   });
 });
