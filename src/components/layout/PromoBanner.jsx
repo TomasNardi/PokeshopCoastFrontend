@@ -7,7 +7,7 @@ import { X } from 'lucide-react';
 
 export const PROMO_KEY = 'psc-promo-closed';
 const HIDE_FOR_MS = 24 * 60 * 60 * 1000; // cerrado, no vuelve a aparecer ese día
-const DELAY_MS = 1200; // no compite con la carga de la página
+const DELAY_MS = 3000; // como unsobremas: aparece a los 3 s
 
 // Donde el cliente está comprando o haciendo un trámite, no se lo interrumpe.
 const QUIET_PATHS = ['/checkout', '/carrito', '/cuenta', '/arrepentimiento', '/desuscribirse', '/acceso-desarrollo', '/vista-previa'];
@@ -35,14 +35,17 @@ function rememberClosed(id) {
 
 /**
  * Banner de promo (admin → Configuración → Banner): la ventanita con la
- * imagen exportada de Figma, como el popup de unsobremas. Opcionalmente con
- * título, texto y botón. Se cierra con la X, tocando afuera o con Escape.
+ * imagen exportada de Figma, calcado del popup de unsobremas (bp-popup):
+ * desktop 760px con la imagen a la izquierda (40%) y el texto sobre #111;
+ * mobile 320px con la imagen arriba (5:2). Aparece a los 3 s, una vez por día.
+ * Se cierra con la X, tocando afuera o con Escape.
  *
- * @param {{ banner: { id: string, image: string, title?: string, text?: string, button_label?: string, button_url?: string } | null }} props
+ * @param {{ banner: { id: string, image: string, eyebrow?: string, title?: string, text?: string, button_label?: string, button_url?: string } | null }} props
  */
 export default function PromoBanner({ banner }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [shown, setShown] = useState(false); // un cuadro después de montar: dispara la animación
   const closeRef = useRef(null);
 
   useEffect(() => {
@@ -55,10 +58,16 @@ export default function PromoBanner({ banner }) {
 
   useEffect(() => {
     if (!open) return undefined;
-    closeRef.current?.focus();
+    const frame = requestAnimationFrame(() => setShown(true));
+    document.documentElement.classList.add('promo-banner-lock');
+    closeRef.current?.focus({ preventScroll: true });
     const onKey = (event) => event.key === 'Escape' && close();
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.documentElement.classList.remove('promo-banner-lock');
+      window.removeEventListener('keydown', onKey);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -66,6 +75,7 @@ export default function PromoBanner({ banner }) {
 
   function close() {
     rememberClosed(banner.id);
+    setShown(false);
     setOpen(false);
   }
 
@@ -73,31 +83,47 @@ export default function PromoBanner({ banner }) {
   const external = /^https?:\/\//.test(href);
   const LinkTag = external ? 'a' : Link;
   const linkProps = external ? { href, target: '_blank', rel: 'noopener noreferrer' } : { href };
-  const hasText = banner.title || banner.text || (banner.button_label && href);
-  const image = <img src={banner.image} alt={banner.title || 'Promoción'} className="promo-banner__image" />;
+  const image = <img src={banner.image} alt={banner.title || 'Promoción'} />;
+  const hasContent = banner.eyebrow || banner.title || banner.text || (banner.button_label && href);
 
   return (
-    <div className="promo-banner" role="dialog" aria-modal="true" aria-label={banner.title || 'Promoción'}>
-      <button type="button" className="promo-banner__backdrop" aria-label="Cerrar" tabIndex={-1} onClick={close} />
-      <div className="promo-banner__card">
+    <div
+      className={`promo-banner${shown ? ' is-open' : ''}${hasContent ? '' : ' promo-banner--image-only'}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label={banner.title || 'Promoción'}
+    >
+      <div className="promo-banner__overlay" aria-hidden="true" onClick={close} />
+      <div className="promo-banner__dialog">
         <button ref={closeRef} type="button" className="promo-banner__close" aria-label="Cerrar" onClick={close}>
-          <X size={20} strokeWidth={2.4} />
+          <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
         </button>
-        {href ? (
-          <LinkTag {...linkProps} onClick={close} className="block">
-            {image}
-          </LinkTag>
-        ) : (
-          image
-        )}
-        {hasText && (
-          <div className="promo-banner__body">
-            {banner.title && <p className="promo-banner__title">{banner.title}</p>}
-            {banner.text && <p className="promo-banner__text">{banner.text}</p>}
+        <div className="promo-banner__media">
+          {href ? (
+            <LinkTag {...linkProps} onClick={close} tabIndex={-1}>
+              {image}
+            </LinkTag>
+          ) : (
+            image
+          )}
+        </div>
+        {hasContent && (
+          <div className="promo-banner__content">
+            {banner.eyebrow && (
+              <p className="promo-banner__block promo-banner__pretitle" style={{ '--i': 1 }}>{banner.eyebrow}</p>
+            )}
+            {banner.title && (
+              <h2 className="promo-banner__block promo-banner__heading" style={{ '--i': 2 }}>{banner.title}</h2>
+            )}
+            {banner.text && <p className="promo-banner__block promo-banner__text" style={{ '--i': 3 }}>{banner.text}</p>}
             {banner.button_label && href && (
-              <LinkTag {...linkProps} onClick={close} className="btn btn--dark promo-banner__button">
-                {banner.button_label}
-              </LinkTag>
+              <div className="promo-banner__block promo-banner__action" style={{ '--i': 4 }}>
+                <LinkTag {...linkProps} onClick={close} className="promo-banner__button">
+                  {banner.button_label}
+                </LinkTag>
+              </div>
             )}
           </div>
         )}

@@ -6,7 +6,7 @@ vi.mock('next/navigation', () => ({ usePathname: () => pathname }));
 
 const { default: PromoBanner, PROMO_KEY } = await import('@/components/layout/PromoBanner');
 
-const BANNER = { id: 'abc', image: 'https://cdn.x/venusaur.webp', title: 'Llegó Venusaur', text: '10% off', button_label: 'Ver ofertas', button_url: '/tienda' };
+const BANNER = { id: 'abc', image: 'https://cdn.x/venusaur.webp', eyebrow: 'Hasta el domingo', title: 'Llegó Venusaur', text: '10% off', button_label: 'Ver ofertas', button_url: '/tienda' };
 
 describe('banner de promo', () => {
   beforeEach(() => {
@@ -17,19 +17,20 @@ describe('banner de promo', () => {
 
   const show = (banner = BANNER) => {
     render(<PromoBanner banner={banner} />);
-    act(() => vi.advanceTimersByTime(1500));
+    act(() => vi.advanceTimersByTime(3500));
   };
 
   it('aparece con la imagen, los textos y el botón', () => {
     show();
     expect(screen.getByRole('dialog')).toBeTruthy();
     expect(screen.getByText('Llegó Venusaur')).toBeTruthy();
+    expect(screen.getByText('Hasta el domingo')).toBeTruthy();
     expect(screen.getByText('Ver ofertas').getAttribute('href')).toBe('/tienda');
   });
 
   it('la X lo cierra y no vuelve ese día', () => {
     show();
-    fireEvent.click(screen.getAllByLabelText('Cerrar')[1]);
+    fireEvent.click(screen.getByLabelText('Cerrar'));
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(JSON.parse(window.localStorage.getItem(PROMO_KEY)).id).toBe('abc');
   });
